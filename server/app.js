@@ -47,6 +47,8 @@ io.on('connection', (socket) => {
     socket.emit('setup', movies);
 
     socket.on('votes_changed', (voteDeltas) => {
+        const newVotes = {};
+
         Object.keys(voteDeltas).forEach((key) => {
             const value = voteDeltas[key];
             const movie = movies[key];
@@ -62,9 +64,11 @@ io.on('connection', (socket) => {
                 // Prevent a movie from having less than 0 votes
                 movie.votes[socket.token] = 0;
             }
+
+            newVotes[key] = movie.votes;
         });
 
-        io.emit('votes_changed', voteDeltas);
+        io.emit('votes_changed', newVotes);
     });
 
     socket.on('disconnect', () => {

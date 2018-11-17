@@ -14,6 +14,7 @@ socket.on('setup', (movies) => {
         const firstCell = $('<td>').text(movies[i].name);
         const secondCell = $('<td>');
         const thirdCell = $('<td>').attr('votes-for', i);
+
         const voteButton = $('<input>')
             .prop('type', 'button')
             .val('Vote!')
@@ -21,13 +22,13 @@ socket.on('setup', (movies) => {
             .attr('data-toggle', 'button')
             .attr('aria-pressed', 'false')
             .click(() => {
-            const voteDeltas = {};
+                const voteDeltas = {};
 
-            // Inverted because the class has not been added at the point of the click event firing
-            voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
+                // Inverted because the class has not been added at the point of the click event firing
+                voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
 
-            socket.emit('votes_changed', voteDeltas);
-        });
+                socket.emit('votes_changed', voteDeltas);
+            });
 
         // Sum all of the votes
         const totalVotes = Object.values(movies[i].votes).reduce((a, b) => a + b, 0);
@@ -43,10 +44,15 @@ socket.on('setup', (movies) => {
     movieTable.css('display', '');
 });
 
-socket.on('votes_changed', (voteDeltas) => {
-    Object.keys(voteDeltas).forEach((key) => {
+socket.on('votes_changed', (newVotes) => {
+    Object.keys(newVotes).forEach((key) => {
         const votesCell = movieTable.find(`td[votes-for=${key}]`);
-        const currentVotes = parseInt(votesCell.text(), 10);
-        votesCell.text(currentVotes + voteDeltas[key]);
+        const totalVotes = Object.values(newVotes[key]).reduce((a, b) => a + b, 0);
+        const fadeMilliseconds = 150;
+
+        votesCell.fadeOut(fadeMilliseconds, () => {
+            votesCell.text(totalVotes);
+            votesCell.fadeIn(fadeMilliseconds);
+        });
     });
 });
