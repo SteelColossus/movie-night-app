@@ -1,0 +1,15 @@
+{
+  "name": "movie-night-app",
+  "version": "0.0.1",
+  "description": "A voting application for movie night.",
+  "main": "server/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "steelcolossus",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.1.1"
+  }
+}
