@@ -7,16 +7,24 @@ socket.on('connect', () => {
 
 socket.on('setup', (movies) => {
     // Remove all the existing movies
-    $(movieTable).find('tr:not(:first-child)').remove();
+    movieTable.find('tr:not(:first-child)').remove();
 
     for (let i = 0; i < movies.length; i++) {
         const tableRow = $('<tr>');
         const firstCell = $('<td>').text(movies[i].name);
         const secondCell = $('<td>');
         const thirdCell = $('<td>').attr('votes-for', i);
-        const voteButton = $('<input>').prop('type', 'checkbox').change(() => {
+        const voteButton = $('<input>')
+            .prop('type', 'button')
+            .val('Vote!')
+            .addClass('btn btn-primary')
+            .attr('data-toggle', 'button')
+            .attr('aria-pressed', 'false')
+            .click(() => {
             const voteDeltas = {};
-            voteDeltas[i] = ($(voteButton).is(':checked')) ? 1 : -1;
+
+            // Inverted because the class has not been added at the point of the click event firing
+            voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
 
             socket.emit('votes_changed', voteDeltas);
         });
@@ -24,18 +32,21 @@ socket.on('setup', (movies) => {
         // Sum all of the votes
         const totalVotes = Object.values(movies[i].votes).reduce((a, b) => a + b, 0);
 
-        $(thirdCell).text(totalVotes);
+        thirdCell.text(totalVotes);
 
-        $(secondCell).append(voteButton);
-        $(tableRow).append(firstCell).append(secondCell).append(thirdCell);
-        $(movieTable).append(tableRow);
+        secondCell.append(voteButton);
+        tableRow.append(firstCell).append(secondCell).append(thirdCell);
+        movieTable.append(tableRow);
     }
+
+    // Show the table
+    movieTable.css('display', '');
 });
 
 socket.on('votes_changed', (voteDeltas) => {
     Object.keys(voteDeltas).forEach((key) => {
-        const votesCell = $(movieTable).find(`td[votes-for=${key}]`)[0];
-        const currentVotes = parseInt($(votesCell).text(), 10);
-        $(votesCell).text(currentVotes + voteDeltas[key]);
+        const votesCell = movieTable.find(`td[votes-for=${key}]`);
+        const currentVotes = parseInt(votesCell.text(), 10);
+        votesCell.text(currentVotes + voteDeltas[key]);
     });
 });
