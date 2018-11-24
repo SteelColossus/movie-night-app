@@ -1,28 +1,42 @@
 const socket = io();
 const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
-const form = $('#form');
+const form = $('#movieSearchForm');
 
 socket.on('connect', () => {
     console.log('Connected to the app server.');
 });
 
 //Get suggestion input
-$('#form').submit(() => {
+form.submit(() => {
     let suggestion = $('#suggestion').val();
-    socket.emit('suggest', suggestion);
+
+    if (suggestion.length > 0) {
+        $('#errorMessage').attr('hidden', '');
+
+        socket.emit('movie_search', suggestion);
+    }
     
     //Stops refresh and connect of new user
     return false;
 });
 
 //Form suggestion table from api results
-socket.on('print', (print) => {
+socket.on('movie_search', (searchData) => {
+    if (searchData.Response === false) {
+        $('#errorMessage').text(`Error: ${searchData.Error}`).removeAttr('hidden');
+
+        return;
+    }
+
+    // Remove all the existing suggestions
     suggestTable.find('tr:not(:first-child)').remove();
 
-    for (let x = 0; x < print.length; x++) {
+    let searchResults = searchData.Search;
+
+    for (let x = 0; x < searchResults.length; x++) {
         const tableRow = $('<tr>');
-        const suggestionCell = $('<td>').text(print[x].Title);
+        const suggestionCell = $('<td>').text(searchResults[x].Title);
         const voteCell = $('<td>');
         const voteButton = $('<input>')
             .prop('type', 'button')
@@ -30,9 +44,9 @@ socket.on('print', (print) => {
             .addClass('btn btn-primary')
             .attr('data-toggle', 'button')
             .attr('aria-pressed', 'false')
-            .attr('data-title', print[x].Title)
+            .data('movie-id', searchResults[x].imdbID)
             .click(() => {
-                socket.emit('chosen', voteButton.attr('data-title'));
+                socket.emit('movie_chosen', voteButton.data('movie-id'));
             });
 
         voteCell.append(voteButton);

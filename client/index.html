@@ -23,12 +23,13 @@
     <script src="main.js" defer></script>
 </head>
 <body>
-    <form id="form" action="">
+    <form id="movieSearchForm" action="">
         <h5>Search for a movie to watch below:</h5>
         <div class="form-inline mb-2">
             <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter">
             <input type="submit" class="btn btn-primary" value="Search!">
         </div>
+        <div id="errorMessage" class="alert alert-danger" role="alert" hidden></div>
     </form>
     <div hidden>
         <h5>Choose a movie to suggest below:</h5>

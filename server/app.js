@@ -36,13 +36,16 @@ io.on('connection', (socket) => {
     
     console.log(`User '${users[token].username}' connected.`);
 
-    //When suggestion is added, check the api for results
-    socket.on('suggest', (suggestion) => {
+    //When a movie is searched for, check the api for results
+    socket.on('movie_search', (suggestion) => {
         //Need to encode the URL for the api key to understand it.
         let encodedSuggestion = encodeURIComponent(suggestion);
         axios.get('http://www.omdbapi.com/?s=' + encodedSuggestion + '&apikey=' + apikey)
             .then((response) => {
-               socket.emit('print', response.data.Search);
+                // Convert the success value to a boolean instead of a string
+                response.data.Response = response.data.Response === 'True';
+
+                socket.emit('movie_search', response.data);
             });
     });
 
@@ -71,9 +74,8 @@ io.on('connection', (socket) => {
     });
 
     //Get information for the movie
-    socket.on('chosen', (choice) => {
-        let choiceParts = choice.split(' ').join('+');
-        axios.get('http://www.omdbapi.com/?t=' + choiceParts + '&apikey=' + apikey)
+    socket.on('movie_chosen', (movieId) => {
+        axios.get('http://www.omdbapi.com/?i=' + movieId + '&apikey=' + apikey)
             .then((response) => {
                 let result = response.data;
                 let movie = {
@@ -86,10 +88,12 @@ io.on('connection', (socket) => {
                     "awards": result.Awards,
                     "votes": {}
                 };
+
                 nightInfo.movies.push(movie);
                 socket.emit('setup', nightInfo);
             });
     });
+
     socket.on('disconnect', () => {
         const userToRemove = users[socket.token];
         users[socket.token].loggedIn = false;
