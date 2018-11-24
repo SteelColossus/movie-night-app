@@ -10,8 +10,10 @@ const port = 3000;
 
 const users = {};
 
-const movies = [
-];
+const nightInfo = {
+    "votingSystem": "multi-vote",
+    "movies": []
+};
 
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
@@ -50,21 +52,20 @@ io.on('connection', (socket) => {
 
         Object.keys(voteDeltas).forEach((key) => {
             const value = voteDeltas[key];
-            const movie = movies[key];
-
-            if (movie.votes.hasOwnProperty(socket.token)) {
-                movie.votes[socket.token] += value;
+            const movie = nightInfo.movies.find(x => x.id == key);
+            if (movie != null) {
+                if (movie.votes.hasOwnProperty(socket.token)) {
+                    movie.votes[socket.token] += value;
+                }
+                else {
+                    movie.votes[socket.token] = value;
+                }
+                if (movie.votes[socket.token] < 0) {
+                    // Prevent a movie from having less than 0 votes
+                    movie.votes[socket.token] = 0;
+                }
+                newVotes[key] = movie.votes;
             }
-            else {
-                movie.votes[socket.token] = value;
-            }
-
-            if (movie.votes[socket.token] < 0) {
-                // Prevent a movie from having less than 0 votes
-                movie.votes[socket.token] = 0;
-            }
-
-            newVotes[key] = movie.votes;
         });
         io.emit('votes_changed', newVotes);
     });
@@ -76,9 +77,8 @@ io.on('connection', (socket) => {
             .then(response => {
                 let result = response.data;
                 let movie = {"title":result.Title,"runtime":result.Runtime,"genre":result.Genre,"plot":result.Plot,"rating":result.imdbRating,"awards":result.Awards,"votes":0};
-                movies.push(movie);
-                console.log(movies);
-                socket.emit('setup', movies);
+                nightInfo.movies.push(movie);
+                socket.emit('setup', nightInfo);
             })
     });
     socket.on('disconnect', () => {

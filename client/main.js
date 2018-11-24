@@ -40,21 +40,21 @@ socket.on('print', (print) => {
     suggestTable.css('display', '');
 });
 
-socket.on('setup', (movies) => {
+socket.on('setup', (info) => {
     // Remove all the existing movies
     movieTable.find('tr:not(:first-child)').remove();
-
-    for (let i = 0; i < movies.length; i++) {
-        const tableRow = $('<tr>');
-        const firstCell = $('<td>').text(movies[i].title);
-        const secondCell = $('<td>').text(movies[i].runtime);
-        const thirdCell = $('<td>').text(movies[i].genre);
-        const fourthCell = $('<td>').text(movies[i].plot);
-        const fifthCell = $('<td>').text(movies[i].rating);
-        const sixthCell = $('<td>').text(movies[i].awards);
-        const seventhCell = $('<td>');
-        const eighthCell = $('<td>').attr('votes-for', i);
-
+    for (let i = 0; i < info.movies.length; i++) {
+    const tableRow = $('<tr>');
+    const firstCell = $('<td>').text(info.movies[i].title);
+    const secondCell = $('<td>').text(info.movies[i].runtime);
+    const thirdCell = $('<td>').text(info.movies[i].genre);
+    const fourthCell = $('<td>').text(info.movies[i].plot);
+    const fifthCell = $('<td>').text(info.movies[i].rating);
+    const sixthCell = $('<td>').text(info.movies[i].awards);
+    const seventhCell = $('<td>');
+    const eighthCell = $('<td>').attr('votes-for', i);
+    switch(info.votingSystem){
+        case "multi-vote":
         const voteButton = $('<input>')
             .prop('type', 'button')
             .val('Vote!')
@@ -69,13 +69,13 @@ socket.on('setup', (movies) => {
 
                 socket.emit('votes_changed', voteDeltas);
             });
-
+            seventhCell.append(voteButton);
+            break;
+    }
         // Sum all of the votes
-        const totalVotes = Object.values(movies[i].votes).reduce((a, b) => a + b, 0);
+        const totalVotes = Object.values(info.movies[i].votes).reduce((a, b) => a + b, 0);
 
         eighthCell.text(totalVotes);
-
-        seventhCell.append(voteButton);
         tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell);
         movieTable.append(tableRow);
     }
