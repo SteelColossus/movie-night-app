@@ -24,30 +24,35 @@
 </head>
 <body>
     <form id="form" action="">
-        <h5>Suggest a movie to watch below:</h5>
+        <h5>Search for a movie to watch below:</h5>
         <div class="form-inline mb-2">
             <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter">
             <input type="submit" class="btn btn-primary" value="Search!">
         </div>
     </form>
-    <table id="suggestionTable" class="table" hidden>
-        <tr>
-            <th scope="col">Suggestion</th>
-            <th scope="col"></th>
-        </tr>
-    </table>
-    <table id="movieTable" class="table" hidden>
+    <div hidden>
+        <h5>Choose a movie to suggest below:</h5>
+        <table id="suggestionTable" class="table">
+            <tr>
+                <th scope="col">Suggestion</th>
+                <th scope="col"></th>
+            </tr>
+        </table>
+    </div>
+    <div hidden>
         <h5>Choose a movie to vote for below:</h5>
-        <tr>
-            <th scope="col">Movie</th>
-            <th scope="col">Runtime</th>
-            <th scope="col">Genre</th>
-            <th scope="col">Plot</th>
-            <th scope="col">Rating</th>
-            <th scope="col">Awards</th>
-            <th></th>
-            <th scope="col">Votes</th>
-        </tr>
-    </table>
+        <table id="movieTable" class="table">
+            <tr>
+                <th scope="col">Movie</th>
+                <th scope="col">Runtime</th>
+                <th scope="col">Genre</th>
+                <th scope="col">Plot</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Awards</th>
+                <th></th>
+                <th scope="col">Votes</th>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>

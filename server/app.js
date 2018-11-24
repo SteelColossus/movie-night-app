@@ -38,9 +38,9 @@ io.on('connection', (socket) => {
 
     //When suggestion is added, check the api for results
     socket.on('suggest', (suggestion) => {
-        //Need to split up words for the api key to understand it.
-        let suggestionParts = suggestion.split(' ').join('+');
-        axios.get('http://www.omdbapi.com/?s=' + suggestionParts + '&apikey=' + apikey)
+        //Need to encode the URL for the api key to understand it.
+        let encodedSuggestion = encodeURIComponent(suggestion);
+        axios.get('http://www.omdbapi.com/?s=' + encodedSuggestion + '&apikey=' + apikey)
             .then((response) => {
                socket.emit('print', response.data.Search);
             });
@@ -77,13 +77,14 @@ io.on('connection', (socket) => {
             .then((response) => {
                 let result = response.data;
                 let movie = {
+                    "id": result.imdbID,
                     "title": result.Title,
                     "runtime": result.Runtime,
                     "genre": result.Genre,
                     "plot": result.Plot,
                     "rating": result.imdbRating,
                     "awards": result.Awards,
-                    "votes": 0
+                    "votes": {}
                 };
                 nightInfo.movies.push(movie);
                 socket.emit('setup', nightInfo);

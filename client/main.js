@@ -40,7 +40,7 @@ socket.on('print', (print) => {
         suggestTable.append(tableRow);
     }
 
-    suggestTable.removeAttr('hidden');
+    suggestTable.parent().removeAttr('hidden');
 });
 
 socket.on('setup', (info) => {
@@ -56,7 +56,7 @@ socket.on('setup', (info) => {
         const fifthCell = $('<td>').text(info.movies[i].rating);
         const sixthCell = $('<td>').text(info.movies[i].awards);
         const seventhCell = $('<td>');
-        const eighthCell = $('<td>').attr('votes-for', i);
+        const eighthCell = $('<td>').attr('votes-for', info.movies[i].id);
         
         switch (info.votingSystem) {
             case "multi-vote": {
@@ -70,7 +70,7 @@ socket.on('setup', (info) => {
                         const voteDeltas = {};
 
                         // Inverted because the class has not been added at the point of the click event firing
-                        voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
+                        voteDeltas[info.movies[i].id] = (!voteButton.is('.active')) ? 1 : -1;
 
                         socket.emit('votes_changed', voteDeltas);
                     });
@@ -89,8 +89,8 @@ socket.on('setup', (info) => {
 
     // Show the table
     form.attr('hidden', '');
-    suggestTable.attr('hidden', '');
-    movieTable.removeAttr('hidden');
+    suggestTable.parent().attr('hidden', '');
+    movieTable.parent().removeAttr('hidden');
 });
 
 socket.on('votes_changed', (newVotes) => {
