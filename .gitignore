@@ -81,3 +81,6 @@ typings/
 
 # VSCode
 .vscode
+
+# Hidden API keys
+api_keys.js

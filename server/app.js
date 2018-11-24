@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const apikey = '315de77c';
 const axios = require('axios');
+const keys = require('./api_keys');
 
 const port = 3000;
 
@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
     socket.on('movie_search', (suggestion) => {
         //Need to encode the URL for the api key to understand it.
         let encodedSuggestion = encodeURIComponent(suggestion);
-        axios.get('http://www.omdbapi.com/?s=' + encodedSuggestion + '&apikey=' + apikey)
+        axios.get('http://www.omdbapi.com/?s=' + encodedSuggestion + '&apikey=' + keys.OMDB_KEY)
             .then((response) => {
                 // Convert the success value to a boolean instead of a string
                 response.data.Response = response.data.Response === 'True';
@@ -75,7 +75,7 @@ io.on('connection', (socket) => {
 
     //Get information for the movie
     socket.on('movie_chosen', (movieId) => {
-        axios.get('http://www.omdbapi.com/?i=' + movieId + '&apikey=' + apikey)
+        axios.get('http://www.omdbapi.com/?i=' + movieId + '&apikey=' + keys.OMDB_KEY)
             .then((response) => {
                 let result = response.data;
                 let movie = {
