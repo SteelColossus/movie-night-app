@@ -8,19 +8,22 @@ socket.on('connect', () => {
 });
 
 //Get suggestion input
-$('#form').submit(function () {
+$('#form').submit(() => {
     let suggestion = $('#suggestion').val();
-    console.log(suggestion);
     socket.emit('suggest', suggestion);
-    return false; //Stops refresh and connect of new user
-})
+    
+    //Stops refresh and connect of new user
+    return false;
+});
 
 //Form suggestion table from api results
 socket.on('print', (print) => {
     suggestTable.find('tr:not(:first-child)').remove();
-    let tableRow = $('<tr>');
+
     for (let x = 0; x < print.length; x++) {
-        let suggestionCell = $('<td>').text(print[x].Title);
+        const tableRow = $('<tr>');
+        const suggestionCell = $('<td>').text(print[x].Title);
+        const voteCell = $('<td>');
         const voteButton = $('<input>')
             .prop('type', 'button')
             .val('Choose!')
@@ -32,46 +35,50 @@ socket.on('print', (print) => {
                 socket.emit('chosen', voteButton.attr('data-title'));
             });
 
-        tableRow.append(suggestionCell).append(voteButton);
+        voteCell.append(voteButton);
+        tableRow.append(suggestionCell).append(voteCell);
         suggestTable.append(tableRow);
-        tableRow = $('<tr>');
-        suggestionCell = $('<td>');
     }
-    suggestTable.css('display', '');
+
+    suggestTable.removeAttr('hidden');
 });
 
 socket.on('setup', (info) => {
     // Remove all the existing movies
     movieTable.find('tr:not(:first-child)').remove();
+
     for (let i = 0; i < info.movies.length; i++) {
-    const tableRow = $('<tr>');
-    const firstCell = $('<td>').text(info.movies[i].title);
-    const secondCell = $('<td>').text(info.movies[i].runtime);
-    const thirdCell = $('<td>').text(info.movies[i].genre);
-    const fourthCell = $('<td>').text(info.movies[i].plot);
-    const fifthCell = $('<td>').text(info.movies[i].rating);
-    const sixthCell = $('<td>').text(info.movies[i].awards);
-    const seventhCell = $('<td>');
-    const eighthCell = $('<td>').attr('votes-for', i);
-    switch(info.votingSystem){
-        case "multi-vote":
-        const voteButton = $('<input>')
-            .prop('type', 'button')
-            .val('Vote!')
-            .addClass('btn btn-primary')
-            .attr('data-toggle', 'button')
-            .attr('aria-pressed', 'false')
-            .click(() => {
-                const voteDeltas = {};
+        const tableRow = $('<tr>');
+        const firstCell = $('<td>').text(info.movies[i].title);
+        const secondCell = $('<td>').text(info.movies[i].runtime);
+        const thirdCell = $('<td>').text(info.movies[i].genre);
+        const fourthCell = $('<td>').text(info.movies[i].plot);
+        const fifthCell = $('<td>').text(info.movies[i].rating);
+        const sixthCell = $('<td>').text(info.movies[i].awards);
+        const seventhCell = $('<td>');
+        const eighthCell = $('<td>').attr('votes-for', i);
+        
+        switch (info.votingSystem) {
+            case "multi-vote": {
+                const voteButton = $('<input>')
+                    .prop('type', 'button')
+                    .val('Vote!')
+                    .addClass('btn btn-primary')
+                    .attr('data-toggle', 'button')
+                    .attr('aria-pressed', 'false')
+                    .click(() => {
+                        const voteDeltas = {};
 
-                // Inverted because the class has not been added at the point of the click event firing
-                voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
+                        // Inverted because the class has not been added at the point of the click event firing
+                        voteDeltas[i] = (!voteButton.is('.active')) ? 1 : -1;
 
-                socket.emit('votes_changed', voteDeltas);
-            });
-            seventhCell.append(voteButton);
-            break;
-    }
+                        socket.emit('votes_changed', voteDeltas);
+                    });
+                seventhCell.append(voteButton);
+                break;
+            }
+        }
+        
         // Sum all of the votes
         const totalVotes = Object.values(info.movies[i].votes).reduce((a, b) => a + b, 0);
 
@@ -81,9 +88,9 @@ socket.on('setup', (info) => {
     }
 
     // Show the table
-    suggestTable.css('display', 'none');
-    form.css('display', 'none');
-    movieTable.css('display', '');
+    form.attr('hidden', '');
+    suggestTable.attr('hidden', '');
+    movieTable.removeAttr('hidden');
 });
 
 socket.on('votes_changed', (newVotes) => {

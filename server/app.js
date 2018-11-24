@@ -37,13 +37,13 @@ io.on('connection', (socket) => {
     console.log(`User '${users[token].username}' connected.`);
 
     //When suggestion is added, check the api for results
-    socket.on('suggest',(suggestion)=>{
+    socket.on('suggest', (suggestion) => {
         //Need to split up words for the api key to understand it.
         let suggestionParts = suggestion.split(' ').join('+');
-        axios.get('http://www.omdbapi.com/?s='+suggestionParts+'&apikey='+ apikey)
-            .then(response => {
-               socket.emit('print',response.data.Search);
-            })
+        axios.get('http://www.omdbapi.com/?s=' + suggestionParts + '&apikey=' + apikey)
+            .then((response) => {
+               socket.emit('print', response.data.Search);
+            });
     });
 
 
@@ -73,13 +73,21 @@ io.on('connection', (socket) => {
     //Get information for the movie
     socket.on('chosen', (choice) => {
         let choiceParts = choice.split(' ').join('+');
-        axios.get('http://www.omdbapi.com/?t='+choiceParts+'&apikey='+ apikey)
-            .then(response => {
+        axios.get('http://www.omdbapi.com/?t=' + choiceParts + '&apikey=' + apikey)
+            .then((response) => {
                 let result = response.data;
-                let movie = {"title":result.Title,"runtime":result.Runtime,"genre":result.Genre,"plot":result.Plot,"rating":result.imdbRating,"awards":result.Awards,"votes":0};
+                let movie = {
+                    "title": result.Title,
+                    "runtime": result.Runtime,
+                    "genre": result.Genre,
+                    "plot": result.Plot,
+                    "rating": result.imdbRating,
+                    "awards": result.Awards,
+                    "votes": 0
+                };
                 nightInfo.movies.push(movie);
                 socket.emit('setup', nightInfo);
-            })
+            });
     });
     socket.on('disconnect', () => {
         const userToRemove = users[socket.token];
