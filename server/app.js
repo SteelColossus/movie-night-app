@@ -3,24 +3,14 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const apikey = '315de77c';
+const axios = require('axios');
 
 const port = 3000;
 
 const users = {};
 
 const movies = [
-    {
-        name: 'Movie 1',
-        votes: {}
-    },
-    {
-        name: 'Movie 2',
-        votes: {}
-    },
-    {
-        name: 'Movie 3',
-        votes: {}
-    }
 ];
 
 // Serve all static files in the /client folder
@@ -44,7 +34,16 @@ io.on('connection', (socket) => {
     
     console.log(`User '${users[token].username}' connected.`);
 
-    socket.emit('setup', movies);
+    //When suggestion is added, check the api for results
+    socket.on('suggest',(suggestion)=>{
+        //Need to split up words for the api key to understand it.
+        let suggestionParts = suggestion.split(' ').join('+');
+        axios.get('http://www.omdbapi.com/?s='+suggestionParts+'&apikey='+ apikey)
+            .then(response => {
+               socket.emit('print',response.data.Search);
+            })
+    });
+
 
     socket.on('votes_changed', (voteDeltas) => {
         const newVotes = {};
@@ -67,10 +66,21 @@ io.on('connection', (socket) => {
 
             newVotes[key] = movie.votes;
         });
-
         io.emit('votes_changed', newVotes);
     });
 
+    //Get information for the movie
+    socket.on('chosen', (choice) => {
+        let choiceParts = choice.split(' ').join('+');
+        axios.get('http://www.omdbapi.com/?t='+choiceParts+'&apikey='+ apikey)
+            .then(response => {
+                let result = response.data;
+                let movie = {"title":result.Title,"runtime":result.Runtime,"genre":result.Genre,"plot":result.Plot,"rating":result.imdbRating,"awards":result.Awards,"votes":0};
+                movies.push(movie);
+                console.log(movies);
+                socket.emit('setup', movies);
+            })
+    });
     socket.on('disconnect', () => {
         const userToRemove = users[socket.token];
         users[socket.token].loggedIn = false;
