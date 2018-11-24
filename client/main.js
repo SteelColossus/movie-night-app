@@ -16,7 +16,7 @@ socket.on('setup', (info) => {
         const thirdCell = $('<td>').attr('votes-for', info.movies[i].id);
 
         switch (info.votingSystem) {
-            case 'multi-vote':
+            case 'multi-vote': {
                 const voteButton = $('<input>')
                     .attr('type', 'button')
                     .val('Vote!')
@@ -34,6 +34,9 @@ socket.on('setup', (info) => {
                     
                 secondCell.append(voteButton);
                 break;
+            }
+        }
+
         // Sum all of the votes
         const totalVotes = Object.values(info.movies[i].votes).reduce((a, b) => a + b, 0);
 
