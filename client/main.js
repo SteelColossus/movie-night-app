@@ -86,7 +86,10 @@ socket.on('connect', () => {
 startForm.submit(() => {
     let name = $('#nightName').val();
     let votingStyle = $('#votingSystem').val();
-    let setupDetails = {name, votingStyle};
+    let setupDetails = {
+        "name": name,
+        "votingSystem": votingStyle
+    };
     //Allow suggestions
     socket.emit('setup_details', setupDetails);
     switchSection('search');

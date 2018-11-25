@@ -11,7 +11,6 @@ const port = 3000;
 const users = {};
 
 const nightInfo = {
-    "votingSystem": "multi-vote",
     "movies": []
 };
 
