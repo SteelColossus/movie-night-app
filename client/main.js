@@ -1,9 +1,40 @@
 const socket = io();
+
+// DOM elements
 const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
 const movieForm = $('#movieSearchForm');
 const startForm = $('#startVotingForm');
+
 let votingSystem = null;
+const sections = {
+    "host": true,
+    "search": false,
+    "suggestions": false,
+    "vote": false
+};
+const sectionAnimationTime = 400;
+
+function showSection(section) {
+    sections[section] = true;
+    $(`#${section}Section`).show(sectionAnimationTime);
+}
+
+function hideSection(section) {
+    sections[section] = false;
+    $(`#${section}Section`).hide(sectionAnimationTime);
+}
+
+function switchSection(section) {
+    Object.keys(sections).forEach((key) => {
+        if (key === section) {
+            showSection(key);
+        }
+        else {
+            hideSection(key);
+        }
+    });
+}
 
 function appendMovieToTable(movie) {
     const tableRow = $('<tr>');
@@ -58,8 +89,7 @@ startForm.submit(() => {
     let setupDetails = {name, votingStyle};
     //Allow suggestions
     socket.emit('setup_details', setupDetails);
-    movieForm.parent().removeAttr('hidden');
-    startForm.attr('hidden', '');
+    switchSection('search');
     //Stops refresh and connect of new user
     return false;
 });
@@ -67,8 +97,7 @@ startForm.submit(() => {
 //Set room then start suggesting
 socket.on('join_movie_night', (roomName) => {
     socket.emit('join_movie_night', roomName);
-    movieForm.parent().removeAttr('hidden');
-    startForm.attr('hidden', '');
+    switchSection('search');
 });
 
 //Get suggestion input
@@ -76,7 +105,7 @@ movieForm.submit(() => {
     let suggestion = $('#suggestion').val();
 
     if (suggestion.length > 0) {
-        $('#errorMessage').attr('hidden', '');
+        $('#errorMessage').hide(sectionAnimationTime);
 
         socket.emit('movie_search', suggestion);
     }
@@ -88,7 +117,7 @@ movieForm.submit(() => {
 //Form suggestion table from api results
 socket.on('movie_search', (searchData) => {
     if (searchData.success === false) {
-        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).removeAttr('hidden');
+        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).show(sectionAnimationTime);
 
         return;
     }
@@ -118,7 +147,7 @@ socket.on('movie_search', (searchData) => {
         suggestTable.append(tableRow);
     }
 
-    suggestTable.parent().removeAttr('hidden');
+    showSection('suggestions');
 });
 
 socket.on('setup', (info) => {
@@ -132,9 +161,7 @@ socket.on('setup', (info) => {
     }
 
     // Show the table
-    movieForm.attr('hidden', '');
-    suggestTable.parent().attr('hidden', '');
-    movieTable.parent().removeAttr('hidden');
+    switchSection('vote');
 });
 
 socket.on('new_movie', (movie) => {

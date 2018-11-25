@@ -23,29 +23,31 @@
     <script src="main.js" defer></script>
 </head>
 <body>
-    <form id="startVotingForm" action="">
-        <h5>Start your movie night</h5>
-        <div class="form-inline">
-            <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night">
-            <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
-            <select id="votingSystem" class="form-control ml-2 mr-2" name="votingSystem">
-                <option value="multi">Multi-Vote</option>
-                <!--- Add more voting styles here --->
-            </select>
-            <input type="submit" class="btn btn-primary" value="Start!">
-        </div>
-    </form>
-    <div hidden>
-    <form id="movieSearchForm" action="">
-        <h5>Search for a movie to watch below:</h5>
-        <div class="form-inline mb-2">
-            <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter">
-            <input type="submit" class="btn btn-primary" value="Search!">
-        </div>
-        <div id="errorMessage" class="alert alert-danger" role="alert" hidden></div>
-    </form>
+    <div id="hostSection">
+        <form id="startVotingForm" action="">
+            <h5>Start your movie night</h5>
+            <div class="form-inline">
+                <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night">
+                <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
+                <select id="votingSystem" class="form-control ml-2 mr-2" name="votingSystem">
+                    <option value="multi">Multi-Vote</option>
+                    <!--- Add more voting styles here --->
+                </select>
+                <input type="submit" class="btn btn-primary" value="Start!">
+            </div>
+        </form>
     </div>
-    <div hidden>
+    <div id="searchSection" style="display: none">
+        <form id="movieSearchForm" action="">
+            <h5>Search for a movie to watch below:</h5>
+            <div class="form-inline mb-2">
+                <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter">
+                <input type="submit" class="btn btn-primary" value="Search!">
+            </div>
+            <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
+        </form>
+    </div>
+    <div id="suggestionsSection" style="display: none">
         <h5>Choose a movie to suggest below:</h5>
         <table id="suggestionTable" class="table">
             <tr>
@@ -54,7 +56,7 @@
             </tr>
         </table>
     </div>
-    <div hidden>
+    <div id="voteSection" style="display: none">
         <h5>Choose a movie to vote for below:</h5>
         <table id="movieTable" class="table">
             <tr>
