@@ -2,6 +2,49 @@ const socket = io();
 const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
 const form = $('#movieSearchForm');
+let votingSystem = null;
+
+function appendMovieToTable(movie) {
+    const tableRow = $('<tr>');
+    const firstCell = $('<td>').text(movie.title);
+    const secondCell = $('<td>').text(movie.runtime);
+    const thirdCell = $('<td>').text(movie.genre);
+    const fourthCell = $('<td>').text(movie.plot);
+    const fifthCell = $('<td>').text(movie.rating);
+    const sixthCell = $('<td>').text(movie.awards);
+    const seventhCell = $('<td>');
+    const eighthCell = $('<td>').attr('votes-for', movie.id);
+    
+    switch (votingSystem) {
+        case "multi-vote": {
+            const voteButton = $('<input>')
+                .prop('type', 'button')
+                .val('Vote!')
+                .addClass('btn btn-primary')
+                .attr('data-toggle', 'button')
+                .attr('aria-pressed', 'false')
+                .click(() => {
+                    const voteDeltas = {};
+
+                    // Inverted because the class has not been added at the point of the click event firing
+                    voteDeltas[movie.id] = (!voteButton.is('.active')) ? 1 : -1;
+
+                    socket.emit('votes_changed', voteDeltas);
+                });
+            seventhCell.append(voteButton);
+            break;
+        }
+    }
+    
+    // Sum all of the votes
+    const totalVotes = Object.values(movie.votes).reduce((a, b) => a + b, 0);
+
+    eighthCell.text(totalVotes);
+    tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell);
+    movieTable.append(tableRow);
+
+    return tableRow;
+}
 
 socket.on('connect', () => {
     console.log('Connected to the app server.');
@@ -58,53 +101,24 @@ socket.on('movie_search', (searchData) => {
 });
 
 socket.on('setup', (info) => {
+    votingSystem = info.votingSystem;
+
     // Remove all the existing movies
     movieTable.find('tr:not(:first-child)').remove();
 
     for (let i = 0; i < info.movies.length; i++) {
-        const tableRow = $('<tr>');
-        const firstCell = $('<td>').text(info.movies[i].title);
-        const secondCell = $('<td>').text(info.movies[i].runtime);
-        const thirdCell = $('<td>').text(info.movies[i].genre);
-        const fourthCell = $('<td>').text(info.movies[i].plot);
-        const fifthCell = $('<td>').text(info.movies[i].rating);
-        const sixthCell = $('<td>').text(info.movies[i].awards);
-        const seventhCell = $('<td>');
-        const eighthCell = $('<td>').attr('votes-for', info.movies[i].id);
-        
-        switch (info.votingSystem) {
-            case "multi-vote": {
-                const voteButton = $('<input>')
-                    .prop('type', 'button')
-                    .val('Vote!')
-                    .addClass('btn btn-primary')
-                    .attr('data-toggle', 'button')
-                    .attr('aria-pressed', 'false')
-                    .click(() => {
-                        const voteDeltas = {};
-
-                        // Inverted because the class has not been added at the point of the click event firing
-                        voteDeltas[info.movies[i].id] = (!voteButton.is('.active')) ? 1 : -1;
-
-                        socket.emit('votes_changed', voteDeltas);
-                    });
-                seventhCell.append(voteButton);
-                break;
-            }
-        }
-        
-        // Sum all of the votes
-        const totalVotes = Object.values(info.movies[i].votes).reduce((a, b) => a + b, 0);
-
-        eighthCell.text(totalVotes);
-        tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell);
-        movieTable.append(tableRow);
+        appendMovieToTable(info.movies[i]);
     }
 
     // Show the table
     form.attr('hidden', '');
     suggestTable.parent().attr('hidden', '');
     movieTable.parent().removeAttr('hidden');
+});
+
+socket.on('new_movie', (movie) => {
+    const movieRow = appendMovieToTable(movie);
+    movieRow.hide().fadeIn();
 });
 
 socket.on('votes_changed', (newVotes) => {

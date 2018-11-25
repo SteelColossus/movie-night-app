@@ -91,6 +91,7 @@ io.on('connection', (socket) => {
 
                 nightInfo.movies.push(movie);
                 socket.emit('setup', nightInfo);
+                socket.broadcast.emit('new_movie', movie);
             });
     });
 
