@@ -87,8 +87,8 @@ movieForm.submit(() => {
 
 //Form suggestion table from api results
 socket.on('movie_search', (searchData) => {
-    if (searchData.Response === false) {
-        $('#errorMessage').text(`Error: ${searchData.Error}`).removeAttr('hidden');
+    if (searchData.success === false) {
+        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).removeAttr('hidden');
 
         return;
     }
@@ -96,11 +96,11 @@ socket.on('movie_search', (searchData) => {
     // Remove all the existing suggestions
     suggestTable.find('tr:not(:first-child)').remove();
 
-    let searchResults = searchData.Search;
+    let searchResults = searchData.results;
 
     for (let x = 0; x < searchResults.length; x++) {
         const tableRow = $('<tr>');
-        const suggestionCell = $('<td>').text(searchResults[x].Title);
+        const suggestionCell = $('<td>').text(searchResults[x].title);
         const voteCell = $('<td>');
         const voteButton = $('<input>')
             .prop('type', 'button')
@@ -108,7 +108,7 @@ socket.on('movie_search', (searchData) => {
             .addClass('btn btn-primary')
             .attr('data-toggle', 'button')
             .attr('aria-pressed', 'false')
-            .data('movie-id', searchResults[x].imdbID)
+            .data('movie-id', searchResults[x].id)
             .click(() => {
                 socket.emit('movie_chosen', voteButton.data('movie-id'));
             });

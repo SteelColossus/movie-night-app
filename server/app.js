@@ -25,6 +25,10 @@ function getRandomToken() {
     return Math.floor(Math.random() * 9999) + 1;
 }
 
+function makeOmdbRequest(type, query) {
+    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
+}
+
 io.on('connection', (socket) => {
     const token = getRandomToken();
     socket.token = token;
@@ -54,13 +58,43 @@ io.on('connection', (socket) => {
     socket.on('movie_search', (suggestion) => {
         //Need to encode the URL for the api key to understand it.
         let encodedSuggestion = encodeURIComponent(suggestion);
-        axios.get('http://www.omdbapi.com/?s=' + encodedSuggestion + '&apikey=' + keys.OMDB_KEY)
-            .then((response) => {
-                // Convert the success value to a boolean instead of a string
-                response.data.Response = response.data.Response === 'True';
 
-                socket.emit('movie_search', response.data);
-            });
+        new Promise(resolve => makeOmdbRequest('s', encodedSuggestion).then((response) => {
+            let movieResults = {
+                "success": response.data.Response === 'True'
+            };
+
+            if (movieResults.success === true) {
+                movieResults.results = response.data.Search.map(result => ({
+                    "id": result.imdbID,
+                    "title": result.Title
+                }));
+
+                resolve(movieResults);
+            }
+            else if (response.data.Error === 'Too many results.') {
+                makeOmdbRequest('t', encodedSuggestion).then((response2) => {
+                    movieResults.success = response2.data.Response === 'True';
+        
+                    if (movieResults.success === true) {
+                        movieResults.results = [{
+                            "id": response2.data.imdbID,
+                            "title": response2.data.Title
+                        }];
+                    }
+                    else {
+                        movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
+                    }
+        
+                    resolve(movieResults);
+                });
+            }
+            else {
+                movieResults.errorMessage = response.data.Error;
+
+                resolve(movieResults);
+            }
+        })).then(movieResults => socket.emit('movie_search', movieResults));
     });
 
     socket.on('votes_changed', (voteDeltas) => {
@@ -88,24 +122,24 @@ io.on('connection', (socket) => {
 
     //Get information for the movie
     socket.on('movie_chosen', (movieId) => {
-        axios.get('http://www.omdbapi.com/?i=' + movieId + '&apikey=' + keys.OMDB_KEY)
-            .then((response) => {
-                let result = response.data;
-                let movie = {
-                    "id": result.imdbID,
-                    "title": result.Title,
-                    "runtime": result.Runtime,
-                    "genre": result.Genre,
-                    "plot": result.Plot,
-                    "rating": result.imdbRating,
-                    "awards": result.Awards,
-                    "votes": {}
-                };
+        makeOmdbRequest('i', movieId).then((response) => {
+            let result = response.data;
+            let movie = {
+                "success": result.Response,
+                "id": result.imdbID,
+                "title": result.Title,
+                "runtime": result.Runtime,
+                "genre": result.Genre,
+                "plot": result.Plot,
+                "rating": result.imdbRating,
+                "awards": result.Awards,
+                "votes": {}
+            };
 
-                nightInfo.movies.push(movie);
-                socket.emit('setup', nightInfo);
-                socket.broadcast.emit('new_movie', movie);
-            });
+            nightInfo.movies.push(movie);
+            socket.emit('setup', nightInfo);
+            socket.broadcast.emit('new_movie', movie);
+        });
     });
 
     socket.on('disconnect', () => {
