@@ -11,7 +11,6 @@ const port = 3000;
 const users = {};
 
 const nightInfo = {
-    "name": "",
     "votingSystem": "multi-vote",
     "movies": []
 };
@@ -34,18 +33,22 @@ io.on('connection', (socket) => {
         username: token,
         loggedIn: true
     };
+
     console.log(`User '${users[token].username}' connected.`);
 
-    //Setup basic movie night details
-    socket.on("setup_details", (value) => {
-        nightInfo.name = value[0];
-        nightInfo.votingSystem = value[1];
-        socket.join(nightInfo.name);
-        console.log("your room is"+nightInfo.name);
-        //Get every client in the room
-        socket.broadcast.emit('go_to_movie_night',nightInfo.name);
-    });
+    if (nightInfo.name != null) {
+        socket.emit('join_movie_night', nightInfo.name);
+    }
 
+    //Setup basic movie night details
+    socket.on("setup_details", (setupDetails) => {
+        nightInfo.name = setupDetails.name;
+        nightInfo.votingSystem = setupDetails.votingSystem;
+        socket.join(nightInfo.name);
+        console.log(`${users[token].username} has started the movie night: ${nightInfo.name}`);
+        //Get every client in the room
+        socket.broadcast.emit('join_movie_night', nightInfo.name);
+    });
 
     //When a movie is searched for, check the api for results
     socket.on('movie_search', (suggestion) => {
@@ -112,12 +115,7 @@ io.on('connection', (socket) => {
     });
 
     //Make the socket join the voting room
-    socket.on('join_room',(room)=>{
+    socket.on('join_movie_night', (room) => {
         socket.join(room);
     });
 });
-
-
-
-
-

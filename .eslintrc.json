@@ -17,7 +17,6 @@
         "array-bracket-newline": "error",
         "array-bracket-spacing": "error",
         "array-callback-return": "error",
-        "array-element-newline": "error",
         "arrow-body-style": "error",
         "arrow-parens": [
             "error",
@@ -125,7 +124,6 @@
         "new-cap": "error",
         "new-parens": "error",
         "newline-after-var": "off",
-        "newline-before-return": "error",
         "newline-per-chained-call": "off",
         "no-alert": "error",
         "no-array-constructor": "error",
@@ -229,8 +227,6 @@
         "nonblock-statement-body-position": "error",
         "object-curly-newline": "error",
         "object-curly-spacing": "error",
-        "object-property-newline": "error",
-        "object-shorthand": "error",
         "one-var": "off",
         "one-var-declaration-per-line": "error",
         "operator-assignment": [

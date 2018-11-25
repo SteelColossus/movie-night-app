@@ -55,9 +55,9 @@ socket.on('connect', () => {
 startForm.submit(() => {
     let name = $('#nightName').val();
     let votingStyle = $('#votingSystem').val();
-    let setup = [name,votingStyle];
+    let setupDetails = {name, votingStyle};
     //Allow suggestions
-    socket.emit('setup_details', setup);
+    socket.emit('setup_details', setupDetails);
     movieForm.parent().removeAttr('hidden');
     startForm.attr('hidden', '');
     //Stops refresh and connect of new user
@@ -65,9 +65,8 @@ startForm.submit(() => {
 });
 
 //Set room then start suggesting
-socket.on('go_to_movie_night', (roomName) => {
-    console.log("your room is"+roomName);
-    socket.emit('join_room',roomName);
+socket.on('join_movie_night', (roomName) => {
+    socket.emit('join_movie_night', roomName);
     movieForm.parent().removeAttr('hidden');
     startForm.attr('hidden', '');
 });
