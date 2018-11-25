@@ -23,6 +23,19 @@
     <script src="main.js" defer></script>
 </head>
 <body>
+    <form id="startVotingForm" acton = "">
+        <h5>Start your movie night</h5>
+        <div class="form-inline mb-2">
+            <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night">
+            <h6>Choose voting system</h6>
+            <select name="votingSystem">
+                <option value="multi">Multi-Vote</option>
+                <!--- Add more voting styles here --->
+            </select>
+            <input type="submit" class="btn btn-primary" value="Start!">
+        </div>
+    </form>
+    <div hidden>
     <form id="movieSearchForm" action="">
         <h5>Search for a movie to watch below:</h5>
         <div class="form-inline mb-2">
@@ -31,6 +44,7 @@
         </div>
         <div id="errorMessage" class="alert alert-danger" role="alert" hidden></div>
     </form>
+    </div>
     <div hidden>
         <h5>Choose a movie to suggest below:</h5>
         <table id="suggestionTable" class="table">

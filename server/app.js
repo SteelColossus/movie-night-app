@@ -11,6 +11,7 @@ const port = 3000;
 const users = {};
 
 const nightInfo = {
+    "name": "",
     "votingSystem": "multi-vote",
     "movies": []
 };
@@ -33,8 +34,18 @@ io.on('connection', (socket) => {
         username: token,
         loggedIn: true
     };
-    
     console.log(`User '${users[token].username}' connected.`);
+
+    //Setup basic movie night details
+    socket.on("setup_details", (value) => {
+        nightInfo.name = value[0];
+        nightInfo.votingSystem = value[1];
+        socket.join(nightInfo.name);
+        console.log("your room is"+nightInfo.name);
+        //Get every client in the room
+        socket.broadcast.emit('go_to_movie_night',nightInfo.name);
+    });
+
 
     //When a movie is searched for, check the api for results
     socket.on('movie_search', (suggestion) => {
@@ -48,7 +59,6 @@ io.on('connection', (socket) => {
                 socket.emit('movie_search', response.data);
             });
     });
-
 
     socket.on('votes_changed', (voteDeltas) => {
         const newVotes = {};
@@ -100,4 +110,14 @@ io.on('connection', (socket) => {
         users[socket.token].loggedIn = false;
         console.log(`User '${userToRemove.username}' disconnected.`);
     });
+
+    //Make the socket join the voting room
+    socket.on('join_room',(room)=>{
+        socket.join(room);
+    });
 });
+
+
+
+
+

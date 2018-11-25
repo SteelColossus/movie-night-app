@@ -1,7 +1,8 @@
 const socket = io();
 const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
-const form = $('#movieSearchForm');
+const movieForm = $('#movieSearchForm');
+const startForm = $('#startVotingForm');
 let votingSystem = null;
 
 function appendMovieToTable(movie) {
@@ -50,8 +51,29 @@ socket.on('connect', () => {
     console.log('Connected to the app server.');
 });
 
+//Start the movie night
+startForm.submit(() => {
+    let name = $('#nightName').val();
+    let votingStyle = $('#votingSystem').val();
+    let setup = [name,votingStyle];
+    //Allow suggestions
+    socket.emit('setup_details', setup);
+    movieForm.parent().removeAttr('hidden');
+    startForm.attr('hidden', '');
+    //Stops refresh and connect of new user
+    return false;
+});
+
+//Set room then start suggesting
+socket.on('go_to_movie_night', (roomName) => {
+    console.log("your room is"+roomName);
+    socket.emit('join_room',roomName);
+    movieForm.parent().removeAttr('hidden');
+    startForm.attr('hidden', '');
+});
+
 //Get suggestion input
-form.submit(() => {
+movieForm.submit(() => {
     let suggestion = $('#suggestion').val();
 
     if (suggestion.length > 0) {
@@ -111,7 +133,7 @@ socket.on('setup', (info) => {
     }
 
     // Show the table
-    form.attr('hidden', '');
+    movieForm.attr('hidden', '');
     suggestTable.parent().attr('hidden', '');
     movieTable.parent().removeAttr('hidden');
 });
