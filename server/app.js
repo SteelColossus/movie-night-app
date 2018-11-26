@@ -86,11 +86,14 @@ io.on('connection', (socket) => {
                 "success": response.data.Response === 'True'
             };
 
+            let movieMapFunction = result => ({
+                "id": result.imdbID,
+                "title": result.Title,
+                "year": result.Year
+            });
+
             if (movieResults.success === true) {
-                movieResults.results = response.data.Search.map(result => ({
-                    "id": result.imdbID,
-                    "title": result.Title
-                }));
+                movieResults.results = response.data.Search.map(result => movieMapFunction(result));
 
                 resolve(movieResults);
             }
@@ -99,10 +102,7 @@ io.on('connection', (socket) => {
                     movieResults.success = response2.data.Response === 'True';
         
                     if (movieResults.success === true) {
-                        movieResults.results = [{
-                            "id": response2.data.imdbID,
-                            "title": response2.data.Title
-                        }];
+                        movieResults.results = [movieMapFunction(response2.data)];
                     }
                     else {
                         movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
@@ -150,6 +150,7 @@ io.on('connection', (socket) => {
                 "success": result.Response,
                 "id": result.imdbID,
                 "title": result.Title,
+                "year": result.Year,
                 "runtime": result.Runtime,
                 "genre": result.Genre,
                 "plot": result.Plot,

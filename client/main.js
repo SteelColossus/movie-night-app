@@ -5,6 +5,7 @@ const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
 const movieForm = $('#movieSearchForm');
 const startForm = $('#startVotingForm');
+const movieNightTitle = $('#movieNightTitle');
 
 let votingSystem = null;
 const sections = {
@@ -39,13 +40,14 @@ function switchSection(section) {
 function appendMovieToTable(movie) {
     const tableRow = $('<tr>');
     const firstCell = $('<td>').text(movie.title);
-    const secondCell = $('<td>').text(movie.runtime);
-    const thirdCell = $('<td>').text(movie.genre);
-    const fourthCell = $('<td>').text(movie.plot);
-    const fifthCell = $('<td>').text(movie.rating);
-    const sixthCell = $('<td>').text(movie.awards);
-    const seventhCell = $('<td>');
-    const eighthCell = $('<td>').attr('votes-for', movie.id);
+    const secondCell = $('<td>').text(movie.year);
+    const thirdCell = $('<td>').text(movie.runtime);
+    const fourthCell = $('<td>').text(movie.genre);
+    const fifthCell = $('<td>').text(movie.plot);
+    const sixthCell = $('<td>').text(movie.rating);
+    const seventhCell = $('<td>').text(movie.awards);
+    const eighthCell = $('<td>');
+    const ninthCell = $('<td>').attr('votes-for', movie.id);
     
     switch (votingSystem) {
         case "multi-vote": {
@@ -63,7 +65,7 @@ function appendMovieToTable(movie) {
 
                     socket.emit('votes_changed', voteDeltas);
                 });
-            seventhCell.append(voteButton);
+            eighthCell.append(voteButton);
             break;
         }
     }
@@ -71,8 +73,8 @@ function appendMovieToTable(movie) {
     // Sum all of the votes
     const totalVotes = Object.values(movie.votes).reduce((a, b) => a + b, 0);
 
-    eighthCell.text(totalVotes);
-    tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell);
+    ninthCell.text(totalVotes);
+    tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell).append(ninthCell);
     movieTable.append(tableRow);
 
     return tableRow;
@@ -108,6 +110,15 @@ socket.on('new_phase', (phaseInfo) => {
             switchSection('search');
             break;
     }
+
+    if (phaseInfo.data != null && phaseInfo.data.name != null) {
+        if (movieNightTitle.css('display') === 'none') {
+            movieNightTitle.text(phaseInfo.data.name).show(sectionAnimationTime);
+        }
+    }
+    else {
+        movieNightTitle.hide(sectionAnimationTime);
+    }
 });
 
 //Get suggestion input
@@ -140,8 +151,9 @@ socket.on('movie_search', (searchData) => {
     for (let x = 0; x < searchResults.length; x++) {
         const tableRow = $('<tr>');
         const suggestionCell = $('<td>').text(searchResults[x].title);
-        const voteCell = $('<td>');
-        const voteButton = $('<input>')
+        const yearCell = $('<td>').text(searchResults[x].year);
+        const chooseCell = $('<td>');
+        const chooseButton = $('<input>')
             .prop('type', 'button')
             .val('Choose!')
             .addClass('btn btn-primary')
@@ -149,11 +161,11 @@ socket.on('movie_search', (searchData) => {
             .attr('aria-pressed', 'false')
             .data('movie-id', searchResults[x].id)
             .click(() => {
-                socket.emit('movie_chosen', voteButton.data('movie-id'));
+                socket.emit('movie_chosen', chooseButton.data('movie-id'));
             });
 
-        voteCell.append(voteButton);
-        tableRow.append(suggestionCell).append(voteCell);
+        chooseCell.append(chooseButton);
+        tableRow.append(suggestionCell).append(yearCell).append(chooseCell);
         suggestTable.append(tableRow);
     }
 

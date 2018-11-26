@@ -23,6 +23,7 @@
     <script src="main.js" defer></script>
 </head>
 <body>
+    <h2 id="movieNightTitle" style="display: none"></h2>
     <div id="hostSection" style="display: none">
         <form id="startVotingForm" action="">
             <h5>Start your movie night</h5>
@@ -52,7 +53,8 @@
         <table id="suggestionTable" class="table">
             <tr>
                 <th scope="col">Suggestion</th>
-                <th scope="col"></th>
+                <th scope="col">Year</th>
+                <th></th>
             </tr>
         </table>
     </div>
@@ -61,10 +63,11 @@
         <table id="movieTable" class="table">
             <tr>
                 <th scope="col">Movie</th>
+                <th scope="col">Year</th>
                 <th scope="col">Runtime</th>
                 <th scope="col">Genre</th>
                 <th scope="col">Plot</th>
-                <th scope="col">Rating</th>
+                <th scope="col">IMDB Rating</th>
                 <th scope="col">Awards</th>
                 <th></th>
                 <th scope="col">Votes</th>
