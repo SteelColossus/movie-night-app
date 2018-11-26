@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const favicon = require('serve-favicon');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -18,6 +19,7 @@ const nightInfo = {
 
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
+app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 
 // Tell the server to listen on the given port
 http.listen(port, console.log(`Listening on port ${port}.`));
