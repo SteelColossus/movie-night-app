@@ -8,6 +8,8 @@ const keys = require('./api_keys');
 
 const port = 3000;
 
+let phase = 'host';
+
 const users = {};
 
 const nightInfo = {
@@ -39,18 +41,39 @@ io.on('connection', (socket) => {
 
     console.log(`User '${users[token].username}' connected.`);
 
-    if (nightInfo.name != null) {
-        socket.emit('join_movie_night', nightInfo.name);
+    // Get newcomers to the same point as everyone else
+    switch (phase) {
+        case 'host':
+            socket.emit('new_phase', {
+                "name": "host",
+                "data": null
+            });
+            break;
+        case 'suggest':
+            socket.emit('new_phase', {
+                "name": "suggest",
+                "data": {
+                    "name": nightInfo.name,
+                    "votingSystem": nightInfo.votingSystem
+                }
+            });
+            break;
     }
 
     //Setup basic movie night details
     socket.on("setup_details", (setupDetails) => {
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
-        socket.join(nightInfo.name);
-        console.log(`${users[token].username} has started the movie night: ${nightInfo.name}`);
+        phase = 'suggest';
+        console.log(`${users[token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
-        socket.broadcast.emit('join_movie_night', nightInfo.name);
+        io.emit('new_phase', {
+            "name": "suggest",
+            "data": {
+                "name": nightInfo.name,
+                "votingSystem": nightInfo.votingSystem
+            }
+        });
     });
 
     //When a movie is searched for, check the api for results
@@ -116,7 +139,7 @@ io.on('connection', (socket) => {
                 newVotes[key] = movie.votes;
             }
         });
-        io.emit('votes_changed', newVotes);
+        io.to(nightInfo.name).emit('votes_changed', newVotes);
     });
 
     //Get information for the movie
@@ -137,7 +160,7 @@ io.on('connection', (socket) => {
 
             nightInfo.movies.push(movie);
             socket.emit('setup', nightInfo);
-            socket.broadcast.emit('new_movie', movie);
+            socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
         });
     });
 

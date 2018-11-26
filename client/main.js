@@ -8,7 +8,7 @@ const startForm = $('#startVotingForm');
 
 let votingSystem = null;
 const sections = {
-    "host": true,
+    "host": false,
     "search": false,
     "suggestions": false,
     "vote": false
@@ -27,10 +27,10 @@ function hideSection(section) {
 
 function switchSection(section) {
     Object.keys(sections).forEach((key) => {
-        if (key === section) {
+        if (key === section && sections[key] === false) {
             showSection(key);
         }
-        else {
+        else if (key !== section && sections[key] === true) {
             hideSection(key);
         }
     });
@@ -98,9 +98,16 @@ startForm.submit(() => {
 });
 
 //Set room then start suggesting
-socket.on('join_movie_night', (roomName) => {
-    socket.emit('join_movie_night', roomName);
-    switchSection('search');
+socket.on('new_phase', (phaseInfo) => {
+    switch (phaseInfo.name) {
+        case 'host':
+            switchSection('host');
+            break;
+        case 'suggest':
+            socket.emit('join_movie_night', phaseInfo.data.name);
+            switchSection('search');
+            break;
+    }
 });
 
 //Get suggestion input
