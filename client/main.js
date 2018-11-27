@@ -16,6 +16,8 @@ const sections = {
 };
 const sectionAnimationTime = 400;
 
+let userToken = null;
+
 function showSection(section) {
     sections[section] = true;
     $(`#${section}Section`).show(sectionAnimationTime);
@@ -46,8 +48,8 @@ function appendMovieToTable(movie) {
     const fifthCell = $('<td>').text(movie.plot);
     const sixthCell = $('<td>').text(movie.rating);
     const seventhCell = $('<td>').text(movie.awards);
-    const eighthCell = $('<td>');
-    const ninthCell = $('<td>').attr('votes-for', movie.id);
+    const eighthCell = $('<td>').css('display', 'none');
+    const ninthCell = $('<td>').attr('votes-for', movie.id).css('display', 'none');
     
     switch (votingSystem) {
         case "multi-vote": {
@@ -80,8 +82,26 @@ function appendMovieToTable(movie) {
     return tableRow;
 }
 
+function setupMovies(info) {
+    votingSystem = info.votingSystem;
+
+    // Remove all the existing movies
+    movieTable.find('tr:not(:first-child)').remove();
+
+    for (let i = 0; i < info.movies.length; i++) {
+        appendMovieToTable(info.movies[i]);
+    }
+
+    // Show the table
+    switchSection('vote');
+}
+
 socket.on('connect', () => {
     console.log('Connected to the app server.');
+});
+
+socket.on('user_token', (token) => {
+    userToken = token;
 });
 
 //Start the movie night
@@ -106,8 +126,22 @@ socket.on('new_phase', (phaseInfo) => {
             switchSection('host');
             break;
         case 'suggest':
+
             socket.emit('join_movie_night', phaseInfo.data.name);
             switchSection('search');
+            
+            if (phaseInfo.data.host === userToken) {
+                $('#closeSuggestionsButton').show(sectionAnimationTime).click(() => {
+                    $('#closeSuggestionsButton').hide();
+                    socket.emit('close_suggestions', 'vote');
+                });
+            }
+            break;
+        case 'vote':
+            if (sections.vote === false) {
+                setupMovies(phaseInfo.data);
+            }
+            movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(sectionAnimationTime);
             break;
     }
 
@@ -173,17 +207,7 @@ socket.on('movie_search', (searchData) => {
 });
 
 socket.on('setup', (info) => {
-    votingSystem = info.votingSystem;
-
-    // Remove all the existing movies
-    movieTable.find('tr:not(:first-child)').remove();
-
-    for (let i = 0; i < info.movies.length; i++) {
-        appendMovieToTable(info.movies[i]);
-    }
-
-    // Show the table
-    switchSection('vote');
+    setupMovies(info);
 });
 
 socket.on('new_movie', (movie) => {

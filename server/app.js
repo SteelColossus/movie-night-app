@@ -41,6 +41,8 @@ io.on('connection', (socket) => {
         loggedIn: true
     };
 
+    socket.emit('user_token', socket.token);
+
     console.log(`User '${users[token].username}' connected.`);
 
     // Get newcomers to the same point as everyone else
@@ -56,16 +58,23 @@ io.on('connection', (socket) => {
                 "name": "suggest",
                 "data": {
                     "name": nightInfo.name,
-                    "votingSystem": nightInfo.votingSystem
+                    "votingSystem": nightInfo.votingSystem,
+                    "host": nightInfo.host
                 }
             });
             break;
+        case 'vote':
+            socket.emit('new_phase', {
+                "name": "vote",
+                "data": nightInfo
+            });
     }
 
     //Setup basic movie night details
     socket.on("setup_details", (setupDetails) => {
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
+        nightInfo.host = socket.token;
         phase = 'suggest';
         console.log(`${users[token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
@@ -73,7 +82,8 @@ io.on('connection', (socket) => {
             "name": "suggest",
             "data": {
                 "name": nightInfo.name,
-                "votingSystem": nightInfo.votingSystem
+                "votingSystem": nightInfo.votingSystem,
+                "host": nightInfo.host
             }
         });
     });
@@ -119,6 +129,15 @@ io.on('connection', (socket) => {
                 resolve(movieResults);
             }
         })).then(movieResults => socket.emit('movie_search', movieResults));
+    });
+
+    socket.on('close_suggestions', () => {
+        phase = 'vote';
+
+        io.emit('new_phase', {
+            "name": "vote",
+            "data": nightInfo
+        });
     });
 
     socket.on('votes_changed', (voteDeltas) => {
