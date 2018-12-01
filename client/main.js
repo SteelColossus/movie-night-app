@@ -108,16 +108,22 @@ socket.on('user_token', (token) => {
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val();
-    let votingStyle = $('#votingSystem').val();
-    let setupDetails = {
-        "name": name,
-        "votingSystem": votingStyle
-    };
-    //Allow suggestions
-    socket.emit('setup_details', setupDetails);
-    switchSection('search');
-    //Stops refresh and connect of new user
-    return false;
+    if(name === "")
+    {
+        window.alert('Stop hacking, please enter movie night name');
+    }
+    else{
+        let votingStyle = $('#votingSystem').val();
+        let setupDetails = {
+            "name": name,
+            "votingSystem": votingStyle
+        };
+        //Allow suggestions
+        socket.emit('setup_details', setupDetails);
+        switchSection('search');
+        //Stops refresh and connect of new user
+        return false;
+    }
 });
 
 function count(obj)
@@ -192,7 +198,6 @@ socket.on('new_phase', (phaseInfo) => {
     switch (phaseInfo.name) {
         case 'host':
             switchSection('host');
-            phaseInfo.movies = [];
             break;
         case 'suggest':
             socket.emit('join_movie_night', phaseInfo.data.name);
