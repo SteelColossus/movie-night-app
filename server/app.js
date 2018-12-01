@@ -141,21 +141,12 @@ io.on('connection', (socket) => {
         switchPhase(io, 'vote');
     });
 
-    socket.on('close_voting',()=>{
-        phase = 'results';
-
-        io.emit('new_phase', {
-            "name": "results",
-            "data": nightInfo
-        });
+    socket.on('close_voting', () => {
+        switchPhase(io, 'results');
     });
 
-    socket.on('end',()=>{
-        phase = 'host';
-        io.emit('new_phase', {
-            "name": "host",
-            "data": null
-        });
+    socket.on('end', () => {
+        switchPhase(io, 'host');
     });
 
     socket.on('votes_changed', (voteDeltas) => {
@@ -178,6 +169,7 @@ io.on('connection', (socket) => {
                 newVotes[key] = movie.votes;
             }
         });
+
         io.to(nightInfo.name).emit('votes_changed', newVotes);
     });
 

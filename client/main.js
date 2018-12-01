@@ -7,18 +7,18 @@ const movieForm = $('#movieSearchForm');
 const startForm = $('#startVotingForm');
 const movieNightTitle = $('#movieNightTitle');
 
-let votingSystem = null;
 const sections = {
     "host": false,
     "search": false,
     "suggestions": false,
     "vote": false,
-    "results":false
+    "results": false
 };
 const sectionAnimationTime = 400;
 
 let inRoom = false;
 let userToken = null;
+let votingSystem = null;
 
 function showSection(section) {
     sections[section] = true;
@@ -39,6 +39,10 @@ function switchSection(section) {
             hideSection(key);
         }
     });
+}
+
+function sumVotes(votesObj) {
+    return Object.values(votesObj).reduce((a, b) => a + b, 0);
 }
 
 function appendMovieToTable(movie) {
@@ -75,7 +79,7 @@ function appendMovieToTable(movie) {
     }
 
     // Sum all of the votes
-    const totalVotes = Object.values(movie.votes).reduce((a, b) => a + b, 0);
+    const totalVotes = sumVotes(movie.votes);
 
     ninthCell.text(totalVotes);
     tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell).append(ninthCell);
@@ -109,11 +113,10 @@ socket.on('user_token', (token) => {
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val();
-    if(name === "")
-    {
-        window.alert('Stop hacking, please enter movie night name');
+    if (name === '') {
+        alert('Stop hacking, please enter movie night name');
     }
-    else{
+    else {
         let votingStyle = $('#votingSystem').val();
         let setupDetails = {
             "name": name,
@@ -122,40 +125,31 @@ startForm.submit(() => {
         //Allow suggestions
         socket.emit('setup_details', setupDetails);
         switchSection('search');
-        //Stops refresh and connect of new user
-        return false;
     }
+    
+    //Stops refresh and connect of new user
+    return false;
 });
 
-function count(obj)
-{
-    var count=0;
-    for(var prop in obj) {
-        if (obj.hasOwnProperty(prop)) {
-            ++count;
-        }
-    }
-    return count;
-}
-function createChart(data)
-{
-    var ctx = $("#voteChart");
-    var movies = data.movies;
-    var labels = [];
-    var votes = [];
-    var winner = {"movie":"","votes":0};
-    for(var x=0;x<movies.length;x++)
-    {
+function createChart(data) {
+    const ctx = $("#voteChart");
+    const movies = data.movies;
+    const labels = [];
+    const votes = [];
+    const winner = { "movie": "", "votes": 0 };
+
+    for (let x = 0; x < movies.length; x++) {
         labels[x] = movies[x].title;
-        votes[x] = count(movies[x].votes);
-        if(votes[x]>winner.votes){
+        votes[x] = sumVotes(movies[x].votes);
+        if (votes[x] > winner.votes) {
             winner.movie = labels[x];
             winner.votes = votes[x];
         }
     }
 
-    $("#winner").text("Winner is "+ winner.movie + " with "+winner.votes + " votes");
-    var myChart = new Chart(ctx, {
+    $("#winner").text(`Winner is ${winner.movie} with ${winner.votes} votes!`);
+
+    const myChart = new Chart(ctx, { // eslint-disable-line no-unused-vars
         type: 'bar',
         data: {
             labels: labels,
@@ -171,7 +165,7 @@ function createChart(data)
                     'rgba(255, 159, 64, 0.2)'
                 ],
                 borderColor: [
-                    'rgba(255,99,132,1)',
+                    'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)',
                     'rgba(255, 206, 86, 1)',
                     'rgba(75, 192, 192, 1)',
@@ -185,22 +179,16 @@ function createChart(data)
             scales: {
                 yAxes: [{
                     ticks: {
-                        beginAtZero:true
+                        beginAtZero: true
                     }
                 }]
             }
         }
     });
-
 }
 
 //Set room then start suggesting
 socket.on('new_phase', (phaseInfo) => {
-    if (!inRoom) {
-        socket.emit('join_movie_night', phaseInfo.data.name);
-        inRoom = true;
-    }
-
     switch (phaseInfo.name) {
         case 'host':
             switchSection('host');
@@ -233,7 +221,6 @@ socket.on('new_phase', (phaseInfo) => {
             }
             break;
         case 'results':
-            console.log("here");
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);
@@ -246,6 +233,11 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
+        if (!inRoom) {     
+            socket.emit('join_movie_night', phaseInfo.data.name);
+            inRoom = true;
+        }
+
         if (movieNightTitle.css('display') === 'none') {
             movieNightTitle.text(phaseInfo.data.name).show(sectionAnimationTime);
         }
@@ -319,7 +311,7 @@ socket.on('votes_changed', (newVotes) => {
     Object.keys(newVotes).forEach((key) => {
         const votesCell = movieTable.find(`td[votes-for=${key}]`);
         console.log(votesCell);
-        const totalVotes = Object.values(newVotes[key]).reduce((a, b) => a + b, 0);
+        const totalVotes = sumVotes(newVotes[key]);
         const fadeMilliseconds = 150;
 
         votesCell.fadeOut(fadeMilliseconds, () => {
