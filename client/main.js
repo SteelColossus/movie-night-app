@@ -206,6 +206,22 @@ socket.on('new_phase', (phaseInfo) => {
                     socket.emit('close_suggestions', 'vote');
                 });
             }
+
+            $('#movieInfo').popover({
+                "trigger": "hover focus",
+                "placement": "bottom",
+                "html": true,
+                "title": "Movie Night Rules:",
+                "content": `
+                    <ul>
+                        <li>NO anime</li>
+                        <li>NO series</li>
+                        <li>NO porn</li>
+                        <li>NO anime series</li>
+                        <li>NO anime porn series</li>
+                    </ul>
+                `
+            });
             break;
         case 'vote':
             if (sections.vote === false) {
@@ -243,6 +259,7 @@ socket.on('new_phase', (phaseInfo) => {
         }
     }
     else {
+        inRoom = false;
         movieNightTitle.hide(sectionAnimationTime);
     }
 });
@@ -310,7 +327,6 @@ socket.on('new_movie', (movie) => {
 socket.on('votes_changed', (newVotes) => {
     Object.keys(newVotes).forEach((key) => {
         const votesCell = movieTable.find(`td[votes-for=${key}]`);
-        console.log(votesCell);
         const totalVotes = sumVotes(newVotes[key]);
         const fadeMilliseconds = 150;
 

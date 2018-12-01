@@ -15,7 +15,6 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
-    "chart.js": "^2.7.3",
     "express": "^4.16.4",
     "serve-favicon": "^2.5.0",
     "socket.io": "^2.1.1"

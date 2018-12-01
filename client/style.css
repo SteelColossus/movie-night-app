@@ -5,3 +5,12 @@ body {
 #votingSystemLabel {
     font-weight: bold;
 }
+
+#movieInfo {
+    font-size: 1.5rem;
+}
+
+.popover-body ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+}
