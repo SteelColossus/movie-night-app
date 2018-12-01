@@ -11,6 +11,10 @@ const port = 3000;
 
 let phase = 'host';
 
+const votingSystems = {
+    "multiVote": "Multi Vote"
+};
+
 const users = {};
 
 const nightInfo = {
@@ -32,6 +36,36 @@ function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
 }
 
+function switchPhase(socket, name) {
+    let data = null;
+
+    switch (name) {
+        case 'host':
+            data = votingSystems;
+            break;
+        case 'suggest':
+            data = {
+                "name": nightInfo.name,
+                "votingSystem": nightInfo.votingSystem,
+                "host": nightInfo.host
+            };
+            break;
+        case 'vote':
+            data = nightInfo;
+            break;
+        default:
+            console.error(`Invalid phase '${name}'.`);
+            return;
+    }
+
+    phase = name;
+
+    socket.emit('new_phase', {
+        "name": name,
+        "data": data
+    });
+}
+
 io.on('connection', (socket) => {
     const token = getRandomToken();
     socket.token = token;
@@ -46,46 +80,16 @@ io.on('connection', (socket) => {
     console.log(`User '${users[token].username}' connected.`);
 
     // Get newcomers to the same point as everyone else
-    switch (phase) {
-        case 'host':
-            socket.emit('new_phase', {
-                "name": "host",
-                "data": null
-            });
-            break;
-        case 'suggest':
-            socket.emit('new_phase', {
-                "name": "suggest",
-                "data": {
-                    "name": nightInfo.name,
-                    "votingSystem": nightInfo.votingSystem,
-                    "host": nightInfo.host
-                }
-            });
-            break;
-        case 'vote':
-            socket.emit('new_phase', {
-                "name": "vote",
-                "data": nightInfo
-            });
-    }
+    switchPhase(socket, phase);
 
     //Setup basic movie night details
     socket.on("setup_details", (setupDetails) => {
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
         nightInfo.host = socket.token;
-        phase = 'suggest';
         console.log(`${users[token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
-        io.emit('new_phase', {
-            "name": "suggest",
-            "data": {
-                "name": nightInfo.name,
-                "votingSystem": nightInfo.votingSystem,
-                "host": nightInfo.host
-            }
-        });
+        switchPhase(io, 'suggest');
     });
 
     //When a movie is searched for, check the api for results
@@ -112,14 +116,14 @@ io.on('connection', (socket) => {
             else if (response.data.Error === 'Too many results.') {
                 makeOmdbRequest('t', encodedSuggestion).then((response2) => {
                     movieResults.success = response2.data.Response === 'True';
-        
+
                     if (movieResults.success === true) {
                         movieResults.results = [movieMapFunction(response2.data)];
                     }
                     else {
                         movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
                     }
-        
+
                     resolve(movieResults);
                 });
             }
@@ -132,12 +136,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        phase = 'vote';
-
-        io.emit('new_phase', {
-            "name": "vote",
-            "data": nightInfo
-        });
+        switchPhase(io, 'vote');
     });
 
     socket.on('votes_changed', (voteDeltas) => {

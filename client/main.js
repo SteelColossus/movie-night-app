@@ -16,6 +16,7 @@ const sections = {
 };
 const sectionAnimationTime = 400;
 
+let inRoom = false;
 let userToken = null;
 
 function showSection(section) {
@@ -50,9 +51,9 @@ function appendMovieToTable(movie) {
     const seventhCell = $('<td>').text(movie.awards);
     const eighthCell = $('<td>').css('display', 'none');
     const ninthCell = $('<td>').attr('votes-for', movie.id).css('display', 'none');
-    
+
     switch (votingSystem) {
-        case "multi-vote": {
+        case 'multiVote': {
             const voteButton = $('<input>')
                 .prop('type', 'button')
                 .val('Vote!')
@@ -71,7 +72,7 @@ function appendMovieToTable(movie) {
             break;
         }
     }
-    
+
     // Sum all of the votes
     const totalVotes = Object.values(movie.votes).reduce((a, b) => a + b, 0);
 
@@ -121,15 +122,22 @@ startForm.submit(() => {
 
 //Set room then start suggesting
 socket.on('new_phase', (phaseInfo) => {
+    if (!inRoom) {
+        socket.emit('join_movie_night', phaseInfo.data.name);
+        inRoom = true;
+    }
+
     switch (phaseInfo.name) {
         case 'host':
             switchSection('host');
+
+            Object.keys(phaseInfo.data).forEach((key) => {
+                $('#votingSystem').append($('<option>').val(key).text(phaseInfo.data[key]));
+            });
             break;
         case 'suggest':
-
-            socket.emit('join_movie_night', phaseInfo.data.name);
             switchSection('search');
-            
+
             if (phaseInfo.data.host === userToken) {
                 $('#closeSuggestionsButton').show(sectionAnimationTime).click(() => {
                     $('#closeSuggestionsButton').hide();
@@ -141,6 +149,7 @@ socket.on('new_phase', (phaseInfo) => {
             if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
             }
+
             movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(sectionAnimationTime);
             break;
     }
@@ -164,7 +173,7 @@ movieForm.submit(() => {
 
         socket.emit('movie_search', suggestion);
     }
-    
+
     //Stops refresh and connect of new user
     return false;
 });
