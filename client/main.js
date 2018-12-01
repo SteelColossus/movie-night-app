@@ -112,7 +112,7 @@ socket.on('user_token', (token) => {
 
 //Start the movie night
 startForm.submit(() => {
-    let name = $('#nightName').val();
+    let name = $('#nightName').val().toString().trim();
     if (name === '') {
         alert('Stop hacking, please enter movie night name');
     }
@@ -266,7 +266,7 @@ socket.on('new_phase', (phaseInfo) => {
 
 //Get suggestion input
 movieForm.submit(() => {
-    let suggestion = $('#suggestion').val();
+    let suggestion = $('#suggestion').val().toString().trim();
 
     if (suggestion.length > 0) {
         $('#errorMessage').hide(sectionAnimationTime);

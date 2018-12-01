@@ -42,7 +42,7 @@
         <form id="startVotingForm" action="">
             <h5>Start your movie night</h5>
             <div class="form-inline">
-                <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night" required>
+                <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night" required pattern=".*\S.*">
                 <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
                 <select id="votingSystem" class="form-control ml-2 mr-2" name="votingSystem"></select>
                 <input type="submit" class="btn btn-primary" value="Start!">
@@ -53,7 +53,7 @@
         <form id="movieSearchForm" action="">
             <h5>Search for a movie to watch below:</h5>
             <div class="form-inline mb-2">
-                <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter" required>
+                <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter" required pattern=".*\S.*">
                 <input type="submit" class="btn btn-primary mr-2" value="Search!">
                 <a id="movieInfo" data-toggle="popover">
                     <i class="fas fa-info-circle"></i>
