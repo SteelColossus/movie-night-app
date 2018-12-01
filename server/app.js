@@ -51,6 +51,7 @@ function switchPhase(socket, name) {
             };
             break;
         case 'vote':
+        case 'results':
             data = nightInfo;
             break;
         default:
@@ -84,6 +85,7 @@ io.on('connection', (socket) => {
 
     //Setup basic movie night details
     socket.on("setup_details", (setupDetails) => {
+        nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
         nightInfo.host = socket.token;
@@ -137,6 +139,23 @@ io.on('connection', (socket) => {
 
     socket.on('close_suggestions', () => {
         switchPhase(io, 'vote');
+    });
+
+    socket.on('close_voting',()=>{
+        phase = 'results';
+
+        io.emit('new_phase', {
+            "name": "results",
+            "data": nightInfo
+        });
+    });
+
+    socket.on('end',()=>{
+        phase = 'host';
+        io.emit('new_phase', {
+            "name": "host",
+            "data": null
+        });
     });
 
     socket.on('votes_changed', (voteDeltas) => {

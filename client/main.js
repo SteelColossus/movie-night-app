@@ -12,7 +12,8 @@ const sections = {
     "host": false,
     "search": false,
     "suggestions": false,
-    "vote": false
+    "vote": false,
+    "results":false
 };
 const sectionAnimationTime = 400;
 
@@ -108,17 +109,90 @@ socket.on('user_token', (token) => {
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val();
-    let votingStyle = $('#votingSystem').val();
-    let setupDetails = {
-        "name": name,
-        "votingSystem": votingStyle
-    };
-    //Allow suggestions
-    socket.emit('setup_details', setupDetails);
-    switchSection('search');
-    //Stops refresh and connect of new user
-    return false;
+    if(name === "")
+    {
+        window.alert('Stop hacking, please enter movie night name');
+    }
+    else{
+        let votingStyle = $('#votingSystem').val();
+        let setupDetails = {
+            "name": name,
+            "votingSystem": votingStyle
+        };
+        //Allow suggestions
+        socket.emit('setup_details', setupDetails);
+        switchSection('search');
+        //Stops refresh and connect of new user
+        return false;
+    }
 });
+
+function count(obj)
+{
+    var count=0;
+    for(var prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            ++count;
+        }
+    }
+    return count;
+}
+function createChart(data)
+{
+    var ctx = $("#voteChart");
+    var movies = data.movies;
+    var labels = [];
+    var votes = [];
+    var winner = {"movie":"","votes":0};
+    for(var x=0;x<movies.length;x++)
+    {
+        labels[x] = movies[x].title;
+        votes[x] = count(movies[x].votes);
+        if(votes[x]>winner.votes){
+            winner.movie = labels[x];
+            winner.votes = votes[x];
+        }
+    }
+
+    $("#winner").text("Winner is "+ winner.movie + " with "+winner.votes + " votes");
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '# of Votes',
+                data: votes,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero:true
+                    }
+                }]
+            }
+        }
+    });
+
+}
 
 //Set room then start suggesting
 socket.on('new_phase', (phaseInfo) => {
@@ -151,7 +225,24 @@ socket.on('new_phase', (phaseInfo) => {
             }
 
             movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(sectionAnimationTime);
+            if (phaseInfo.data.host === userToken) {
+                $('#closeVotingButton').show(sectionAnimationTime).click(() => {
+                    $('#closeVotingButton').hide();
+                    socket.emit('close_voting', 'results');
+                });
+            }
             break;
+        case 'results':
+            console.log("here");
+            hideSection('vote');
+            showSection('results');
+            createChart(phaseInfo.data);
+            if (phaseInfo.data.host === userToken) {
+                $('#endButton').show(sectionAnimationTime).click(() => {
+                    $('#endButton').hide();
+                    socket.emit('end', phaseInfo.data);
+                });
+            }
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
