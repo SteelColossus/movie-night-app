@@ -78,6 +78,7 @@ io.on('connection', (socket) => {
 
     //Setup basic movie night details
     socket.on("setup_details", (setupDetails) => {
+        nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
         nightInfo.host = socket.token;
