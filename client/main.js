@@ -223,8 +223,9 @@ socket.on('new_phase', (phaseInfo) => {
             }
             break;
         case 'results':
+            console.log("here");
             createChart(phaseInfo.data);
-            hideSection('votes');
+            hideSection('vote');
             showSection('results');
             if (phaseInfo.data.host === userToken) {
                 $('#endButton').show(sectionAnimationTime).click(() => {
