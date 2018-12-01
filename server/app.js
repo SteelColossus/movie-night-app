@@ -68,6 +68,12 @@ io.on('connection', (socket) => {
                 "name": "vote",
                 "data": nightInfo
             });
+            break;
+        case 'results':
+            socket.emit('new_phase', {
+                "name": "results",
+                "data": nightInfo
+            });
     }
 
     //Setup basic movie night details
@@ -137,6 +143,23 @@ io.on('connection', (socket) => {
         io.emit('new_phase', {
             "name": "vote",
             "data": nightInfo
+        });
+    });
+
+    socket.on('close_voting',()=>{
+        phase = 'results';
+
+        io.emit('new_phase', {
+            "name": "results",
+            "data": nightInfo
+        });
+    });
+
+    socket.on('end',()=>{
+        phase = 'host';
+        io.emit('new_phase', {
+            "name": "host",
+            "data": null
         });
     });
 
