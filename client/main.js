@@ -18,7 +18,6 @@ const sections = {
 const sectionAnimationTime = 400;
 
 let inRoom = false;
-let userToken = null;
 let votingSystem = null;
 
 function showSection(section) {
@@ -108,8 +107,7 @@ socket.on('connect', () => {
 });
 
 socket.on('request_user_token', () => {
-    userToken = client.getFingerprint();
-    socket.emit('user_token', userToken);
+    socket.emit('user_token', client.getFingerprint());
 });
 
 //Start the movie night
@@ -130,7 +128,7 @@ startForm.submit(() => {
         socket.emit('setup_details', setupDetails);
         switchSection('search');
     }
-    
+
     //Stops refresh and connect of new user
     return false;
 });
@@ -204,7 +202,7 @@ socket.on('new_phase', (phaseInfo) => {
         case 'suggest':
             switchSection('search');
 
-            if (phaseInfo.data.host === userToken) {
+            if (phaseInfo.isHost) {
                 $('#closeSuggestionsButton').show(sectionAnimationTime).click(() => {
                     $('#closeSuggestionsButton').hide();
                     socket.emit('close_suggestions', 'vote');
@@ -230,12 +228,12 @@ socket.on('new_phase', (phaseInfo) => {
         case 'vote':
             $('#closeSuggestionsButton').hide();
 
-            if (sections.vote === false) {
+            if (phaseInfo.isHost) {
                 setupMovies(phaseInfo.data);
             }
 
             movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(sectionAnimationTime);
-            if (phaseInfo.data.host === userToken) {
+            if (phaseInfo.isHost) {
                 $('#closeVotingButton').show(sectionAnimationTime).click(() => {
                     $('#closeVotingButton').hide();
                     socket.emit('close_voting', 'results');
@@ -248,7 +246,8 @@ socket.on('new_phase', (phaseInfo) => {
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);
-            if (phaseInfo.data.host === userToken) {
+
+            if (phaseInfo.isHost) {
                 $('#endButton').show(sectionAnimationTime).click(() => {
                     $('#endButton').hide();
                     socket.emit('end', phaseInfo.data);
@@ -257,7 +256,7 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
-        if (!inRoom) {     
+        if (!inRoom) {
             socket.emit('join_movie_night', phaseInfo.data.name);
             inRoom = true;
         }

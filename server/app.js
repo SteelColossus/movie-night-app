@@ -14,6 +14,7 @@ const socketDebug = false;
 
 let phase = 'host';
 let userNum = 1;
+let host = null;
 
 const votingSystems = {
     "multiVote": "Multi Vote"
@@ -36,7 +37,12 @@ function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
 }
 
-function switchPhase(socket, name) {
+function switchPhase(socket, name, sendToAll = true) {
+    // Server side validation to prevent non hosts from moving phases
+    if (sendToAll === true && host !== socket.token) {
+        return;
+    }
+
     let data = null;
 
     switch (name) {
@@ -46,8 +52,7 @@ function switchPhase(socket, name) {
         case 'suggest':
             data = {
                 "name": nightInfo.name,
-                "votingSystem": nightInfo.votingSystem,
-                "host": nightInfo.host
+                "votingSystem": nightInfo.votingSystem
             };
             break;
         case 'vote':
@@ -61,10 +66,24 @@ function switchPhase(socket, name) {
 
     phase = name;
 
-    socket.emit('new_phase', {
+    const phaseInfo = {
         "name": name,
         "data": data
-    });
+    };
+
+    if (host != null) {
+        phaseInfo.isHost = (host === socket.token);
+    }
+
+    socket.emit('new_phase', phaseInfo);
+
+    if (sendToAll === true) {
+        if (host != null) {
+            phaseInfo.isHost = false;
+        }
+
+        socket.broadcast.emit('new_phase', phaseInfo);
+    }
 }
 
 io.on('connection', (socket) => {
@@ -88,7 +107,7 @@ io.on('connection', (socket) => {
         console.log(`${isNewUser ? 'New' : 'Existing'} user '${users[token].username}' connected.`);
 
         // Get newcomers to the same point as everyone else
-        switchPhase(socket, phase);
+        switchPhase(socket, phase, false);
     });
 
     //Setup basic movie night details
@@ -96,10 +115,10 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
-        nightInfo.host = socket.token;
+        host = socket.token;
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
-        switchPhase(io, 'suggest');
+        switchPhase(socket, 'suggest');
     });
 
     //When a movie is searched for, check the api for results
@@ -146,15 +165,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        switchPhase(io, 'vote');
+        switchPhase(socket, 'vote');
     });
 
     socket.on('close_voting', () => {
-        switchPhase(io, 'results');
+        switchPhase(socket, 'results');
     });
 
     socket.on('end', () => {
-        switchPhase(io, 'host');
+        switchPhase(socket, 'host');
     });
 
     socket.on('votes_changed', (voteDeltas) => {
