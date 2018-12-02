@@ -217,7 +217,7 @@ socket.on('new_phase', (phaseInfo) => {
             if (phaseInfo.isHost) {
                 $('#closeSuggestionsButton').show(sectionAnimationTime).click(() => {
                     $('#closeSuggestionsButton').hide();
-                    socket.emit('close_suggestions', 'vote');
+                    socket.emit('close_suggestions');
                 });
             }
 
@@ -249,7 +249,7 @@ socket.on('new_phase', (phaseInfo) => {
             if (phaseInfo.isHost) {
                 $('#closeVotingButton').show(sectionAnimationTime).click(() => {
                     $('#closeVotingButton').hide();
-                    socket.emit('close_voting', 'results');
+                    socket.emit('close_voting');
                 });
             }
             break;
@@ -261,7 +261,12 @@ socket.on('new_phase', (phaseInfo) => {
             if (phaseInfo.isHost) {
                 $('#endButton').show(sectionAnimationTime).click(() => {
                     $('#endButton').hide();
-                    socket.emit('end', phaseInfo.data);
+                    socket.emit('end');
+                });
+
+                $('#newMovieButton').show(sectionAnimationTime).click(() => {
+                    $('#newMovieButton').hide();
+                    socket.emit('new_round');
                 });
             }
     }

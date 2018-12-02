@@ -178,6 +178,12 @@ io.on('connection', (socket) => {
 
     socket.on('end', () => {
         switchPhase(socket, 'host');
+        host = null;
+    });
+
+    socket.on('new_round', () => {
+        nightInfo.movies = [];
+        switchPhase(socket, 'suggest');
     });
 
     socket.on('votes_changed', (voteDeltas) => {
