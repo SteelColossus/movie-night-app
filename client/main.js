@@ -239,7 +239,6 @@ socket.on('new_phase', (phaseInfo) => {
             });
             break;
         case 'vote':
-            $('#closeSuggestionsButton').hide();
 
             if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
@@ -254,8 +253,6 @@ socket.on('new_phase', (phaseInfo) => {
             }
             break;
         case 'results':
-            $('#closeVotingButton').hide();
-
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);
@@ -281,6 +278,14 @@ socket.on('new_phase', (phaseInfo) => {
     else {
         inRoom = false;
         movieNightTitle.hide(sectionAnimationTime);
+    }
+
+    if (phaseInfo.name !== 'suggest') {
+        $('#closeSuggestionsButton').hide();
+    }
+    else if (phaseInfo.name !== 'vote') {
+        $('#closeVotingButton').hide();
+        movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').hide();
     }
 });
 
