@@ -9,7 +9,11 @@ const keys = require('./api_keys');
 
 const port = 3000;
 
+// Log when sockets connect and disconnect
+const socketDebug = false;
+
 let phase = 'host';
+let userNum = 1;
 
 const votingSystems = {
     "multiVote": "Multi Vote"
@@ -27,10 +31,6 @@ app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 
 // Tell the server to listen on the given port
 http.listen(port, console.log(`Listening on port ${port}.`));
-
-function getRandomToken() {
-    return Math.floor(Math.random() * 9999) + 1;
-}
 
 function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
@@ -68,28 +68,36 @@ function switchPhase(socket, name) {
 }
 
 io.on('connection', (socket) => {
-    const token = getRandomToken();
-    socket.token = token;
+    if (socketDebug) {
+        console.log(`Socket ${socket.id} connected.`);
+    }
 
-    users[token] = {
-        username: token,
-        loggedIn: true
-    };
+    socket.emit('request_user_token');
 
-    socket.emit('user_token', socket.token);
+    socket.on('user_token', (token) => {
+        socket.token = token;
 
-    console.log(`User '${users[token].username}' connected.`);
+        const isNewUser = !users.hasOwnProperty(token);
 
-    // Get newcomers to the same point as everyone else
-    switchPhase(socket, phase);
+        if (isNewUser) {
+            users[token] = {
+                "username": `User ${userNum++}`
+            };
+        }
+
+        console.log(`${isNewUser ? 'New' : 'Existing'} user '${users[token].username}' connected.`);
+
+        // Get newcomers to the same point as everyone else
+        switchPhase(socket, phase);
+    });
 
     //Setup basic movie night details
-    socket.on("setup_details", (setupDetails) => {
+    socket.on('setup_details', (setupDetails) => {
         nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
         nightInfo.host = socket.token;
-        console.log(`${users[token].username} has started the movie night: '${nightInfo.name}'`);
+        console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
         switchPhase(io, 'suggest');
     });
@@ -197,9 +205,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        const userToRemove = users[socket.token];
-        users[socket.token].loggedIn = false;
-        console.log(`User '${userToRemove.username}' disconnected.`);
+        if (socket.token != null) {
+            const userToRemove = users[socket.token];
+            console.log(`User '${userToRemove.username}' disconnected.`);
+        }
+        else if (socketDebug) {
+            console.log(`Socket ${socket.id} disconnected.`);
+        }
     });
 
     //Make the socket join the voting room

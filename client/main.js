@@ -1,4 +1,5 @@
 const socket = io();
+const client = new ClientJS();
 
 // DOM elements
 const movieTable = $('#movieTable');
@@ -106,17 +107,20 @@ socket.on('connect', () => {
     console.log('Connected to the app server.');
 });
 
-socket.on('user_token', (token) => {
-    userToken = token;
+socket.on('request_user_token', () => {
+    userToken = client.getFingerprint();
+    socket.emit('user_token', userToken);
 });
 
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val().toString().trim();
     if (name === '') {
-        alert('Stop hacking, please enter movie night name');
+        $('#errorMessage').text('Stop hacking, please enter movie night name').show(sectionAnimationTime);
     }
     else {
+        $('#errorMessage').hide(sectionAnimationTime);
+
         let votingStyle = $('#votingSystem').val();
         let setupDetails = {
             "name": name,
@@ -132,7 +136,7 @@ startForm.submit(() => {
 });
 
 function createChart(data) {
-    const ctx = $("#voteChart");
+    const ctx = $('#voteChart');
     const movies = data.movies;
     const labels = [];
     const votes = [];
@@ -147,7 +151,7 @@ function createChart(data) {
         }
     }
 
-    $("#winner").text(`Winner is ${winner.movie} with ${winner.votes} votes!`);
+    $('#winner').text(`Winner is ${winner.movie} with ${winner.votes} vote${winner.votes > 1 ? 's' : ''}!`);
 
     const myChart = new Chart(ctx, { // eslint-disable-line no-unused-vars
         type: 'bar',
@@ -224,6 +228,8 @@ socket.on('new_phase', (phaseInfo) => {
             });
             break;
         case 'vote':
+            $('#closeSuggestionsButton').hide();
+
             if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
             }
@@ -237,6 +243,8 @@ socket.on('new_phase', (phaseInfo) => {
             }
             break;
         case 'results':
+            $('#closeVotingButton').hide();
+
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);
