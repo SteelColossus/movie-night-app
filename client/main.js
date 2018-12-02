@@ -74,6 +74,11 @@ function appendMovieToTable(movie) {
 
                     socket.emit('votes_changed', voteDeltas);
                 });
+            
+            if (movie.votes[userToken] != null && movie.votes[userToken] >= 1) {
+                voteButton.addClass('active').attr('aria-pressed', 'true');
+            }
+
             eighthCell.append(voteButton);
             break;
         }
