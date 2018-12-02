@@ -113,6 +113,7 @@ function setupMovies(info) {
 }
 
 socket.on('connect', () => {
+    inRoom = false;
     console.log('Connected to the app server.');
 });
 
