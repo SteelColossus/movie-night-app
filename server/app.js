@@ -96,18 +96,22 @@ io.on('connection', (socket) => {
     socket.on('user_token', (token) => {
         socket.token = token;
 
-        const isNewUser = !users.hasOwnProperty(token);
+        const isNewUser = !users.hasOwnProperty(socket.token);
 
         if (isNewUser) {
-            users[token] = {
+            users[socket.token] = {
                 "username": `User ${userNum++}`
             };
         }
 
-        console.log(`${isNewUser ? 'New' : 'Existing'} user '${users[token].username}' connected.`);
+        console.log(`${isNewUser ? 'New' : 'Existing'} user '${users[socket.token].username}' connected.`);
 
         // Get newcomers to the same point as everyone else
         switchPhase(socket, phase, false);
+
+        if (phase === 'suggest' && nightInfo.movies.some(m => m.suggester === socket.token)) {
+            socket.emit('setup', nightInfo);
+        }
     });
 
     //Setup basic movie night details
@@ -214,7 +218,8 @@ io.on('connection', (socket) => {
                 "plot": result.Plot,
                 "rating": result.imdbRating,
                 "awards": result.Awards,
-                "votes": {}
+                "votes": {},
+                "suggester": socket.token
             };
 
             nightInfo.movies.push(movie);

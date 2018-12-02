@@ -18,6 +18,7 @@ const sections = {
 const sectionAnimationTime = 400;
 
 let inRoom = false;
+let userToken = null;
 let votingSystem = null;
 
 function showSection(section) {
@@ -85,6 +86,10 @@ function appendMovieToTable(movie) {
     tableRow.append(firstCell).append(secondCell).append(thirdCell).append(fourthCell).append(fifthCell).append(sixthCell).append(seventhCell).append(eighthCell).append(ninthCell);
     movieTable.append(tableRow);
 
+    if (movie.suggester === userToken) {
+        tableRow.addClass('suggester-row');
+    }
+
     return tableRow;
 }
 
@@ -107,7 +112,8 @@ socket.on('connect', () => {
 });
 
 socket.on('request_user_token', () => {
-    socket.emit('user_token', client.getFingerprint());
+    userToken = client.getFingerprint();
+    socket.emit('user_token', userToken);
 });
 
 //Start the movie night
@@ -216,6 +222,8 @@ socket.on('new_phase', (phaseInfo) => {
                 "title": "Movie Night Rules:",
                 "content": `
                     <ul>
+                        <li>NO documentaries</li>
+                        <li>NO shorts</li>
                         <li>NO anime</li>
                         <li>NO series</li>
                         <li>NO porn</li>
@@ -228,7 +236,7 @@ socket.on('new_phase', (phaseInfo) => {
         case 'vote':
             $('#closeSuggestionsButton').hide();
 
-            if (phaseInfo.isHost) {
+            if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
             }
 
