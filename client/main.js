@@ -59,7 +59,7 @@ function appendMovieToTable(movie) {
     const ninthCell = $('<td>').attr('votes-for', movie.id).css('display', 'none');
 
     switch (votingSystem) {
-        case 'multiVote': {
+        case constants.VOTING_SYSTEMS.MULTI_VOTE: {
             const voteButton = $('<input>')
                 .prop('type', 'button')
                 .val('Vote!')
@@ -74,7 +74,7 @@ function appendMovieToTable(movie) {
 
                     socket.emit('votes_changed', voteDeltas);
                 });
-            
+
             if (movie.votes[userToken] != null && movie.votes[userToken] >= 1) {
                 voteButton.addClass('active').attr('aria-pressed', 'true');
             }
@@ -204,14 +204,14 @@ function createChart(data) {
 //Set room then start suggesting
 socket.on('new_phase', (phaseInfo) => {
     switch (phaseInfo.name) {
-        case 'host':
+        case constants.PHASES.HOST:
             switchSection('host');
 
             Object.keys(phaseInfo.data).forEach((key) => {
                 $('#votingSystem').append($('<option>').val(key).text(phaseInfo.data[key]));
             });
             break;
-        case 'suggest':
+        case constants.PHASES.SUGGEST:
             switchSection('search');
 
             if (phaseInfo.isHost) {
@@ -239,8 +239,7 @@ socket.on('new_phase', (phaseInfo) => {
                 `
             });
             break;
-        case 'vote':
-
+        case constants.PHASES.VOTE:
             if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
             }
@@ -253,7 +252,7 @@ socket.on('new_phase', (phaseInfo) => {
                 });
             }
             break;
-        case 'results':
+        case constants.PHASES.RESULTS:
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);

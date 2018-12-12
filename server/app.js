@@ -6,19 +6,16 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
 const keys = require('./api_keys');
+const constants = require('./constants');
 
 const port = 3000;
 
 // Log when sockets connect and disconnect
 const socketDebug = false;
 
-let phase = 'host';
+let phase = constants.PHASES.HOST;
 let userNum = 1;
 let host = null;
-
-const votingSystems = {
-    "multiVote": "Multi Vote"
-};
 
 const users = {};
 
@@ -29,6 +26,8 @@ const nightInfo = {
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
+// Serve the constants file
+app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given port
 http.listen(port, console.log(`Listening on port ${port}.`));
@@ -46,17 +45,17 @@ function switchPhase(socket, name, sendToAll = true) {
     let data = null;
 
     switch (name) {
-        case 'host':
-            data = votingSystems;
+        case constants.PHASES.HOST:
+            data = constants.VOTING_SYSTEMS;
             break;
-        case 'suggest':
+        case constants.PHASES.SUGGEST:
             data = {
                 "name": nightInfo.name,
                 "votingSystem": nightInfo.votingSystem
             };
             break;
-        case 'vote':
-        case 'results':
+        case constants.PHASES.VOTE:
+        case constants.PHASES.RESULTS:
             data = nightInfo;
             break;
         default:
@@ -169,21 +168,21 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        switchPhase(socket, 'vote');
+        switchPhase(socket, constants.PHASES.VOTE);
     });
 
     socket.on('close_voting', () => {
-        switchPhase(socket, 'results');
+        switchPhase(socket, constants.PHASES.RESULTS);
     });
 
     socket.on('end', () => {
-        switchPhase(socket, 'host');
+        switchPhase(socket, constants.PHASES.HOST);
         host = null;
     });
 
     socket.on('new_round', () => {
         nightInfo.movies = [];
-        switchPhase(socket, 'suggest');
+        switchPhase(socket, constants.PHASES.SUGGEST);
     });
 
     socket.on('votes_changed', (voteDeltas) => {

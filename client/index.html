@@ -7,7 +7,7 @@
 
     <title>Movie Night App</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"
             integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link href="style.css" rel="stylesheet">
 
@@ -33,14 +33,16 @@
         integrity="sha384-bNOdVeWbABef8Lh4uZ8c3lJXVlHdf8W5hh1OpJ4dGyqIEhMmcnJrosjQ36Kniaqm" crossorigin="anonymous"></script>
     <!-- Socket.io -->
     <script src="/socket.io/socket.io.js" defer></script>
+    <!-- Constants shared by client and server -->
+    <script src="constants.js" defer></script>
     <!-- Local files -->
     <script src="main.js" defer></script>
 </head>
 <body>
     <h2 id="movieNightTitle" style="display: none"></h2>
     <div id="hostSection" style="display: none">
-        <form id="startVotingForm" action="">
-            <h5>Start your movie night</h5>
+        <form id="startVotingForm">
+            <h5>Start your movie night:</h5>
             <div class="form-inline mb-2">
                 <input id="nightName" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Our Movie Night" required pattern=".*\S.*">
                 <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
@@ -50,7 +52,7 @@
         </form>
     </div>
     <div id="searchSection" style="display: none">
-        <form id="movieSearchForm" action="">
+        <form id="movieSearchForm">
             <h5>Search for a movie to watch below:</h5>
             <div class="form-inline mb-2">
                 <input id="suggestion" type="text" class="form-control mr-2" name="movie" size="40" placeholder="e.g. Harry Potter" required pattern=".*\S.*">

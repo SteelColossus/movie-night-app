@@ -12,7 +12,8 @@
     "globals": {
         "io": false,
         "Chart": false,
-        "ClientJS": false
+        "ClientJS": false,
+        "constants": false
     },
     "rules": {
         "accessor-pairs": "error",
