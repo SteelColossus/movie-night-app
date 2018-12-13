@@ -40,6 +40,16 @@
 </head>
 <body>
     <h2 id="movieNightTitle" style="display: none"></h2>
+    <h3 id="usernameIndicator" style="display: none"></h3>
+    <div id="usernameSection" style="display: none">
+        <form id="usernameForm">
+            <h5>Enter your name:</h5>
+            <div class="form-inline mb-2">
+                <input id="username" type="text" class="form-control mr-2" name="movie" size="20" required pattern=".*\S.*">
+                <input type="submit" class="btn btn-primary" value="Join!">
+            </div>
+        </form>
+    </div>
     <div id="hostSection" style="display: none">
         <form id="startVotingForm">
             <h5>Start your movie night:</h5>

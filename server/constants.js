@@ -4,19 +4,29 @@ if (typeof module === 'undefined') {
 }
 
 // Stores all constants used by both the client and server
-exports.VOTING_SYSTEMS = {
-    MULTI_VOTE: "Multi Vote"
-};
 
-exports.PHASES = {
-    HOST: "host",
-    SUGGEST: "suggest",
-    VOTE: "vote",
-    RESULTS: "results"
-};
+// Voting systems
+exports.MULTI_VOTE = "Multi Vote";
+
+exports.VOTING_SYSTEMS = [
+    exports.MULTI_VOTE
+];
+
+// Phases
+exports.HOST = "host";
+exports.SUGGEST = "suggest";
+exports.VOTE = "vote";
+exports.RESULTS = "results";
+
+exports.PHASES = [
+    exports.HOST,
+    exports.SUGGEST,
+    exports.VOTE,
+    exports.RESULTS
+];
 
 // Hack to be able to use this node module client side
 if (typeof module === 'undefined') {
     window.constants = window.exports;
-    Reflect.deleteProperty(window, 'exports');
+    delete window.exports;
 }

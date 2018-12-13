@@ -2,6 +2,19 @@ body {
     padding: 10px;
 }
 
+#usernameIndicator {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: inherit;
+    background-color: inherit;
+
+    /* For those cheeky boys and girls who put massive usernames */
+    max-width: 50%;
+    overflow-wrap: break-word;
+    text-align: right;
+}
+
 #votingSystemLabel {
     font-weight: bold;
 }
@@ -16,5 +29,5 @@ body {
 }
 
 .suggester-row {
-    font-weight: 500;
+    font-weight: 600;
 }

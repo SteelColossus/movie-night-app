@@ -6,29 +6,30 @@ const movieTable = $('#movieTable');
 const suggestTable = $('#suggestionTable');
 const movieForm = $('#movieSearchForm');
 const startForm = $('#startVotingForm');
+const usernameForm = $('#usernameForm');
 const movieNightTitle = $('#movieNightTitle');
 
 const sections = {
+    "username": false,
     "host": false,
     "search": false,
     "suggestions": false,
     "vote": false,
     "results": false
 };
-const sectionAnimationTime = 400;
+const defaultAnimationTime = 400;
 
-let inRoom = false;
-let userToken = null;
 let votingSystem = null;
+let userToken = null;
 
 function showSection(section) {
     sections[section] = true;
-    $(`#${section}Section`).show(sectionAnimationTime);
+    $(`#${section}Section`).show(defaultAnimationTime);
 }
 
 function hideSection(section) {
     sections[section] = false;
-    $(`#${section}Section`).hide(sectionAnimationTime);
+    $(`#${section}Section`).hide(defaultAnimationTime);
 }
 
 function switchSection(section) {
@@ -59,7 +60,7 @@ function appendMovieToTable(movie) {
     const ninthCell = $('<td>').attr('votes-for', movie.id).css('display', 'none');
 
     switch (votingSystem) {
-        case constants.VOTING_SYSTEMS.MULTI_VOTE: {
+        case constants.MULTI_VOTE: {
             const voteButton = $('<input>')
                 .prop('type', 'button')
                 .val('Vote!')
@@ -113,7 +114,6 @@ function setupMovies(info) {
 }
 
 socket.on('connect', () => {
-    inRoom = false;
     console.log('Connected to the app server.');
 });
 
@@ -122,14 +122,20 @@ socket.on('request_user_token', () => {
     socket.emit('user_token', userToken);
 });
 
+socket.on('request_new_user', () => {
+    // TODO: Find a better way to do this
+    $('#movieNightTitle, #errorMessage, #usernameIndicator').hide(defaultAnimationTime);
+    switchSection('username');
+});
+
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val().toString().trim();
     if (name === '') {
-        $('#errorMessage').text('Stop hacking, please enter movie night name').show(sectionAnimationTime);
+        $('#errorMessage').text('Stop hacking, please enter movie night name').show(defaultAnimationTime);
     }
     else {
-        $('#errorMessage').hide(sectionAnimationTime);
+        $('#errorMessage').hide(defaultAnimationTime);
 
         let votingStyle = $('#votingSystem').val();
         let setupDetails = {
@@ -140,6 +146,18 @@ startForm.submit(() => {
         socket.emit('setup_details', setupDetails);
         switchSection('search');
     }
+
+    //Stops refresh and connect of new user
+    return false;
+});
+
+usernameForm.submit(() => {
+    let username = usernameForm.find('#username').val();
+
+    socket.emit('new_user', {
+        "token": userToken,
+        "username": username
+    });
 
     //Stops refresh and connect of new user
     return false;
@@ -204,18 +222,18 @@ function createChart(data) {
 //Set room then start suggesting
 socket.on('new_phase', (phaseInfo) => {
     switch (phaseInfo.name) {
-        case constants.PHASES.HOST:
+        case constants.HOST:
             switchSection('host');
 
-            Object.keys(phaseInfo.data).forEach((key) => {
-                $('#votingSystem').append($('<option>').val(key).text(phaseInfo.data[key]));
+            phaseInfo.data.votingSystems.forEach((system) => {
+                $('#votingSystem').append($('<option>').val(system).text(system));
             });
             break;
-        case constants.PHASES.SUGGEST:
+        case constants.SUGGEST:
             switchSection('search');
 
             if (phaseInfo.isHost) {
-                $('#closeSuggestionsButton').show(sectionAnimationTime).click(() => {
+                $('#closeSuggestionsButton').show(defaultAnimationTime).click(() => {
                     $('#closeSuggestionsButton').hide();
                     socket.emit('close_suggestions');
                 });
@@ -239,31 +257,31 @@ socket.on('new_phase', (phaseInfo) => {
                 `
             });
             break;
-        case constants.PHASES.VOTE:
+        case constants.VOTE:
             if (sections.vote === false) {
                 setupMovies(phaseInfo.data);
             }
 
-            movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(sectionAnimationTime);
+            movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').show(defaultAnimationTime);
             if (phaseInfo.isHost) {
-                $('#closeVotingButton').show(sectionAnimationTime).click(() => {
+                $('#closeVotingButton').show(defaultAnimationTime).click(() => {
                     $('#closeVotingButton').hide();
                     socket.emit('close_voting');
                 });
             }
             break;
-        case constants.PHASES.RESULTS:
+        case constants.RESULTS:
             hideSection('vote');
             showSection('results');
             createChart(phaseInfo.data);
 
             if (phaseInfo.isHost) {
-                $('#endButton').show(sectionAnimationTime).click(() => {
+                $('#endButton').show(defaultAnimationTime).click(() => {
                     $('#endButton').hide();
                     socket.emit('end');
                 });
 
-                $('#newMovieButton').show(sectionAnimationTime).click(() => {
+                $('#newMovieButton').show(defaultAnimationTime).click(() => {
                     $('#newMovieButton').hide();
                     socket.emit('new_round');
                 });
@@ -271,18 +289,10 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
-        if (!inRoom) {
-            socket.emit('join_movie_night', phaseInfo.data.name);
-            inRoom = true;
-        }
-
-        if (movieNightTitle.css('display') === 'none') {
-            movieNightTitle.text(phaseInfo.data.name).show(sectionAnimationTime);
-        }
+        movieNightTitle.text(phaseInfo.data.name).show(defaultAnimationTime);
     }
     else {
-        inRoom = false;
-        movieNightTitle.hide(sectionAnimationTime);
+        movieNightTitle.hide(defaultAnimationTime);
     }
 
     if (phaseInfo.name !== 'suggest') {
@@ -292,6 +302,10 @@ socket.on('new_phase', (phaseInfo) => {
         $('#closeVotingButton').hide();
         movieTable.find('tr th:nth-last-child(2), tr th:last-child, tr td:nth-last-child(2), tr td:last-child').hide();
     }
+
+    if (phaseInfo.username != null) {
+        $('#usernameIndicator').text(phaseInfo.username).show(defaultAnimationTime);
+    }
 });
 
 //Get suggestion input
@@ -299,7 +313,7 @@ movieForm.submit(() => {
     let suggestion = $('#suggestion').val().toString().trim();
 
     if (suggestion.length > 0) {
-        $('#errorMessage').hide(sectionAnimationTime);
+        $('#errorMessage').hide(defaultAnimationTime);
 
         socket.emit('movie_search', suggestion);
     }
@@ -311,7 +325,7 @@ movieForm.submit(() => {
 //Form suggestion table from api results
 socket.on('movie_search', (searchData) => {
     if (searchData.success === false) {
-        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).show(sectionAnimationTime);
+        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).show(defaultAnimationTime);
 
         return;
     }

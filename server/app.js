@@ -13,8 +13,7 @@ const port = 3000;
 // Log when sockets connect and disconnect
 const socketDebug = false;
 
-let phase = constants.PHASES.HOST;
-let userNum = 1;
+let phase = constants.HOST;
 let host = null;
 
 const users = {};
@@ -36,26 +35,44 @@ function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
 }
 
+function isLoggedIn(socket) {
+    return socket.token != null && users[socket.token] != null;
+}
+
 function switchPhase(socket, name, sendToAll = true) {
     // Server side validation to prevent non hosts from moving phases
-    if (sendToAll === true && host !== socket.token) {
-        return;
+    if (sendToAll === true && (!isLoggedIn(socket) || host !== socket.token)) return;
+    
+    // Get the clients in the movie night room if they aren't already
+    if (nightInfo.name != null) {
+        if (sendToAll === true) {
+            Object.values(io.sockets.connected).forEach((sock) => {
+                if (sock.token != null) {
+                    sock.join(nightInfo.name);
+                }
+            });
+        }
+        else {
+            socket.join(nightInfo.name);
+        }
     }
 
     let data = null;
 
     switch (name) {
-        case constants.PHASES.HOST:
-            data = constants.VOTING_SYSTEMS;
+        case constants.HOST:
+            data = {
+                "votingSystems": constants.VOTING_SYSTEMS
+            };
             break;
-        case constants.PHASES.SUGGEST:
+        case constants.SUGGEST:
             data = {
                 "name": nightInfo.name,
                 "votingSystem": nightInfo.votingSystem
             };
             break;
-        case constants.PHASES.VOTE:
-        case constants.PHASES.RESULTS:
+        case constants.VOTE:
+        case constants.RESULTS:
             data = nightInfo;
             break;
         default:
@@ -74,6 +91,10 @@ function switchPhase(socket, name, sendToAll = true) {
         phaseInfo.isHost = (host === socket.token);
     }
 
+    if (isLoggedIn(socket) && users[socket.token].username != null) {
+        phaseInfo.username = users[socket.token].username;
+    }
+
     socket.emit('new_phase', phaseInfo);
 
     if (sendToAll === true) {
@@ -81,7 +102,35 @@ function switchPhase(socket, name, sendToAll = true) {
             phaseInfo.isHost = false;
         }
 
-        socket.broadcast.emit('new_phase', phaseInfo);
+        delete phaseInfo.username;
+
+        socket.broadcast.to(nightInfo.name).emit('new_phase', phaseInfo);
+    }
+}
+
+function addUser(socket, token, username = null) {
+    const isExistingUser = users.hasOwnProperty(token);
+
+    if (isExistingUser || username != null) {
+        if (username != null) {
+            users[token] = {
+                "username": username
+            };
+        }
+
+        socket.token = token;
+
+        console.log(`${isExistingUser ? 'Existing' : 'New'} user '${users[token].username}' connected.`);
+
+        // Get newcomers to the same point as everyone else
+        switchPhase(socket, phase, false);
+
+        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === token)) {
+            socket.emit('setup', nightInfo);
+        }
+    }
+    else {
+        socket.emit('request_new_user');
     }
 }
 
@@ -93,24 +142,11 @@ io.on('connection', (socket) => {
     socket.emit('request_user_token');
 
     socket.on('user_token', (token) => {
-        socket.token = token;
+        addUser(socket, token);
+    });
 
-        const isNewUser = !users.hasOwnProperty(socket.token);
-
-        if (isNewUser) {
-            users[socket.token] = {
-                "username": `User ${userNum++}`
-            };
-        }
-
-        console.log(`${isNewUser ? 'New' : 'Existing'} user '${users[socket.token].username}' connected.`);
-
-        // Get newcomers to the same point as everyone else
-        switchPhase(socket, phase, false);
-
-        if (phase === 'suggest' && nightInfo.movies.some(m => m.suggester === socket.token)) {
-            socket.emit('setup', nightInfo);
-        }
+    socket.on('new_user', (user) => {
+        addUser(socket, user.token, user.username);
     });
 
     //Setup basic movie night details
@@ -121,11 +157,13 @@ io.on('connection', (socket) => {
         host = socket.token;
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
-        switchPhase(socket, 'suggest');
+        switchPhase(socket, constants.SUGGEST);
     });
 
     //When a movie is searched for, check the api for results
     socket.on('movie_search', (suggestion) => {
+        if (!isLoggedIn(socket)) return;
+
         //Need to encode the URL for the api key to understand it.
         let encodedSuggestion = encodeURIComponent(suggestion);
 
@@ -168,24 +206,26 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        switchPhase(socket, constants.PHASES.VOTE);
+        switchPhase(socket, constants.VOTE);
     });
 
     socket.on('close_voting', () => {
-        switchPhase(socket, constants.PHASES.RESULTS);
+        switchPhase(socket, constants.RESULTS);
     });
 
     socket.on('end', () => {
-        switchPhase(socket, constants.PHASES.HOST);
+        switchPhase(socket, constants.HOST);
         host = null;
     });
 
     socket.on('new_round', () => {
         nightInfo.movies = [];
-        switchPhase(socket, constants.PHASES.SUGGEST);
+        switchPhase(socket, constants.SUGGEST);
     });
 
     socket.on('votes_changed', (voteDeltas) => {
+        if (!isLoggedIn(socket)) return;
+
         const newVotes = {};
 
         Object.keys(voteDeltas).forEach((key) => {
@@ -211,6 +251,8 @@ io.on('connection', (socket) => {
 
     //Get information for the movie
     socket.on('movie_chosen', (movieId) => {
+        if (!isLoggedIn(socket)) return;
+
         makeOmdbRequest('i', movieId).then((response) => {
             let result = response.data;
             let movie = {
@@ -241,10 +283,5 @@ io.on('connection', (socket) => {
         else if (socketDebug) {
             console.log(`Socket ${socket.id} disconnected.`);
         }
-    });
-
-    //Make the socket join the voting room
-    socket.on('join_movie_night', (room) => {
-        socket.join(room);
     });
 });
