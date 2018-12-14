@@ -8,6 +8,7 @@ const movieForm = $('#movieSearchForm');
 const startForm = $('#startVotingForm');
 const usernameForm = $('#usernameForm');
 const movieNightTitle = $('#movieNightTitle');
+const errorMessage = $('#errorMessage');
 
 const sections = {
     "username": false,
@@ -123,20 +124,21 @@ socket.on('request_user_token', () => {
 });
 
 socket.on('request_new_user', () => {
-    // TODO: Find a better way to do this
     $('#movieNightTitle, #errorMessage, #usernameIndicator').hide(defaultAnimationTime);
     switchSection('username');
+});
+
+socket.on('request_new_username', () => {
+    errorMessage.text('The name you have entered is already taken.').show(defaultAnimationTime);
 });
 
 //Start the movie night
 startForm.submit(() => {
     let name = $('#nightName').val().toString().trim();
     if (name === '') {
-        $('#errorMessage').text('Stop hacking, please enter movie night name').show(defaultAnimationTime);
+        errorMessage.text('Stop hacking, please enter movie night name').show(defaultAnimationTime);
     }
     else {
-        $('#errorMessage').hide(defaultAnimationTime);
-
         let votingStyle = $('#votingSystem').val();
         let setupDetails = {
             "name": name,
@@ -152,7 +154,7 @@ startForm.submit(() => {
 });
 
 usernameForm.submit(() => {
-    let username = usernameForm.find('#username').val();
+    let username = usernameForm.find('#username').val().toString().trim();
 
     socket.emit('new_user', {
         "token": userToken,
@@ -288,6 +290,8 @@ socket.on('new_phase', (phaseInfo) => {
             }
     }
 
+    errorMessage.hide(defaultAnimationTime);
+
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
         movieNightTitle.text(phaseInfo.data.name).show(defaultAnimationTime);
     }
@@ -313,8 +317,6 @@ movieForm.submit(() => {
     let suggestion = $('#suggestion').val().toString().trim();
 
     if (suggestion.length > 0) {
-        $('#errorMessage').hide(defaultAnimationTime);
-
         socket.emit('movie_search', suggestion);
     }
 
@@ -325,7 +327,7 @@ movieForm.submit(() => {
 //Form suggestion table from api results
 socket.on('movie_search', (searchData) => {
     if (searchData.success === false) {
-        $('#errorMessage').text(`Error: ${searchData.errorMessage}`).show(defaultAnimationTime);
+        errorMessage.text(`Error: ${searchData.errorMessage}`).show(defaultAnimationTime);
 
         return;
     }

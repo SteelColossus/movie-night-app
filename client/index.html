@@ -44,10 +44,11 @@
     <div id="usernameSection" style="display: none">
         <form id="usernameForm">
             <h5>Enter your name:</h5>
-            <div class="form-inline mb-2">
-                <input id="username" type="text" class="form-control mr-2" name="movie" size="20" required pattern=".*\S.*">
+            <div class="form-inline">
+                <input id="username" type="text" class="form-control mr-2" name="movie" size="25" placeholder="e.g. Will" required pattern="(?=^.{2,25}$).*\S.*" aria-describedby="usernameHelp">
                 <input type="submit" class="btn btn-primary" value="Join!">
             </div>
+            <small id="usernameHelp" class="form-text text-muted mb-2">Must be 2-25 characters long.</small>
         </form>
     </div>
     <div id="hostSection" style="display: none">
@@ -110,7 +111,7 @@
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
     <div id="oldBrowserMessage" style="display: none">
         <h2 style="display: inline-block">This browser is old, and sucks balls.</h2>
-        <img id="ieImage" src="no_ie.png" width="40" height="40" style="margin-left: 10px; vertical-align: top; display: none;">
+        <img id="ieImage" src="no_ie.png" width="40" height="40" style="display: none">
         <p>
             This website uses content that this browser does not support.
             <br>

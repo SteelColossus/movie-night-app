@@ -31,3 +31,8 @@ body {
 .suggester-row {
     font-weight: 600;
 }
+
+#ieImage {
+    margin-left: 10px;
+    vertical-align: top;
+}

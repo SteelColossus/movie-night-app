@@ -113,6 +113,13 @@ function addUser(socket, token, username = null) {
 
     if (isExistingUser || username != null) {
         if (username != null) {
+            let usernameExists = Object.keys(users).some(userToken => userToken !== token.toString() && users[userToken].username === username);
+
+            if (usernameExists === true) {
+                socket.emit('request_new_username');
+                return;
+            }
+
             users[token] = {
                 "username": username
             };
