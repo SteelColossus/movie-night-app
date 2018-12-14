@@ -35,6 +35,30 @@ function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
 }
 
+function sumVotes(votesObj) {
+    return Object.values(votesObj).reduce((a, b) => a + b, 0);
+}
+
+function setWinner() {
+    if (nightInfo.winner != null) {
+        return;
+    }
+
+    const movieResults = nightInfo.movies.map(movie => ({
+        "title": movie.title,
+        "votes": sumVotes(movie.votes)
+    }));
+
+    const highestVotes = movieResults.reduce((max, movie) => (movie.votes > max ? movie.votes : max), 0);
+
+    if (highestVotes > 0) {
+        const winners = movieResults.filter(movie => movie.votes === highestVotes);
+
+        // Pick a random winner. This is only temporary while something more visual gets added.
+        nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
+    }
+}
+
 function isLoggedIn(socket) {
     return socket.token != null && users[socket.token] != null;
 }
@@ -72,7 +96,10 @@ function switchPhase(socket, name, sendToAll = true) {
             };
             break;
         case constants.VOTE:
+            data = nightInfo;
+            break;
         case constants.RESULTS:
+            setWinner();
             data = nightInfo;
             break;
         default:
@@ -161,6 +188,7 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
         nightInfo.votingSystem = setupDetails.votingSystem;
+        nightInfo.winner = null;
         host = socket.token;
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         //Get every client in the room
@@ -227,6 +255,7 @@ io.on('connection', (socket) => {
 
     socket.on('new_round', () => {
         nightInfo.movies = [];
+        nightInfo.winner = null;
         switchPhase(socket, constants.SUGGEST);
     });
 
