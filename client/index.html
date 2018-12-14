@@ -108,5 +108,32 @@
         <canvas id="voteChart" width="1000" height="1000"></canvas>
     </div>
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
+    <div id="oldBrowserMessage" style="display: none">
+        <h2 style="display: inline-block">This browser is old, and sucks balls.</h2>
+        <img id="ieImage" src="no_ie.png" width="40" height="40" style="margin-left: 10px; vertical-align: top; display: none;">
+        <p>
+            This website uses content that this browser does not support.
+            <br>
+            To use this website, update to the latest version of this browser or download a supported browser, like <a href="https://www.google.com/chrome/">Chrome</a> or <a href="https://www.mozilla.org/en-GB/firefox/">Firefox</a>.
+        </p>
+    </div>
+    <!-- Script for old browsers -->
+    <script nomodule>
+        // Show the message
+        document.getElementById('oldBrowserMessage').style.display = 'block';
+
+        // Check if using IE
+        if (window.navigator.userAgent.indexOf('MSIE ') > 0 || window.navigator.userAgent.indexOf('Trident/') > 0) {
+            document.getElementById('ieImage').style.display = 'inline';
+        }
+    </script>
+    <!-- Shown when JS is disabled -->
+    <noscript>
+        <h2>Err... how exactly were you expecting this to work?</h2>
+        <p>
+            We're not in the 90's anymore, most websites need JavaScript to work nowadays, and this one is no exception.<br>
+            Please re-enable JavaScript in your browser to use this website.
+        </p>
+    </noscript>
 </body>
 </html>
