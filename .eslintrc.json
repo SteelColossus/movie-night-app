@@ -85,7 +85,9 @@
         "func-style": [
             "error",
             "declaration",
-            { "allowArrowFunctions": true }
+            {
+                "allowArrowFunctions": true
+            }
         ],
         "function-paren-newline": "error",
         "generator-star-spacing": "error",
@@ -136,7 +138,9 @@
         "no-catch-shadow": "error",
         "no-confusing-arrow": [
             "error",
-            {"allowParens": true}
+            {
+                "allowParens": true
+            }
         ],
         "no-console": "off",
         "no-continue": "error",

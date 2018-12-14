@@ -333,6 +333,8 @@ socket.on('movie_search', (searchData) => {
         return;
     }
 
+    errorMessage.hide(defaultAnimationTime);
+
     // Remove all the existing suggestions
     suggestTable.find('tr:not(:first-child)').remove();
 

@@ -1,3 +1,4 @@
+const os = require('os');
 const path = require('path');
 const express = require('express');
 const favicon = require('serve-favicon');
@@ -8,10 +9,13 @@ const axios = require('axios');
 const keys = require('./api_keys');
 const constants = require('./constants');
 
-const port = 3000;
-
 // Log when sockets connect and disconnect
 const socketDebug = false;
+// Allow people on the same network to access the app (this will use a different hostname)
+const allowOutsideConnections = false;
+
+const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
+const port = 3000;
 
 let phase = constants.HOST;
 let host = null;
@@ -28,8 +32,8 @@ app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 // Serve the constants file
 app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'constants.js')));
 
-// Tell the server to listen on the given port
-http.listen(port, console.log(`Listening on port ${port}.`));
+// Tell the server to listen on the given hostname and port
+http.listen(port, hostname, console.log(`Listening at http://${hostname}:${port}.`));
 
 function makeOmdbRequest(type, query) {
     return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
@@ -66,7 +70,7 @@ function isLoggedIn(socket) {
 function switchPhase(socket, name, sendToAll = true) {
     // Server side validation to prevent non hosts from moving phases
     if (sendToAll === true && (!isLoggedIn(socket) || host !== socket.token)) return;
-    
+
     // Get the clients in the movie night room if they aren't already
     if (nightInfo.name != null) {
         if (sendToAll === true) {
