@@ -6,13 +6,14 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
+const args = require('minimist')(process.argv.slice(2));
 const keys = require('./api_keys');
 const constants = require('./constants');
 
 // Log when sockets connect and disconnect
 const socketDebug = false;
 // Allow people on the same network to access the app (this will use a different hostname)
-const allowOutsideConnections = false;
+const allowOutsideConnections = args.o === true;
 
 const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
 const port = 3000;

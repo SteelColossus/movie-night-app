@@ -78,9 +78,4 @@ typings/
 .fusebox/
 
 ### ADDITIONAL
-
-# VSCode
 .vscode
-
-# Hidden API keys
-api_keys.js

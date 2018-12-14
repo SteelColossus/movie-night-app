@@ -1,13 +1,12 @@
 {
   "name": "movie-night-app",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "steelcolossus",
-  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/SteelColossus/movie-night-app.git"
@@ -16,11 +15,12 @@
   "dependencies": {
     "axios": "^0.18.0",
     "express": "^4.16.4",
+    "minimist": "^1.2.0",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.9.0",
+    "eslint": "^5.10.0",
     "htmlhint": "^0.10.1"
   }
 }
