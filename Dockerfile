@@ -7,7 +7,7 @@ WORKDIR /home/node/movie-night-app
 # Copy all of the required files into the working directory
 COPY [".", "."]
 # Install all the required node packages
-RUN npm install
+RUN npm install --only=prod
 # Set the user as the node user
 USER node
 # Run the node command
