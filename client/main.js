@@ -10,38 +10,24 @@ const usernameForm = $('#usernameForm');
 const movieNightTitle = $('#movieNightTitle');
 const errorMessage = $('#errorMessage');
 
-const sections = {
-    "username": false,
-    "host": false,
-    "search": false,
-    "suggestions": false,
-    "vote": false,
-    "results": false
-};
 const defaultAnimationTime = 400;
 
 let votingSystem = null;
 let userToken = null;
+let currentPage = null;
 
-function showSection(section) {
-    sections[section] = true;
-    $(`#${section}Section`).show(defaultAnimationTime);
-}
+function switchPage(page) {
+    const pageChanged = currentPage !== page;
 
-function hideSection(section) {
-    sections[section] = false;
-    $(`#${section}Section`).hide(defaultAnimationTime);
-}
+    errorMessage.hide(defaultAnimationTime);
 
-function switchSection(section) {
-    Object.keys(sections).forEach((key) => {
-        if (key === section && sections[key] === false) {
-            showSection(key);
-        }
-        else if (key !== section && sections[key] === true) {
-            hideSection(key);
-        }
-    });
+    if (pageChanged) {
+        $(`#${currentPage}Page`).hide(defaultAnimationTime);
+        $(`#${page}Page`).show(defaultAnimationTime);
+        currentPage = page;
+    }
+
+    return pageChanged;
 }
 
 function sumVotes(votesObj) {
@@ -109,9 +95,6 @@ function setupMovies(info) {
     for (let i = 0; i < info.movies.length; i++) {
         appendMovieToTable(info.movies[i]);
     }
-
-    // Show the table
-    switchSection('vote');
 }
 
 socket.on('connect', () => {
@@ -124,8 +107,8 @@ socket.on('request_user_token', () => {
 });
 
 socket.on('request_new_user', () => {
-    $('#movieNightTitle, #errorMessage, #usernameIndicator').hide(defaultAnimationTime);
-    switchSection('username');
+    $('#movieNightTitle, #usernameIndicator').hide(defaultAnimationTime);
+    switchPage('username');
 });
 
 socket.on('request_new_username', () => {
@@ -146,7 +129,6 @@ startForm.submit(() => {
         };
         //Allow suggestions
         socket.emit('setup_details', setupDetails);
-        switchSection('search');
     }
 
     //Stops refresh and connect of new user
@@ -226,14 +208,14 @@ function createChart(data) {
 socket.on('new_phase', (phaseInfo) => {
     switch (phaseInfo.name) {
         case constants.HOST:
-            switchSection('host');
+            switchPage('host');
 
             phaseInfo.data.votingSystems.forEach((system) => {
                 $('#votingSystem').append($('<option>').val(system).text(system));
             });
             break;
         case constants.SUGGEST:
-            switchSection('search');
+            switchPage('search');
 
             if (phaseInfo.isHost) {
                 $('#closeSuggestionsButton').show(defaultAnimationTime).click(() => {
@@ -261,7 +243,7 @@ socket.on('new_phase', (phaseInfo) => {
             });
             break;
         case constants.VOTE:
-            if (sections.vote === false) {
+            if (switchPage('vote')) {
                 setupMovies(phaseInfo.data);
             }
 
@@ -274,8 +256,7 @@ socket.on('new_phase', (phaseInfo) => {
             }
             break;
         case constants.RESULTS:
-            hideSection('vote');
-            switchSection('results');
+            switchPage('results');
             createChart(phaseInfo.data);
 
             if (phaseInfo.isHost) {
@@ -290,8 +271,6 @@ socket.on('new_phase', (phaseInfo) => {
                 });
             }
     }
-
-    errorMessage.hide(defaultAnimationTime);
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
         movieNightTitle.text(phaseInfo.data.name).show(defaultAnimationTime);
@@ -361,16 +340,17 @@ socket.on('movie_search', (searchData) => {
         suggestTable.append(tableRow);
     }
 
-    showSection('suggestions');
+    $('#suggestionsSection').show(defaultAnimationTime);
 });
 
 socket.on('setup', (info) => {
+    switchPage('vote');
     setupMovies(info);
 });
 
 socket.on('new_movie', (movie) => {
     const movieRow = appendMovieToTable(movie);
-    movieRow.hide().fadeIn();
+    movieRow.hide().show(defaultAnimationTime);
 });
 
 socket.on('votes_changed', (newVotes) => {
