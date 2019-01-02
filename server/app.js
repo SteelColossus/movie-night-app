@@ -165,7 +165,16 @@ function addUser(socket, token, username = null) {
         switchPhase(socket, phase, false);
 
         if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === token)) {
-            socket.emit('setup', nightInfo);
+            const setupInfo = {
+                "movies": nightInfo.movies,
+                "votingSystem": nightInfo.votingSystem
+            };
+            
+            if (host != null) {
+                setupInfo.isHost = (host === socket.token);
+            }
+
+            socket.emit('setup_movies', setupInfo);
         }
     }
     else {
@@ -311,7 +320,17 @@ io.on('connection', (socket) => {
             };
 
             nightInfo.movies.push(movie);
-            socket.emit('setup', nightInfo);
+
+            const setupInfo = {
+                "movies": nightInfo.movies,
+                "votingSystem": nightInfo.votingSystem
+            };
+            
+            if (host != null) {
+                setupInfo.isHost = (host === socket.token);
+            }
+
+            socket.emit('setup_movies', setupInfo);
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
         });
     });
