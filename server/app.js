@@ -166,8 +166,7 @@ function addUser(socket, token, username = null) {
 
         if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === token)) {
             const setupInfo = {
-                "movies": nightInfo.movies,
-                "votingSystem": nightInfo.votingSystem
+                "movies": nightInfo.movies
             };
             
             if (host != null) {
@@ -322,8 +321,7 @@ io.on('connection', (socket) => {
             nightInfo.movies.push(movie);
 
             const setupInfo = {
-                "movies": nightInfo.movies,
-                "votingSystem": nightInfo.votingSystem
+                "movies": nightInfo.movies
             };
             
             if (host != null) {
