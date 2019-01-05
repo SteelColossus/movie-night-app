@@ -8,8 +8,8 @@ export class HostView extends View {
         this.votingSystemInput = $('#votingSystem');
     }
 
-    formSubmit(view) {
-        let name = view.nightInput.val().toString().trim();
+    formSubmit() {
+        let name = this.nightInput.val().toString().trim();
         let votingSystem = this.votingSystemInput.val();
         let setupDetails = {
             "name": name,
@@ -28,7 +28,7 @@ export class HostView extends View {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });
 
-        $('#startVotingForm').submit(() => this.formSubmit(this));
+        $('#startVotingForm').submit(this.formSubmit.bind(this));
     }
 
     onViewHidden() {

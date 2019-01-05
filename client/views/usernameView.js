@@ -7,8 +7,8 @@ export class UsernameView extends View {
         this.usernameInput = $('#username');
     }
 
-    formSubmit(view) {
-        let username = view.usernameInput.val().toString().trim();
+    formSubmit() {
+        let username = this.usernameInput.val().toString().trim();
 
         this.socket.emit('new_user', {
             "token": this.userToken,
@@ -20,7 +20,7 @@ export class UsernameView extends View {
     }
 
     onViewShown() {
-        $('#usernameForm').submit(() => this.formSubmit(this));
+        $('#usernameForm').submit(this.formSubmit.bind(this));
     }
 
     onViewHidden() {

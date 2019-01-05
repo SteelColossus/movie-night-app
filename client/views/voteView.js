@@ -106,7 +106,9 @@ export class VoteView extends View {
     onViewShown() {
         this.buildVoteDisplay(this.movies, this.votingSystem);
 
-        this.socket.on('votes_changed', newVotes => this.handleVotesChanged(newVotes));
+        this.votesChangedListener = this.handleVotesChanged.bind(this);
+
+        this.socket.on('votes_changed', this.votesChangedListener);
 
         if (this.isHost === true) {
             this.closeVotingButton.show(this.animTime).click(() => {
@@ -116,6 +118,8 @@ export class VoteView extends View {
     }
 
     onViewHidden() {
+        this.socket.off('votes_changed', this.votesChangedListener);
+
         this.closeVotingButton.hide();
         this.voteDisplay.empty();
     }

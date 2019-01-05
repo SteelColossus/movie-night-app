@@ -10,8 +10,8 @@ export class SearchView extends View {
     }
 
     // Get suggestion input
-    formSubmit(view) {
-        let suggestion = view.suggestionInput.val().toString().trim();
+    formSubmit() {
+        let suggestion = this.suggestionInput.val().toString().trim();
 
         if (suggestion.length > 0) {
             this.socket.emit('movie_search', suggestion);
@@ -29,6 +29,7 @@ export class SearchView extends View {
 
         this.errorMessage.hide(this.animTime);
 
+        // Form suggestion table from API results
         const suggestTable = $('#suggestionTable');
 
         // Remove all the existing suggestions
@@ -81,13 +82,16 @@ export class SearchView extends View {
             `
         });
 
-        $('#movieSearchForm').submit(() => this.formSubmit(this));
+        $('#movieSearchForm').submit(this.formSubmit.bind(this));
 
-        // Form suggestion table from API results
-        this.socket.on('movie_search', searchData => this.handleSearch(searchData));
+        this.movieSearchListener = this.handleSearch.bind(this);
+
+        this.socket.on('movie_search', this.movieSearchListener);
     }
 
     onViewHidden() {
+        this.socket.off('movie_search', this.movieSearchListener);
+
         this.suggestionInput.val('');
         this.searchResults.hide();
     }

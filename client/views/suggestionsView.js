@@ -31,13 +31,17 @@ export class SuggestionsView extends View {
         movies.forEach(movie => this.appendMovieToTable(movie));
     }
 
+    handleNewMovie(movie) {
+        const movieRow = this.appendMovieToTable(movie);
+        movieRow.hide().show(this.animTime);
+    }
+
     onViewShown() {
         this.buildSuggestionsTable(this.movies);
 
-        this.socket.on('new_movie', (movie) => {
-            const movieRow = this.appendMovieToTable(movie);
-            movieRow.hide().show(this.animTime);
-        });
+        this.newMovieListener = this.handleNewMovie.bind(this);
+
+        this.socket.on('new_movie', this.newMovieListener);
 
         if (this.isHost === true) {
             this.closeSuggestionsButton.show(this.animTime).click(() => {
@@ -47,6 +51,8 @@ export class SuggestionsView extends View {
     }
 
     onViewHidden() {
+        this.socket.off('new_movie', this.newMovieListener);
+
         this.closeSuggestionsButton.hide();
         // Remove all the existing movies
         this.movieTable.find('tr:not(:first-child)').remove();
