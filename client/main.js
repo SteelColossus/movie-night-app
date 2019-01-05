@@ -15,7 +15,11 @@ const usernameIndicator = $('#usernameIndicator');
 
 const animTime = 400;
 
+// The unique ClientJS token of the current browser
 let userToken = null;
+// Whether this client believes it should be authenticated
+let authenticated = false;
+// The view that is currently being shown
 let currentView = null;
 
 function switchView(view) {
@@ -39,10 +43,17 @@ socket.on('request_user_token', () => {
 });
 
 socket.on('request_new_user', () => {
-    movieNightTitle.add(usernameIndicator).hide(animTime);
-    const usernameView = new UsernameView(socket, animTime);
-    usernameView.userToken = userToken;
-    switchView(usernameView);
+    if (authenticated === false) {
+        movieNightTitle.add(usernameIndicator).hide(animTime);
+
+        const usernameView = new UsernameView(socket, animTime);
+        usernameView.userToken = userToken;
+        switchView(usernameView);
+    }
+    else {
+        // The app server has likely been restarted - refresh the page to prevent side effects
+        location.reload();
+    }
 });
 
 socket.on('request_new_username', () => {
@@ -58,6 +69,8 @@ socket.on('setup_movies', (info) => {
 });
 
 socket.on('new_phase', (phaseInfo) => {
+    authenticated = true;
+
     switch (phaseInfo.name) {
         case constants.HOST: {
             const hostView = new HostView(socket, animTime);
