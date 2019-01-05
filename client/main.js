@@ -15,13 +15,6 @@ const usernameIndicator = $('#usernameIndicator');
 
 const animTime = 400;
 
-const usernameView = new UsernameView(socket, animTime);
-const hostView = new HostView(socket, animTime);
-const searchView = new SearchView(socket, animTime);
-const suggestionsView = new SuggestionsView(socket, animTime);
-const voteView = new VoteView(socket, animTime);
-const resultsView = new ResultsView(socket, animTime);
-
 let userToken = null;
 let currentView = null;
 
@@ -47,6 +40,7 @@ socket.on('request_user_token', () => {
 
 socket.on('request_new_user', () => {
     movieNightTitle.add(usernameIndicator).hide(animTime);
+    const usernameView = new UsernameView(socket, animTime);
     usernameView.userToken = userToken;
     switchView(usernameView);
 });
@@ -56,6 +50,7 @@ socket.on('request_new_username', () => {
 });
 
 socket.on('setup_movies', (info) => {
+    const suggestionsView = new SuggestionsView(socket, animTime);
     suggestionsView.isHost = info.isHost;
     suggestionsView.movies = info.movies;
     suggestionsView.userToken = userToken;
@@ -64,27 +59,35 @@ socket.on('setup_movies', (info) => {
 
 socket.on('new_phase', (phaseInfo) => {
     switch (phaseInfo.name) {
-        case constants.HOST:
+        case constants.HOST: {
+            const hostView = new HostView(socket, animTime);
             hostView.votingSystems = phaseInfo.data.votingSystems;
             switchView(hostView);
             break;
-        case constants.SUGGEST:
+        }
+        case constants.SUGGEST: {
+            const searchView = new SearchView(socket, animTime);
             searchView.errorMessage = errorMessage;
             switchView(searchView);
             break;
-        case constants.VOTE:
+        }
+        case constants.VOTE: {
+            const voteView = new VoteView(socket, animTime);
             voteView.isHost = phaseInfo.isHost;
             voteView.movies = phaseInfo.data.movies;
             voteView.votingSystem = phaseInfo.data.votingSystem;
             voteView.userToken = userToken;
             switchView(voteView);
             break;
-        case constants.RESULTS:
+        }
+        case constants.RESULTS: {
+            const resultsView = new ResultsView(socket, animTime);
             resultsView.isHost = phaseInfo.isHost;
             resultsView.movies = phaseInfo.data.movies;
             resultsView.winner = phaseInfo.data.winner;
             switchView(resultsView);
             break;
+        }
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {

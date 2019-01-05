@@ -82,7 +82,7 @@ export class ResultsView extends View {
         this.endButton.hide();
         this.newMovieButton.hide();
         // Destroy the existing chart so that a new one can be created
-        this.voteChart.destroy();
+        if (this.voteChart != null) this.voteChart.destroy();
         this.canvas.hide();
     }
 }
