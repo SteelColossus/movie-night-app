@@ -44,7 +44,7 @@
     <h2 id="movieNightTitle" style="display: none"></h2>
     <span class="h3" id="usernameIndicator" style="display: none"></span>
 
-    <div id="usernamePage" style="display: none">
+    <div id="usernameView" style="display: none">
         <form id="usernameForm">
             <h5>Enter your name:</h5>
             <div class="form-inline">
@@ -56,7 +56,7 @@
         </form>
     </div>
 
-    <div id="hostPage" style="display: none">
+    <div id="hostView" style="display: none">
         <form id="startVotingForm">
             <h5>Start your movie night:</h5>
             <div class="form-inline mb-2">
@@ -69,7 +69,7 @@
         </form>
     </div>
 
-    <div id="searchPage" style="display: none">
+    <div id="searchView" style="display: none">
         <form id="movieSearchForm">
             <h5>Search for a movie to watch below:</h5>
             <div class="form-inline mb-2">
@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <div id="suggestionsPage" style="display: none">
+    <div id="suggestionsView" style="display: none">
         <table id="movieTable" class="table">
             <tr>
                 <th scope="col">Movie</th>
@@ -110,17 +110,17 @@
         <input id="closeSuggestionsButton" type="button" class="btn btn-danger mb-2" value="Close Suggestions" style="display: none">
     </div>
 
-    <div id="votePage" style="display: none">
+    <div id="voteView" style="display: none">
         <h5>Choose a movie to vote for below:</h5>
         <div id="voteDisplay"></div>
         <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
     </div>
 
-    <div id="resultsPage" style="display: none">
+    <div id="resultsView" style="display: none">
         <div id="winner" class="mb-2"></div>
         <input id="endButton" type="button" class="btn btn-danger" value="End Movie Night" style="display: none">
         <input id="newMovieButton" type="button" class="btn btn-primary" value="New Movie" style="display: none">
-        <canvas id="voteChart" width="1000" height="1000"></canvas>
+        <canvas id="voteChart" width="1000" height="1000" style="display: none"></canvas>
     </div>
 
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>

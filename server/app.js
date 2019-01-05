@@ -59,7 +59,7 @@ function setWinner() {
     if (highestVotes > 0) {
         const winners = movieResults.filter(movie => movie.votes === highestVotes);
 
-        // Pick a random winner. This is only temporary while something more visual gets added.
+        // Pick a random winner - this is only temporary until something more visual gets added
         nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
     }
 }
@@ -168,7 +168,7 @@ function addUser(socket, token, username = null) {
             const setupInfo = {
                 "movies": nightInfo.movies
             };
-            
+
             if (host != null) {
                 setupInfo.isHost = (host === socket.token);
             }
@@ -196,7 +196,7 @@ io.on('connection', (socket) => {
         addUser(socket, user.token, user.username);
     });
 
-    //Setup basic movie night details
+    // Setup basic movie night details
     socket.on('setup_details', (setupDetails) => {
         nightInfo.movies = [];
         nightInfo.name = setupDetails.name;
@@ -204,15 +204,15 @@ io.on('connection', (socket) => {
         nightInfo.winner = null;
         host = socket.token;
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
-        //Get every client in the room
+        // Get every client in the room
         switchPhase(socket, constants.SUGGEST);
     });
 
-    //When a movie is searched for, check the api for results
+    // When a movie is searched for, check the API for results
     socket.on('movie_search', (suggestion) => {
         if (!isLoggedIn(socket)) return;
 
-        //Need to encode the URL for the api key to understand it.
+        // Need to encode the URL for the API key to understand it
         let encodedSuggestion = encodeURIComponent(suggestion);
 
         new Promise(resolve => makeOmdbRequest('s', encodedSuggestion).then((response) => {
@@ -298,7 +298,7 @@ io.on('connection', (socket) => {
         io.to(nightInfo.name).emit('votes_changed', newVotes);
     });
 
-    //Get information for the movie
+    // Get information for the movie
     socket.on('movie_chosen', (movieId) => {
         if (!isLoggedIn(socket)) return;
 
@@ -323,7 +323,7 @@ io.on('connection', (socket) => {
             const setupInfo = {
                 "movies": nightInfo.movies
             };
-            
+
             if (host != null) {
                 setupInfo.isHost = (host === socket.token);
             }
