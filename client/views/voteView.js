@@ -17,7 +17,6 @@ export class VoteView extends View {
             { "text": movie.genre },
             { "text": movie.plot },
             { "text": movie.rating },
-            { "text": movie.awards },
             {
                 "func": (cell) => {
                     switch (votingSystem) {
@@ -65,7 +64,7 @@ export class VoteView extends View {
     buildMovieTable(movies, votingSystem) {
         const movieTable = $('<table>').addClass('table');
 
-        const headings = ['Movie', 'Year', 'Runtime', 'Genre', 'Plot', 'IMDB Rating', 'Awards', null, 'Votes'];
+        const headings = ['Movie', 'Year', 'Runtime', 'Genre', 'Plot', 'IMDB Rating', null, 'Votes'];
 
         const headingRow = $('<tr>');
 
