@@ -3,8 +3,7 @@ import { appendTableRow } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime) {
-        super('suggestions', animTime);
-        this.socket = socket;
+        super('suggestions', socket, animTime);
         this.movieTable = $('#movieTable');
         this.closeSuggestionsButton = $('#closeSuggestionsButton');
     }
@@ -39,20 +38,16 @@ export class SuggestionsView extends View {
     onViewShown() {
         this.buildSuggestionsTable(this.movies);
 
-        this.newMovieListener = this.handleNewMovie.bind(this);
-
-        this.socket.on('new_movie', this.newMovieListener);
+        this.addSocketListener('new_movie', this.handleNewMovie);
 
         if (this.isHost === true) {
-            this.closeSuggestionsButton.show(this.animTime).click(() => {
+            this.addDOMListener(this.closeSuggestionsButton, 'click', () => {
                 this.socket.emit('close_suggestions');
-            });
+            }).show(this.animTime);
         }
     }
 
     onViewHidden() {
-        this.socket.off('new_movie', this.newMovieListener);
-
         this.closeSuggestionsButton.hide();
         // Remove all the existing movies
         this.movieTable.find('tr:not(:first-child)').remove();

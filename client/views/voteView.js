@@ -3,8 +3,7 @@ import { appendTableRow, sumVotes } from './viewFunctions.js';
 
 export class VoteView extends View {
     constructor(socket, animTime) {
-        super('vote', animTime);
-        this.socket = socket;
+        super('vote', socket, animTime);
         this.voteDisplay = $('#voteDisplay');
         this.closeVotingButton = $('#closeVotingButton');
     }
@@ -105,20 +104,16 @@ export class VoteView extends View {
     onViewShown() {
         this.buildVoteDisplay(this.movies, this.votingSystem);
 
-        this.votesChangedListener = this.handleVotesChanged.bind(this);
-
-        this.socket.on('votes_changed', this.votesChangedListener);
+        this.addSocketListener('votes_changed', this.handleVotesChanged);
 
         if (this.isHost === true) {
-            this.closeVotingButton.show(this.animTime).click(() => {
+            this.addDOMListener(this.closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
-            });
+            }).show(this.animTime);
         }
     }
 
     onViewHidden() {
-        this.socket.off('votes_changed', this.votesChangedListener);
-
         this.closeVotingButton.hide();
         this.voteDisplay.empty();
     }

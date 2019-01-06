@@ -2,8 +2,7 @@ import { View } from './view.js';
 
 export class UsernameView extends View {
     constructor(socket, animTime) {
-        super('username', animTime);
-        this.socket = socket;
+        super('username', socket, animTime);
         this.usernameInput = $('#username');
     }
 
@@ -20,7 +19,7 @@ export class UsernameView extends View {
     }
 
     onViewShown() {
-        $('#usernameForm').submit(this.formSubmit.bind(this));
+        this.addDOMListener($('#usernameForm'), 'submit', this.formSubmit);
     }
 
     onViewHidden() {

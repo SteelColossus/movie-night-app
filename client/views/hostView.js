@@ -2,8 +2,7 @@ import { View } from './view.js';
 
 export class HostView extends View {
     constructor(socket, animTime) {
-        super('host', animTime);
-        this.socket = socket;
+        super('host', socket, animTime);
         this.nightInput = $('#nightName');
         this.votingSystemInput = $('#votingSystem');
     }
@@ -28,7 +27,7 @@ export class HostView extends View {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });
 
-        $('#startVotingForm').submit(this.formSubmit.bind(this));
+        this.addDOMListener($('#startVotingForm'), 'submit', this.formSubmit);
     }
 
     onViewHidden() {

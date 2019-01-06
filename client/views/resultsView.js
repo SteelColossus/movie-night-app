@@ -3,8 +3,7 @@ import { sumVotes } from './viewFunctions.js';
 
 export class ResultsView extends View {
     constructor(socket, animTime) {
-        super('results', animTime);
-        this.socket = socket;
+        super('results', socket, animTime);
         this.canvas = $('#voteChart');
         this.endButton = $('#endButton');
         this.newMovieButton = $('#newMovieButton');
@@ -68,13 +67,13 @@ export class ResultsView extends View {
         }
 
         if (this.isHost === true) {
-            this.endButton.show(this.animTime).click(() => {
+            this.addDOMListener(this.endButton, 'click', () => {
                 this.socket.emit('end');
-            });
+            }).show(this.animTime);
 
-            this.newMovieButton.show(this.animTime).click(() => {
+            this.addDOMListener(this.newMovieButton, 'click', () => {
                 this.socket.emit('new_round');
-            });
+            }).show(this.animTime);
         }
     }
 

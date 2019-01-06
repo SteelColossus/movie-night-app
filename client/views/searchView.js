@@ -3,8 +3,7 @@ import { appendTableRow } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime) {
-        super('search', animTime);
-        this.socket = socket;
+        super('search', socket, animTime);
         this.suggestionInput = $('#suggestion');
         this.searchResults = $('#searchResults');
     }
@@ -82,16 +81,12 @@ export class SearchView extends View {
             `
         });
 
-        $('#movieSearchForm').submit(this.formSubmit.bind(this));
+        this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
 
-        this.movieSearchListener = this.handleSearch.bind(this);
-
-        this.socket.on('movie_search', this.movieSearchListener);
+        this.addSocketListener('movie_search', this.handleSearch);
     }
 
     onViewHidden() {
-        this.socket.off('movie_search', this.movieSearchListener);
-
         this.suggestionInput.val('');
         this.searchResults.hide();
     }
