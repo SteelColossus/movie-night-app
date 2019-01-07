@@ -7,7 +7,8 @@
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "ecmaVersion": 2015
+        "ecmaVersion": 2015,
+        "sourceType": "module"
     },
     "globals": {
         "io": false,
@@ -43,7 +44,6 @@
         "callback-return": "error",
         "camelcase": "error",
         "capitalized-comments": "off",
-        "class-methods-use-this": "error",
         "comma-dangle": "error",
         "comma-spacing": [
             "error",
@@ -270,7 +270,6 @@
             "error",
             "last"
         ],
-        "sort-imports": "error",
         "sort-keys": "off",
         "sort-vars": "error",
         "space-before-blocks": "error",
@@ -281,7 +280,10 @@
         ],
         "space-infix-ops": "error",
         "space-unary-ops": "error",
-        "spaced-comment": "off",
+        "spaced-comment": [
+            "error",
+            "always"
+        ],
         "strict": [
             "error",
             "never"

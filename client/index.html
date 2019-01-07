@@ -31,17 +31,20 @@
         integrity="sha384-Xgf/DMe1667bioB9X1UM5QX+EG6FolMT4K7G+6rqNZBSONbmPh/qZ62nBPfTx+xG" crossorigin="anonymous"></script>
     <script src="https://use.fontawesome.com/releases/v5.5.0/js/fontawesome.js" defer
         integrity="sha384-bNOdVeWbABef8Lh4uZ8c3lJXVlHdf8W5hh1OpJ4dGyqIEhMmcnJrosjQ36Kniaqm" crossorigin="anonymous"></script>
+
     <!-- Socket.io -->
     <script src="/socket.io/socket.io.js" defer></script>
+
     <!-- Constants shared by client and server -->
     <script src="constants.js" defer></script>
     <!-- Local files -->
-    <script src="main.js" defer></script>
+    <script src="main.js" type="module" defer></script>
 </head>
 <body>
     <h2 id="movieNightTitle" style="display: none"></h2>
-    <h3 id="usernameIndicator" style="display: none"></h3>
-    <div id="usernameSection" style="display: none">
+    <span class="h3" id="usernameIndicator" style="display: none"></span>
+
+    <div id="usernameView" style="display: none">
         <form id="usernameForm">
             <h5>Enter your name:</h5>
             <div class="form-inline">
@@ -52,7 +55,8 @@
             <small id="usernameHelp" class="form-text text-muted mb-2">Must be 2-25 characters long.</small>
         </form>
     </div>
-    <div id="hostSection" style="display: none">
+
+    <div id="hostView" style="display: none">
         <form id="startVotingForm">
             <h5>Start your movie night:</h5>
             <div class="form-inline mb-2">
@@ -64,7 +68,8 @@
             </div>
         </form>
     </div>
-    <div id="searchSection" style="display: none">
+
+    <div id="searchView" style="display: none">
         <form id="movieSearchForm">
             <h5>Search for a movie to watch below:</h5>
             <div class="form-inline mb-2">
@@ -76,19 +81,20 @@
                 </a>
             </div>
         </form>
+
+        <div id="searchResults" style="display: none">
+            <h5>Choose a movie to suggest below:</h5>
+            <table id="suggestionTable" class="table">
+                <tr>
+                    <th scope="col">Suggestion</th>
+                    <th scope="col">Year</th>
+                    <th></th>
+                </tr>
+            </table>
+        </div>
     </div>
-    <div id="suggestionsSection" style="display: none">
-        <h5>Choose a movie to suggest below:</h5>
-        <table id="suggestionTable" class="table">
-            <tr>
-                <th scope="col">Suggestion</th>
-                <th scope="col">Year</th>
-                <th></th>
-            </tr>
-        </table>
-    </div>
-    <div id="voteSection" style="display: none">
-        <h5>Choose a movie to vote for below:</h5>
+
+    <div id="suggestionsView" style="display: none">
         <table id="movieTable" class="table">
             <tr>
                 <th scope="col">Movie</th>
@@ -98,30 +104,47 @@
                 <th scope="col">Plot</th>
                 <th scope="col">IMDB Rating</th>
                 <th scope="col">Awards</th>
-                <th style="display: none"></th>
-                <th scope="col" style="display: none">Votes</th>
             </tr>
         </table>
+
         <input id="closeSuggestionsButton" type="button" class="btn btn-danger mb-2" value="Close Suggestions" style="display: none">
+    </div>
+
+    <div id="voteView" style="display: none">
+        <h5>Choose a movie to vote for below:</h5>
+        <div id="voteDisplay"></div>
         <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
     </div>
-    <div id="resultsSection" style="display: none">
+
+    <div id="resultsView" style="display: none">
         <div id="winner" class="mb-2"></div>
         <input id="endButton" type="button" class="btn btn-danger" value="End Movie Night" style="display: none">
         <input id="newMovieButton" type="button" class="btn btn-primary" value="New Movie" style="display: none">
-        <canvas id="voteChart" width="1000" height="1000"></canvas>
+        <canvas id="voteChart" width="1000" height="1000" style="display: none"></canvas>
     </div>
+
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
+
+    <!-- Shown when JS is disabled -->
+    <noscript>
+        <h2>Err... how exactly were you expecting this to work?</h2>
+        <p>
+            We're not in the 90's anymore, most websites need JavaScript to work nowadays, and this one is no
+            exception.<br>
+            Please re-enable JavaScript in your browser to use this website.
+        </p>
+    </noscript>
+
     <div id="oldBrowserMessage" style="display: none">
         <h2 style="display: inline-block">This browser is old, and sucks balls.</h2>
         <img id="ieImage" src="no_ie.png" width="40" height="40" style="display: none">
         <p>
-            This website uses content that this browser does not support.
-            <br>
+            This website uses content that this browser does not support.<br>
             To use this website, update to the latest version of this browser or download a supported browser, like
             <a href="https://www.google.com/chrome/">Chrome</a> or <a href="https://www.mozilla.org/en-GB/firefox/">Firefox</a>.
         </p>
     </div>
+
     <!-- Script for old browsers -->
     <script nomodule>
         // Show the message
@@ -132,14 +155,5 @@
             document.getElementById('ieImage').style.display = 'inline';
         }
     </script>
-    <!-- Shown when JS is disabled -->
-    <noscript>
-        <h2>Err... how exactly were you expecting this to work?</h2>
-        <p>
-            We're not in the 90's anymore, most websites need JavaScript to work nowadays, and this one is no
-            exception.<br>
-            Please re-enable JavaScript in your browser to use this website.
-        </p>
-    </noscript>
 </body>
 </html>
