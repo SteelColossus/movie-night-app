@@ -4,7 +4,7 @@
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "start node . & node test/test.js"
   },
   "author": "steelcolossus",
   "repository": {
@@ -20,7 +20,8 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.10.0",
-    "htmlhint": "^0.10.1"
+    "eslint": "^5.12.0",
+    "htmlhint": "^0.10.1",
+    "selenium-webdriver": "^4.0.0-alpha.1"
   }
 }
