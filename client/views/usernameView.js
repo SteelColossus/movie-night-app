@@ -14,7 +14,7 @@ export class UsernameView extends View {
             "username": username
         });
 
-        // Stops refresh and connect of new user
+        // Stop the page from refreshing
         return false;
     }
 

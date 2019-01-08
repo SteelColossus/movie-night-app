@@ -68,7 +68,7 @@ export class ResultsView extends View {
 
         if (this.isHost === true) {
             this.addDOMListener(this.endButton, 'click', () => {
-                this.socket.emit('end');
+                this.socket.emit('end_night');
             }).show(this.animTime);
 
             this.addDOMListener(this.newMovieButton, 'click', () => {

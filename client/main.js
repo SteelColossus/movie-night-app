@@ -44,13 +44,11 @@ socket.on('request_user_token', () => {
 
 socket.on('request_new_user', () => {
     if (authenticated === false) {
-        movieNightTitle.add(usernameIndicator).hide(animTime);
-
         const usernameView = new UsernameView(socket, animTime);
         usernameView.userToken = userToken;
         switchView(usernameView);
     }
-    else {
+    else if (authenticated === true) {
         // The app server has likely been restarted - refresh the page to prevent side effects
         location.reload();
     }
@@ -58,14 +56,6 @@ socket.on('request_new_user', () => {
 
 socket.on('request_new_username', () => {
     errorMessage.text('The name you have entered is already taken.').show(animTime);
-});
-
-socket.on('setup_movies', (info) => {
-    const suggestionsView = new SuggestionsView(socket, animTime);
-    suggestionsView.isHost = info.isHost;
-    suggestionsView.movies = info.movies;
-    suggestionsView.userToken = userToken;
-    switchView(suggestionsView);
 });
 
 socket.on('new_phase', (phaseInfo) => {
@@ -113,4 +103,15 @@ socket.on('new_phase', (phaseInfo) => {
     if (phaseInfo.username != null) {
         usernameIndicator.text(phaseInfo.username).show(animTime);
     }
+    else {
+        usernameIndicator.hide(animTime);
+    }
+});
+
+socket.on('movie_suggestions', (info) => {
+    const suggestionsView = new SuggestionsView(socket, animTime);
+    suggestionsView.isHost = info.isHost;
+    suggestionsView.movies = info.movies;
+    suggestionsView.userToken = userToken;
+    switchView(suggestionsView);
 });

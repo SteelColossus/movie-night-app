@@ -8,7 +8,6 @@ export class SearchView extends View {
         this.searchResults = $('#searchResults');
     }
 
-    // Get suggestion input
     formSubmit() {
         let suggestion = this.suggestionInput.val().toString().trim();
 
@@ -16,7 +15,7 @@ export class SearchView extends View {
             this.socket.emit('movie_search', suggestion);
         }
 
-        // Stops refresh and connect of new user
+        // Stop the page from refreshing
         return false;
     }
 
@@ -28,7 +27,6 @@ export class SearchView extends View {
 
         this.errorMessage.hide(this.animTime);
 
-        // Form suggestion table from API results
         const suggestTable = $('#suggestionTable');
 
         // Remove all the existing suggestions
@@ -36,6 +34,7 @@ export class SearchView extends View {
 
         let searchResults = searchData.results;
 
+        // Create the suggestion table from the API results
         searchResults.forEach((result) => {
             appendTableRow(suggestTable, [
                 { "text": result.title },
@@ -83,7 +82,7 @@ export class SearchView extends View {
 
         this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
 
-        this.addSocketListener('movie_search', this.handleSearch);
+        this.addSocketListener('movie_search_results', this.handleSearch);
     }
 
     onViewHidden() {

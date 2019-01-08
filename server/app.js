@@ -10,8 +10,6 @@ const args = require('minimist')(process.argv.slice(2));
 const keys = require('./api_keys');
 const constants = require('./constants');
 
-// Log when sockets connect and disconnect
-const socketDebug = false;
 // Allow people on the same network to access the app (this will use a different hostname)
 const allowOutsideConnections = args.o === true;
 
@@ -81,7 +79,7 @@ function switchPhase(socket, name, sendToAll = true) {
                 }
             });
         }
-        else {
+        else if (sendToAll === false) {
             socket.join(nightInfo.name);
         }
     }
@@ -138,6 +136,20 @@ function switchPhase(socket, name, sendToAll = true) {
 
         socket.broadcast.to(nightInfo.name).emit('new_phase', phaseInfo);
     }
+    else if (sendToAll === false) {
+        // If we're at the suggest phase and the user has already suggested a movie, send them back the movie suggestions
+        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === host.token)) {
+            const setupInfo = {
+                "movies": nightInfo.movies
+            };
+
+            if (host != null) {
+                setupInfo.isHost = (host === socket.token);
+            }
+
+            socket.emit('movie_suggestions', setupInfo);
+        }
+    }
 }
 
 function addUser(socket, token, username = null) {
@@ -161,20 +173,8 @@ function addUser(socket, token, username = null) {
 
         console.log(`${isExistingUser ? 'Existing' : 'New'} user '${users[token].username}' connected.`);
 
-        // Get newcomers to the same point as everyone else
+        // Get newcomers to the same phase as everyone else
         switchPhase(socket, phase, false);
-
-        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === token)) {
-            const setupInfo = {
-                "movies": nightInfo.movies
-            };
-
-            if (host != null) {
-                setupInfo.isHost = (host === socket.token);
-            }
-
-            socket.emit('setup_movies', setupInfo);
-        }
     }
     else {
         socket.emit('request_new_user');
@@ -182,10 +182,6 @@ function addUser(socket, token, username = null) {
 }
 
 io.on('connection', (socket) => {
-    if (socketDebug) {
-        console.log(`Socket ${socket.id} connected.`);
-    }
-
     socket.emit('request_user_token');
 
     socket.on('user_token', (token) => {
@@ -196,15 +192,14 @@ io.on('connection', (socket) => {
         addUser(socket, user.token, user.username);
     });
 
-    // Setup basic movie night details
-    socket.on('setup_details', (setupDetails) => {
+    // Host a new movie night
+    socket.on('host_night', (info) => {
         nightInfo.movies = [];
-        nightInfo.name = setupDetails.name;
-        nightInfo.votingSystem = setupDetails.votingSystem;
+        nightInfo.name = info.name;
+        nightInfo.votingSystem = info.votingSystem;
         nightInfo.winner = null;
         host = socket.token;
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
-        // Get every client in the room
         switchPhase(socket, constants.SUGGEST);
     });
 
@@ -238,7 +233,7 @@ io.on('connection', (socket) => {
                     if (movieResults.success === true) {
                         movieResults.results = [movieMapFunction(response2.data)];
                     }
-                    else {
+                    else if (movieResults.success === false) {
                         movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
                     }
 
@@ -250,58 +245,13 @@ io.on('connection', (socket) => {
 
                 resolve(movieResults);
             }
-        })).then(movieResults => socket.emit('movie_search', movieResults));
+        })).then(movieResults => socket.emit('movie_search_results', movieResults));
     });
 
-    socket.on('close_suggestions', () => {
-        switchPhase(socket, constants.VOTE);
-    });
-
-    socket.on('close_voting', () => {
-        switchPhase(socket, constants.RESULTS);
-    });
-
-    socket.on('end', () => {
-        switchPhase(socket, constants.HOST);
-        host = null;
-    });
-
-    socket.on('new_round', () => {
-        nightInfo.movies = [];
-        nightInfo.winner = null;
-        switchPhase(socket, constants.SUGGEST);
-    });
-
-    socket.on('votes_changed', (voteDeltas) => {
-        if (!isLoggedIn(socket)) return;
-
-        const newVotes = {};
-
-        Object.keys(voteDeltas).forEach((key) => {
-            const value = voteDeltas[key];
-            const movie = nightInfo.movies.find(x => x.id == key);
-            if (movie != null) {
-                if (movie.votes.hasOwnProperty(socket.token)) {
-                    movie.votes[socket.token] += value;
-                }
-                else {
-                    movie.votes[socket.token] = value;
-                }
-                if (movie.votes[socket.token] < 0) {
-                    // Prevent a movie from having less than 0 votes
-                    movie.votes[socket.token] = 0;
-                }
-                newVotes[key] = movie.votes;
-            }
-        });
-
-        io.to(nightInfo.name).emit('votes_changed', newVotes);
-    });
-
-    // Get information for the movie
     socket.on('movie_chosen', (movieId) => {
         if (!isLoggedIn(socket)) return;
 
+        // Get more information for the chosen movie
         makeOmdbRequest('i', movieId).then((response) => {
             let result = response.data;
             let movie = {
@@ -328,18 +278,61 @@ io.on('connection', (socket) => {
                 setupInfo.isHost = (host === socket.token);
             }
 
-            socket.emit('setup_movies', setupInfo);
+            socket.emit('movie_suggestions', setupInfo);
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
         });
+    });
+
+    socket.on('votes_changed', (voteDeltas) => {
+        if (!isLoggedIn(socket)) return;
+
+        const newVotes = {};
+
+        Object.keys(voteDeltas).forEach((key) => {
+            const value = voteDeltas[key];
+            const movie = nightInfo.movies.find(x => x.id === key);
+
+            if (movie != null) {
+                if (movie.votes.hasOwnProperty(socket.token)) {
+                    movie.votes[socket.token] += value;
+                }
+                else {
+                    movie.votes[socket.token] = value;
+                }
+                if (movie.votes[socket.token] < 0) {
+                    // Prevent a movie from having less than 0 votes
+                    movie.votes[socket.token] = 0;
+                }
+                newVotes[key] = movie.votes;
+            }
+        });
+
+        io.to(nightInfo.name).emit('votes_changed', newVotes);
+    });
+
+    socket.on('close_suggestions', () => {
+        switchPhase(socket, constants.VOTE);
+    });
+
+    socket.on('close_voting', () => {
+        switchPhase(socket, constants.RESULTS);
+    });
+
+    socket.on('end_night', () => {
+        switchPhase(socket, constants.HOST);
+        host = null;
+    });
+
+    socket.on('new_round', () => {
+        nightInfo.movies = [];
+        nightInfo.winner = null;
+        switchPhase(socket, constants.SUGGEST);
     });
 
     socket.on('disconnect', () => {
         if (socket.token != null) {
             const userToRemove = users[socket.token];
             console.log(`User '${userToRemove.username}' disconnected.`);
-        }
-        else if (socketDebug) {
-            console.log(`Socket ${socket.id} disconnected.`);
         }
     });
 });
