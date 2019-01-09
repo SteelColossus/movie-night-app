@@ -266,7 +266,6 @@ io.on('connection', (socket) => {
         makeOmdbRequest('i', movieId).then((response) => {
             let result = response.data;
             let movie = {
-                "success": result.Response,
                 "id": result.imdbID,
                 "title": result.Title,
                 "year": result.Year,
