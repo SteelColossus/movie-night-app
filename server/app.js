@@ -20,10 +20,7 @@ let phase = constants.HOST;
 let host = null;
 
 const users = {};
-
-const nightInfo = {
-    "movies": []
-};
+const nightInfo = {};
 
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
@@ -66,10 +63,12 @@ function isLoggedIn(socket) {
     return socket.token != null && users[socket.token] != null;
 }
 
-function switchPhase(socket, name, sendToAll = true) {
-    // Server side validation to prevent non hosts from moving phases
-    if (sendToAll === true && (!isLoggedIn(socket) || host !== socket.token)) return;
+// Perform some checks before proceeding with a socket request
+function preCheck(socket, requiredPhase, requireHost) {
+    return isLoggedIn(socket) && phase === requiredPhase && (!requireHost || host === socket.token);
+}
 
+function switchPhase(socket, phaseName, sendToAll = true) {
     // Get the clients in the movie night room if they aren't already
     if (nightInfo.name != null) {
         if (sendToAll === true) {
@@ -86,7 +85,7 @@ function switchPhase(socket, name, sendToAll = true) {
 
     let data = null;
 
-    switch (name) {
+    switch (phaseName) {
         case constants.HOST:
             data = {
                 "votingSystems": constants.VOTING_SYSTEMS
@@ -102,18 +101,15 @@ function switchPhase(socket, name, sendToAll = true) {
             data = nightInfo;
             break;
         case constants.RESULTS:
-            setWinner();
             data = nightInfo;
             break;
         default:
-            console.error(`Invalid phase '${name}'.`);
+            console.error(`Invalid phase '${phaseName}'.`);
             return;
     }
 
-    phase = name;
-
     const phaseInfo = {
-        "name": name,
+        "name": phaseName,
         "data": data
     };
 
@@ -124,6 +120,8 @@ function switchPhase(socket, name, sendToAll = true) {
     if (isLoggedIn(socket) && users[socket.token].username != null) {
         phaseInfo.username = users[socket.token].username;
     }
+
+    phase = phaseName;
 
     socket.emit('new_phase', phaseInfo);
 
@@ -182,6 +180,7 @@ function addUser(socket, token, username = null) {
 }
 
 io.on('connection', (socket) => {
+    // Ask for the user's token so we can authenticate them
     socket.emit('request_user_token');
 
     socket.on('user_token', (token) => {
@@ -194,62 +193,74 @@ io.on('connection', (socket) => {
 
     // Host a new movie night
     socket.on('host_night', (info) => {
+        if (!preCheck(socket, constants.HOST, false)) return;
+
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
-        nightInfo.winner = null;
         host = socket.token;
+
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         switchPhase(socket, constants.SUGGEST);
     });
 
     // When a movie is searched for, check the API for results
     socket.on('movie_search', (suggestion) => {
-        if (!isLoggedIn(socket)) return;
+        if (!preCheck(socket, constants.SUGGEST, false)) return;
 
         // Need to encode the URL for the API key to understand it
         let encodedSuggestion = encodeURIComponent(suggestion);
 
-        new Promise(resolve => makeOmdbRequest('s', encodedSuggestion).then((response) => {
-            let movieResults = {
-                "success": response.data.Response === 'True'
-            };
+        /*
+         * Weird syntax - create a promise that will eventually resolve with either a list of results or an error message.
+         * This is needed because we can either get the results immediately or need to make another request which is done asynchronously.
+         * When we get the results we send them back to the user.
+         */
+        const movieResultsPromise = new Promise((resolve) => {
+            makeOmdbRequest('s', encodedSuggestion).then((response) => {
+                let movieResults = {
+                    "success": response.data.Response === 'True'
+                };
 
-            let movieMapFunction = result => ({
-                "id": result.imdbID,
-                "title": result.Title,
-                "year": result.Year
-            });
+                let movieMapFunction = result => ({
+                    "id": result.imdbID,
+                    "title": result.Title,
+                    "year": result.Year
+                });
 
-            if (movieResults.success === true) {
-                movieResults.results = response.data.Search.map(result => movieMapFunction(result));
-
-                resolve(movieResults);
-            }
-            else if (response.data.Error === 'Too many results.') {
-                makeOmdbRequest('t', encodedSuggestion).then((response2) => {
-                    movieResults.success = response2.data.Response === 'True';
-
-                    if (movieResults.success === true) {
-                        movieResults.results = [movieMapFunction(response2.data)];
-                    }
-                    else if (movieResults.success === false) {
-                        movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
-                    }
+                if (movieResults.success === true) {
+                    movieResults.results = response.data.Search.map(movieMapFunction);
 
                     resolve(movieResults);
-                });
-            }
-            else {
-                movieResults.errorMessage = response.data.Error;
+                }
+                else if (response.data.Error === 'Too many results.') {
+                    // If the API says we get too many results, then instead try to search by the exact title
+                    makeOmdbRequest('t', encodedSuggestion).then((response2) => {
+                        movieResults.success = response2.data.Response === 'True';
 
-                resolve(movieResults);
-            }
-        })).then(movieResults => socket.emit('movie_search_results', movieResults));
+                        if (movieResults.success === true) {
+                            movieResults.results = [movieMapFunction(response2.data)];
+                        }
+                        else if (movieResults.success === false) {
+                            movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
+                        }
+
+                        resolve(movieResults);
+                    });
+                }
+                else {
+                    movieResults.errorMessage = response.data.Error;
+
+                    resolve(movieResults);
+                }
+            });
+        });
+
+        movieResultsPromise.then(movieResults => socket.emit('movie_search_results', movieResults));
     });
 
     socket.on('movie_chosen', (movieId) => {
-        if (!isLoggedIn(socket)) return;
+        if (!preCheck(socket, constants.SUGGEST, false)) return;
 
         // Get more information for the chosen movie
         makeOmdbRequest('i', movieId).then((response) => {
@@ -264,8 +275,8 @@ io.on('connection', (socket) => {
                 "plot": result.Plot,
                 "rating": result.imdbRating,
                 "awards": result.Awards,
-                "votes": {},
-                "suggester": socket.token
+                "suggester": socket.token,
+                "votes": {}
             };
 
             nightInfo.movies.push(movie);
@@ -284,7 +295,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('votes_changed', (voteDeltas) => {
-        if (!isLoggedIn(socket)) return;
+        if (!preCheck(socket, constants.VOTE, false)) return;
 
         const newVotes = {};
 
@@ -311,21 +322,39 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
+        if (!preCheck(socket, constants.SUGGEST, true)) return;
+
         switchPhase(socket, constants.VOTE);
     });
 
     socket.on('close_voting', () => {
+        if (!preCheck(socket, constants.VOTE, true)) return;
+
+        setWinner();
+
         switchPhase(socket, constants.RESULTS);
     });
 
     socket.on('end_night', () => {
-        switchPhase(socket, constants.HOST);
+        if (!preCheck(socket, constants.RESULTS, true)) return;
+
+        nightInfo.movies = [];
+        nightInfo.votingSystem = null;
+        nightInfo.winner = null;
         host = null;
+
+        switchPhase(socket, constants.HOST);
+        
+        // The name has to be reset after switching the phase as it is used as the socket room name
+        nightInfo.name = null;
     });
 
     socket.on('new_round', () => {
+        if (!preCheck(socket, constants.RESULTS, true)) return;
+
         nightInfo.movies = [];
         nightInfo.winner = null;
+
         switchPhase(socket, constants.SUGGEST);
     });
 
