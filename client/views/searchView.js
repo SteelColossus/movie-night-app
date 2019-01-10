@@ -61,6 +61,12 @@ export class SearchView extends View {
         this.searchResults.show(this.animTime);
     }
 
+    handleMovieRejected(message) {
+        const fullMessage = `${message}\nPlease choose a different movie.`;
+
+        alert(fullMessage); // eslint-disable-line no-alert
+    }
+
     onViewShown() {
         $('#movieInfo').popover({
             "trigger": "hover focus",
@@ -83,6 +89,8 @@ export class SearchView extends View {
         this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
 
         this.addSocketListener('movie_search_results', this.handleSearch);
+
+        this.addSocketListener('request_different_movie', this.handleMovieRejected);
     }
 
     onViewHidden() {

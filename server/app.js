@@ -136,7 +136,7 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     }
     else if (sendToAll === false) {
         // If we're at the suggest phase and the user has already suggested a movie, send them back the movie suggestions
-        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === host.token)) {
+        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === socket.token)) {
             const setupInfo = {
                 "movies": nightInfo.movies
             };
@@ -261,6 +261,12 @@ io.on('connection', (socket) => {
 
     socket.on('movie_chosen', (movieId) => {
         if (!preCheck(socket, constants.SUGGEST, false)) return;
+
+        // Disallow multiple people from choosing the same movie
+        if (nightInfo.movies.some(x => x.id === movieId)) {
+            socket.emit('request_different_movie', 'Someone has already chosen that movie.');
+            return;
+        }
 
         // Get more information for the chosen movie
         makeOmdbRequest('i', movieId).then((response) => {
