@@ -264,7 +264,7 @@ io.on('connection', (socket) => {
 
         // Disallow multiple people from choosing the same movie
         if (nightInfo.movies.some(x => x.id === movieId)) {
-            socket.emit('request_different_movie', 'Someone has already chosen that movie.');
+            socket.emit('request_different_movie', 'Someone else has already chosen that movie.');
             return;
         }
 
