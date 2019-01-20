@@ -75,8 +75,8 @@ export class SearchView extends View {
             "title": "Movie Night Rules:",
             "content": `
                 <ul>
-                    <li>NO documentaries</li>
                     <li>NO shorts</li>
+                    <li>NO documentaries</li>
                     <li>NO anime</li>
                     <li>NO series</li>
                     <li>NO porn</li>

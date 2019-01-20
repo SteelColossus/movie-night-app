@@ -284,6 +284,32 @@ io.on('connection', (socket) => {
                 "votes": {}
             };
 
+            const bannedGenres = ['Short', 'Documentary'];
+            const movieGenres = movie.genre.split(', ');
+
+            const sharedGenres = bannedGenres.filter(genre => movieGenres.includes(genre));
+
+            // Disallow anyone from choosing a movie that is one of the banned genres
+            if (sharedGenres.length > 0) {
+                socket.emit('request_different_movie', `The movie you have picked is one of the banned genres: ${sharedGenres.join(', ')}.`);
+                return;
+            }
+
+            const missing = 'N/A';
+            const missingInfo = [];
+
+            if (movie.year === missing) missingInfo.push('Year');
+            if (movie.runtime === missing) missingInfo.push('Runtime');
+            if (movie.genre === missing) missingInfo.push('Genre');
+            if (movie.plot === missing) missingInfo.push('Plot');
+            if (movie.rating === missing) missingInfo.push('Rating');
+
+            // Disallow movies which have key pieces of information missing (likely obscure movies that no-one really wants to watch)
+            if (missingInfo.length > 0) {
+                socket.emit('request_different_movie', `The movie you have picked is missing the following key information: ${missingInfo.join(', ')}.`);
+                return;
+            }
+
             nightInfo.movies.push(movie);
 
             const setupInfo = {
