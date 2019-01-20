@@ -1,4 +1,5 @@
 const os = require('os');
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const favicon = require('serve-favicon');
@@ -369,13 +370,31 @@ io.on('connection', (socket) => {
     socket.on('end_night', () => {
         if (!preCheck(socket, constants.RESULTS, true)) return;
 
+        if (args.c === true) {
+            // Make a copy of the night info
+            const fileOutput = Object.assign({}, nightInfo);
+            fileOutput.host = host;
+            fileOutput.users = users;
+
+            const currentDate = new Date();
+
+            // Construct a filename by replacing spaces with underscores in the night name and assembling the current date
+            const filename = `${nightInfo.name.replace(/ /gu, '_')}_${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}.json`;
+
+            // Output all of the info to a file
+            fs.writeFile(filename, JSON.stringify(fileOutput), (err) => {
+                if (err) throw err;
+                console.log(`Dump file saved as ${filename}.`);
+            });
+        }
+
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
         nightInfo.winner = null;
         host = null;
 
         switchPhase(socket, constants.HOST);
-        
+
         // The name has to be reset after switching the phase as it is used as the socket room name
         nightInfo.name = null;
     });
