@@ -11,6 +11,7 @@ export class View {
     // Show this page
     show() {
         this.container.show(this.animTime);
+        this.updateHistory();
         this.onViewShown();
     }
 
@@ -29,6 +30,19 @@ export class View {
     // Called when this page is hidden
     onViewHidden() {
         // Since this is emulating an abstract class, we do nothing here
+    }
+
+    // Updates the history of the webpage with this view 
+    updateHistory() {
+        const hash = `#${this.viewName}`;
+
+        if (View.isFirst === true) {
+            history.replaceState(null, this.viewName, hash);
+            View.isFirst = false;
+        }
+        else {
+            history.pushState(null, this.viewName, hash);
+        }
     }
 
     // Adds an event listener for the associated socket - need to call this so the event is removed when the page is hidden
@@ -70,3 +84,5 @@ export class View {
         this.domListeners.length = 0;
     }
 }
+
+View.isFirst = true;
