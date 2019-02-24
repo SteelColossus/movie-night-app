@@ -2,8 +2,11 @@ import { View } from './view.js';
 import { appendTableRow } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, userToken, isHost, movies) {
         super('suggestions', socket, animTime);
+        this.userToken = userToken;
+        this.isHost = isHost;
+        this.movies = movies;
         this.movieTable = $('#movieTable');
         this.closeSuggestionsButton = $('#closeSuggestionsButton');
     }

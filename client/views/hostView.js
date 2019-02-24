@@ -1,8 +1,9 @@
 import { View } from './view.js';
 
 export class HostView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, votingSystems) {
         super('host', socket, animTime);
+        this.votingSystems = votingSystems;
         this.nightInput = $('#nightName');
         this.votingSystemInput = $('#votingSystem');
     }

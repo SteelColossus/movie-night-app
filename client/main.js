@@ -44,9 +44,7 @@ socket.on('request_user_token', () => {
 
 socket.on('request_new_user', () => {
     if (authenticated === false) {
-        const usernameView = new UsernameView(socket, animTime);
-        usernameView.userToken = userToken;
-        switchView(usernameView);
+        switchView(new UsernameView(socket, animTime, userToken));
     }
     else if (authenticated === true) {
         // The app server has likely been restarted - refresh the page to prevent side effects
@@ -63,32 +61,19 @@ socket.on('new_phase', (phaseInfo) => {
 
     switch (phaseInfo.name) {
         case constants.HOST: {
-            const hostView = new HostView(socket, animTime);
-            hostView.votingSystems = phaseInfo.data.votingSystems;
-            switchView(hostView);
+            switchView(new HostView(socket, animTime, phaseInfo.data.votingSystems));
             break;
         }
         case constants.SUGGEST: {
-            const searchView = new SearchView(socket, animTime);
-            searchView.errorMessage = errorMessage;
-            switchView(searchView);
+            switchView(new SearchView(socket, animTime));
             break;
         }
         case constants.VOTE: {
-            const voteView = new VoteView(socket, animTime);
-            voteView.isHost = phaseInfo.isHost;
-            voteView.movies = phaseInfo.data.movies;
-            voteView.votingSystem = phaseInfo.data.votingSystem;
-            voteView.userToken = userToken;
-            switchView(voteView);
+            switchView(new VoteView(socket, animTime, userToken, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.votingSystem));
             break;
         }
         case constants.RESULTS: {
-            const resultsView = new ResultsView(socket, animTime);
-            resultsView.isHost = phaseInfo.isHost;
-            resultsView.movies = phaseInfo.data.movies;
-            resultsView.winner = phaseInfo.data.winner;
-            switchView(resultsView);
+            switchView(new ResultsView(socket, animTime, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.winner));
             break;
         }
     }
@@ -109,9 +94,5 @@ socket.on('new_phase', (phaseInfo) => {
 });
 
 socket.on('movie_suggestions', (info) => {
-    const suggestionsView = new SuggestionsView(socket, animTime);
-    suggestionsView.isHost = info.isHost;
-    suggestionsView.movies = info.movies;
-    suggestionsView.userToken = userToken;
-    switchView(suggestionsView);
+    switchView(new SuggestionsView(socket, animTime, userToken, info.isHost, info.movies));
 });

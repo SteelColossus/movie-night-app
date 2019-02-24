@@ -6,6 +6,7 @@ export class SearchView extends View {
         super('search', socket, animTime);
         this.suggestionInput = $('#suggestion');
         this.searchResults = $('#searchResults');
+        this.errorMessage = $('#errorMessage');
     }
 
     formSubmit() {
@@ -32,10 +33,10 @@ export class SearchView extends View {
         // Remove all the existing suggestions
         suggestTable.find('tr:not(:first-child)').remove();
 
-        let searchResults = searchData.results;
+        const searchDataResults = searchData.results;
 
         // Create the suggestion table from the API results
-        searchResults.forEach((result) => {
+        searchDataResults.forEach((result) => {
             appendTableRow(suggestTable, [
                 { "text": result.title },
                 { "text": result.year },

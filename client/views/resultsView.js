@@ -2,8 +2,11 @@ import { View } from './view.js';
 import { sumVotes } from './viewFunctions.js';
 
 export class ResultsView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, isHost, movies, winner) {
         super('results', socket, animTime);
+        this.isHost = isHost;
+        this.movies = movies;
+        this.winner = winner;
         this.canvas = $('#voteChart');
         this.endButton = $('#endButton');
         this.newMovieButton = $('#newMovieButton');

@@ -2,8 +2,12 @@ import { View } from './view.js';
 import { appendTableRow, sumVotes } from './viewFunctions.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, userToken, isHost, movies, votingSystem) {
         super('vote', socket, animTime);
+        this.userToken = userToken;
+        this.isHost = isHost;
+        this.movies = movies;
+        this.votingSystem = votingSystem;
         this.voteDisplay = $('#voteDisplay');
         this.closeVotingButton = $('#closeVotingButton');
     }
