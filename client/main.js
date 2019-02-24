@@ -60,19 +60,19 @@ socket.on('new_phase', (phaseInfo) => {
     authenticated = true;
 
     switch (phaseInfo.name) {
-        case constants.HOST: {
+        case constants.PHASES.HOST: {
             switchView(new HostView(socket, animTime, phaseInfo.data.votingSystems));
             break;
         }
-        case constants.SUGGEST: {
+        case constants.PHASES.SUGGEST: {
             switchView(new SearchView(socket, animTime));
             break;
         }
-        case constants.VOTE: {
+        case constants.PHASES.VOTE: {
             switchView(new VoteView(socket, animTime, userToken, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.votingSystem));
             break;
         }
-        case constants.RESULTS: {
+        case constants.PHASES.RESULTS: {
             switchView(new ResultsView(socket, animTime, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.winner));
             break;
         }

@@ -3,7 +3,7 @@ import { appendTableRow, sumVotes } from './viewFunctions.js';
 
 export class VoteView extends View {
     constructor(socket, animTime, userToken, isHost, movies, votingSystem) {
-        super('vote', socket, animTime);
+        super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
         this.movies = movies;
@@ -23,7 +23,7 @@ export class VoteView extends View {
             {
                 "func": (cell) => {
                     switch (votingSystem) {
-                        case constants.MULTI_VOTE: {
+                        case constants.VOTING_SYSTEMS.MULTI_VOTE: {
                             const voteButton = $('<input>')
                                 .prop('type', 'button')
                                 .val('Vote!')
@@ -122,3 +122,5 @@ export class VoteView extends View {
         this.voteDisplay.empty();
     }
 }
+
+VoteView.viewName = 'vote';

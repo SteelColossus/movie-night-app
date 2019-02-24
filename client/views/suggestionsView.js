@@ -3,7 +3,7 @@ import { appendTableRow } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies) {
-        super('suggestions', socket, animTime);
+        super(SuggestionsView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
         this.movies = movies;
@@ -56,3 +56,5 @@ export class SuggestionsView extends View {
         this.movieTable.find('tr:not(:first-child)').remove();
     }
 }
+
+SuggestionsView.viewName = 'suggestions';

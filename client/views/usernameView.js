@@ -2,7 +2,7 @@ import { View } from './view.js';
 
 export class UsernameView extends View {
     constructor(socket, animTime, userToken) {
-        super('username', socket, animTime);
+        super(UsernameView.viewName, socket, animTime);
         this.userToken = userToken;
         this.usernameInput = $('#username');
     }
@@ -27,3 +27,5 @@ export class UsernameView extends View {
         this.usernameInput.val('');
     }
 }
+
+UsernameView.viewName = 'username';

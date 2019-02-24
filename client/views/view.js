@@ -52,8 +52,8 @@ export class View {
         this.socket.on(eventName, func);
 
         this.socketListeners.push({
-            'name': eventName,
-            'func': func
+            "name": eventName,
+            "func": func
         });
 
         // Return the socket for chaining purposes
@@ -67,9 +67,9 @@ export class View {
         element.on(eventName, func);
 
         this.domListeners.push({
-            'element': element,
-            'name': eventName,
-            'func': func
+            "element": element,
+            "name": eventName,
+            "func": func
         });
 
         // Return the jQuery object for chaining purposes

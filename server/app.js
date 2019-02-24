@@ -16,7 +16,7 @@ const allowOutsideConnections = args.o === true;
 const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
 const port = 3000;
 
-let phase = constants.HOST;
+let phase = constants.PHASES.HOST;
 let host = null;
 
 const users = {};
@@ -86,21 +86,21 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     let data = null;
 
     switch (phaseName) {
-        case constants.HOST:
+        case constants.PHASES.HOST:
             data = {
-                "votingSystems": constants.VOTING_SYSTEMS
+                "votingSystems": Object.values(constants.VOTING_SYSTEMS)
             };
             break;
-        case constants.SUGGEST:
+        case constants.PHASES.SUGGEST:
             data = {
                 "name": nightInfo.name,
                 "votingSystem": nightInfo.votingSystem
             };
             break;
-        case constants.VOTE:
+        case constants.PHASES.VOTE:
             data = nightInfo;
             break;
-        case constants.RESULTS:
+        case constants.PHASES.RESULTS:
             data = nightInfo;
             break;
         default:
@@ -136,7 +136,7 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     }
     else if (sendToAll === false) {
         // If we're at the suggest phase and the user has already suggested a movie, send them back the movie suggestions
-        if (phase === constants.SUGGEST && nightInfo.movies.some(m => m.suggester === socket.token)) {
+        if (phase === constants.PHASES.SUGGEST && nightInfo.movies.some(m => m.suggester === socket.token)) {
             const setupInfo = {
                 "movies": nightInfo.movies
             };
@@ -193,7 +193,7 @@ io.on('connection', (socket) => {
 
     // Host a new movie night
     socket.on('host_night', (info) => {
-        if (!preCheck(socket, constants.HOST, false)) return;
+        if (!preCheck(socket, constants.PHASES.HOST, false)) return;
 
         nightInfo.movies = [];
         nightInfo.name = info.name;
@@ -201,12 +201,12 @@ io.on('connection', (socket) => {
         host = socket.token;
 
         console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
-        switchPhase(socket, constants.SUGGEST);
+        switchPhase(socket, constants.PHASES.SUGGEST);
     });
 
     // When a movie is searched for, check the API for results
     socket.on('movie_search', (suggestion) => {
-        if (!preCheck(socket, constants.SUGGEST, false)) return;
+        if (!preCheck(socket, constants.PHASES.SUGGEST, false)) return;
 
         // Need to encode the URL for the API key to understand it
         let encodedSuggestion = encodeURIComponent(suggestion);
@@ -260,7 +260,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('movie_chosen', (movieId) => {
-        if (!preCheck(socket, constants.SUGGEST, false)) return;
+        if (!preCheck(socket, constants.PHASES.SUGGEST, false)) return;
 
         // Disallow multiple people from choosing the same movie
         if (nightInfo.movies.some(x => x.id === movieId)) {
@@ -326,7 +326,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('votes_changed', (voteDeltas) => {
-        if (!preCheck(socket, constants.VOTE, false)) return;
+        if (!preCheck(socket, constants.PHASES.VOTE, false)) return;
 
         const newVotes = {};
 
@@ -353,40 +353,40 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        if (!preCheck(socket, constants.SUGGEST, true)) return;
+        if (!preCheck(socket, constants.PHASES.SUGGEST, true)) return;
 
-        switchPhase(socket, constants.VOTE);
+        switchPhase(socket, constants.PHASES.VOTE);
     });
 
     socket.on('close_voting', () => {
-        if (!preCheck(socket, constants.VOTE, true)) return;
+        if (!preCheck(socket, constants.PHASES.VOTE, true)) return;
 
         setWinner();
 
-        switchPhase(socket, constants.RESULTS);
+        switchPhase(socket, constants.PHASES.RESULTS);
     });
 
     socket.on('end_night', () => {
-        if (!preCheck(socket, constants.RESULTS, true)) return;
+        if (!preCheck(socket, constants.PHASES.RESULTS, true)) return;
 
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
         nightInfo.winner = null;
         host = null;
 
-        switchPhase(socket, constants.HOST);
+        switchPhase(socket, constants.PHASES.HOST);
         
         // The name has to be reset after switching the phase as it is used as the socket room name
         nightInfo.name = null;
     });
 
     socket.on('new_round', () => {
-        if (!preCheck(socket, constants.RESULTS, true)) return;
+        if (!preCheck(socket, constants.PHASES.RESULTS, true)) return;
 
         nightInfo.movies = [];
         nightInfo.winner = null;
 
-        switchPhase(socket, constants.SUGGEST);
+        switchPhase(socket, constants.PHASES.SUGGEST);
     });
 
     socket.on('disconnect', () => {

@@ -3,7 +3,7 @@ import { sumVotes } from './viewFunctions.js';
 
 export class ResultsView extends View {
     constructor(socket, animTime, isHost, movies, winner) {
-        super('results', socket, animTime);
+        super(ResultsView.viewName, socket, animTime);
         this.isHost = isHost;
         this.movies = movies;
         this.winner = winner;
@@ -88,3 +88,5 @@ export class ResultsView extends View {
         this.canvas.hide();
     }
 }
+
+ResultsView.viewName = 'results';
