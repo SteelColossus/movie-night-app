@@ -39,12 +39,13 @@ export class View {
         if (location.hash !== hash) {
             if (View.isFirst === true) {
                 history.replaceState(null, this.viewName, hash);
-                View.isFirst = false;
             }
             else {
                 history.pushState(null, this.viewName, hash);
             }
         }
+        
+        View.isFirst = false;
     }
 
     // Adds an event listener for the associated socket - need to call this so the event is removed when the page is hidden

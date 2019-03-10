@@ -2,12 +2,13 @@ import { View } from './view.js';
 import { appendTableRow, sumVotes } from './viewFunctions.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime, userToken, isHost, movies, votingSystem) {
+    constructor(socket, animTime, userToken, isHost, movies, votingSystem, isExactPhase) {
         super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
         this.movies = movies;
         this.votingSystem = votingSystem;
+        this.isExactPhase = isExactPhase;
         this.voteDisplay = $('#voteDisplay');
         this.closeVotingButton = $('#closeVotingButton');
     }
@@ -38,6 +39,10 @@ export class VoteView extends View {
 
                                     this.socket.emit('votes_changed', voteDeltas);
                                 });
+
+                            if (this.isExactPhase === false) {
+                                voteButton.prop('disabled', true);
+                            }
 
                             if (movie.votes[this.userToken] != null && movie.votes[this.userToken] >= 1) {
                                 voteButton.addClass('active').attr('aria-pressed', 'true');
@@ -110,7 +115,7 @@ export class VoteView extends View {
 
         this.addSocketListener('votes_changed', this.handleVotesChanged);
 
-        if (this.isHost === true) {
+        if (this.isHost === true && this.isExactPhase === true) {
             this.addDOMListener(this.closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
             }).show(this.animTime);

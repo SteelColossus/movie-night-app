@@ -75,8 +75,8 @@ function isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) {
 }
 
 // Perform some checks before proceeding with a socket request
-function preCheck(token, requiredPhase, requireHost) {
-    return isLoggedIn(token) && isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) && (!requireHost || host === token);
+function preCheck(token, requiredPhase, requireHost, requireExactPhase = false) {
+    return isLoggedIn(token) && (requireExactPhase ? phase === requiredPhase : isCurrentPhaseBeforeOrSameAsPhase(requiredPhase)) && (!requireHost || host === token);
 }
 
 function getPhaseData(phaseName, token) {
@@ -214,14 +214,22 @@ io.on('connection', (socket) => {
 
     // Host a new movie night
     socket.on('host_night', (info) => {
-        if (!preCheck(socket.token, constants.PHASES.HOST, false)) return;
+        const nightAlreadyHosted = host != null;
+
+        if (!preCheck(socket.token, constants.PHASES.HOST, nightAlreadyHosted)) return;
 
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
         host = socket.token;
 
-        console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
+        if (nightAlreadyHosted) {
+            console.log(`${users[socket.token].username} has restarted the movie night under the new name: '${nightInfo.name}'`);
+        }
+        else {
+            console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
+        }
+
         switchPhase(socket, constants.PHASES.SUGGEST);
     });
 
@@ -331,6 +339,16 @@ io.on('connection', (socket) => {
                 return;
             }
 
+            const removedMovieIds = [];
+
+            // Remove all the previous movie suggestions this user has made
+            for (let i = 0; i < nightInfo.movies.length; i++) {
+                if (nightInfo.movies[i].suggester === socket.token) {
+                    removedMovieIds.push(nightInfo.movies[i].id);
+                    nightInfo.movies.splice(i, 1);
+                }
+            }
+
             nightInfo.movies.push(movie);
 
             const data = {
@@ -343,11 +361,15 @@ io.on('connection', (socket) => {
 
             socket.emit('movie_suggestions', data);
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
+
+            removedMovieIds.forEach((removedMovieId) => {
+                socket.broadcast.to(nightInfo.name).emit('removed_movie', removedMovieId);
+            });
         });
     });
 
     socket.on('votes_changed', (voteDeltas) => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, false)) return;
+        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) return;
 
         const newVotes = {};
 
@@ -374,13 +396,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.SUGGEST, true, true)) return;
 
         switchPhase(socket, constants.PHASES.VOTE);
     });
 
     socket.on('close_voting', () => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) return;
 
         setWinner();
 
@@ -418,6 +440,8 @@ io.on('connection', (socket) => {
         if (host != null) {
             data.isHost = (host === socket.token);
         }
+
+        data.isExactPhase = phase === phaseName;
 
         socket.emit('get_phase_data', data);
     });

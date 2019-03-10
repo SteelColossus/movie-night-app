@@ -23,6 +23,8 @@ export class HostView extends View {
     }
 
     onViewShown() {
+        this.votingSystemInput.empty();
+
         this.votingSystems.forEach((system) => {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });

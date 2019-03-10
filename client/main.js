@@ -34,7 +34,7 @@ function switchView(view) {
     }
 }
 
-function switchViewWithName(viewName, data = null, isHost = null) {
+function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true) {
     let view = null;
 
     switch (viewName) {
@@ -48,10 +48,10 @@ function switchViewWithName(viewName, data = null, isHost = null) {
             view = new SearchView(socket, animTime);
             break;
         case SuggestionsView.viewName:
-            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies);
+            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
             break;
         case VoteView.viewName:
-            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem);
+            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, isExactPhase);
             break;
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
@@ -174,5 +174,5 @@ socket.on('movie_suggestions', (data) => {
 
 socket.on('get_phase_data', (data) => {
     const viewName = location.hash.substring(1);
-    switchViewWithName(viewName, data, data.isHost);
+    switchViewWithName(viewName, data, data.isHost, data.isExactPhase);
 });
