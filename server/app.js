@@ -22,6 +22,13 @@ let host = null;
 const users = {};
 const nightInfo = {};
 
+const orderedPhases = [
+    constants.PHASES.HOST,
+    constants.PHASES.SUGGEST,
+    constants.PHASES.VOTE,
+    constants.PHASES.RESULTS
+];
+
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
@@ -63,9 +70,13 @@ function isLoggedIn(token) {
     return token != null && users[token] != null;
 }
 
+function isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) {
+    return orderedPhases.indexOf(requiredPhase) <= orderedPhases.indexOf(phase);
+}
+
 // Perform some checks before proceeding with a socket request
 function preCheck(token, requiredPhase, requireHost) {
-    return isLoggedIn(token) && phase === requiredPhase && (!requireHost || host === token);
+    return isLoggedIn(token) && isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) && (!requireHost || host === token);
 }
 
 function getPhaseData(phaseName, token) {
@@ -400,7 +411,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('get_phase_data', (phaseName) => {
-        // TODO: Check if the user is allowed to get the data
+        if (!preCheck(socket.token, phaseName, false)) return;
+
         const data = getPhaseData(phaseName, socket.token);
 
         if (host != null) {
