@@ -4,7 +4,8 @@
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
-    "test": "start node . & node test/test.js"
+    "test": "jasmine",
+    "lint": "node_modules/.bin/eslint client server spec"
   },
   "author": "steelcolossus",
   "repository": {
@@ -20,8 +21,9 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.12.0",
-    "htmlhint": "^0.10.1",
+    "eslint": "^5.15.1",
+    "htmlhint": "^0.11.0",
+    "jasmine": "^3.3.1",
     "selenium-webdriver": "^4.0.0-alpha.1"
   }
 }

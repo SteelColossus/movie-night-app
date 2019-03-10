@@ -1,0 +1,8 @@
+{
+    "globals": {
+        "io": false,
+        "Chart": false,
+        "ClientJS": false,
+        "constants": false
+    }
+}
