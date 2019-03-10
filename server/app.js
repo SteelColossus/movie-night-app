@@ -141,10 +141,6 @@ function switchPhase(socket, phaseName, sendToAll = true) {
         phaseInfo.isHost = (host === socket.token);
     }
 
-    if (isLoggedIn(socket.token) && users[socket.token].username != null) {
-        phaseInfo.username = users[socket.token].username;
-    }
-
     phase = phaseName;
 
     socket.emit('new_phase', phaseInfo);
@@ -154,19 +150,18 @@ function switchPhase(socket, phaseName, sendToAll = true) {
             phaseInfo.isHost = false;
         }
 
-        delete phaseInfo.username;
-
         socket.broadcast.to(nightInfo.name).emit('new_phase', phaseInfo);
     }
 }
 
 function addUser(socket, token, username = null) {
     const isExistingUser = users.hasOwnProperty(token);
+    const newUsername = username != null;
 
-    if (isExistingUser || username != null) {
+    if (isExistingUser || newUsername) {
         let previousUsername = null;
 
-        if (username != null) {
+        if (newUsername) {
             let usernameExists = Object.keys(users).some(userToken => userToken !== token.toString() && users[userToken].username === username);
 
             if (usernameExists === true) {
@@ -185,11 +180,15 @@ function addUser(socket, token, username = null) {
 
         socket.token = token;
 
-        if (isExistingUser && username != null) {
+        if (isExistingUser && newUsername) {
             console.log(`Existing user '${previousUsername}' changed their name to '${username}'.`);
         }
         else {
             console.log(`${isExistingUser ? 'Existing' : 'New'} user '${users[token].username}' connected.`);
+        }
+
+        if (newUsername) {
+            socket.emit('user_info', username);
         }
 
         // Get newcomers to the same phase as everyone else

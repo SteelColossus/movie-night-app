@@ -121,6 +121,10 @@ socket.on('request_new_username', () => {
     errorMessage.text('The name you have entered is already taken.').show(animTime);
 });
 
+socket.on('user_info', (username) => {
+    usernameIndicator.text(username).show(animTime);
+});
+
 socket.on('new_phase', (phaseInfo) => {
     authenticated = true;
 
@@ -158,13 +162,6 @@ socket.on('new_phase', (phaseInfo) => {
     }
     else {
         movieNightTitle.hide(animTime);
-    }
-
-    if (phaseInfo.username != null) {
-        usernameIndicator.text(phaseInfo.username).show(animTime);
-    }
-    else {
-        usernameIndicator.hide(animTime);
     }
 });
 
