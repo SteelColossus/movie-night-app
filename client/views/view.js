@@ -36,12 +36,14 @@ export class View {
     updateHistory() {
         const hash = `#${this.viewName}`;
 
-        if (View.isFirst === true) {
-            history.replaceState(null, this.viewName, hash);
-            View.isFirst = false;
-        }
-        else {
-            history.pushState(null, this.viewName, hash);
+        if (location.hash !== hash) {
+            if (View.isFirst === true) {
+                history.replaceState(null, this.viewName, hash);
+                View.isFirst = false;
+            }
+            else {
+                history.pushState(null, this.viewName, hash);
+            }
         }
     }
 
