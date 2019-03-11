@@ -38,8 +38,10 @@ app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'consta
 // Tell the server to listen on the given hostname and port
 http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
 
-function makeOmdbRequest(type, query) {
-    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`);
+function makeOmdbRequest(type, query, callback) {
+    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`)
+        .then(callback)
+        .catch(console.log);
 }
 
 function sumVotes(votesObj) {
@@ -246,7 +248,7 @@ io.on('connection', (socket) => {
          * When we get the results we send them back to the user.
          */
         const movieResultsPromise = new Promise((resolve) => {
-            makeOmdbRequest('s', encodedSuggestion).then((response) => {
+            makeOmdbRequest('s', encodedSuggestion, (response) => {
                 let movieResults = {
                     "success": response.data.Response === 'True'
                 };
@@ -264,7 +266,7 @@ io.on('connection', (socket) => {
                 }
                 else if (response.data.Error === 'Too many results.') {
                     // If the API says we get too many results, then instead try to search by the exact title
-                    makeOmdbRequest('t', encodedSuggestion).then((response2) => {
+                    makeOmdbRequest('t', encodedSuggestion, (response2) => {
                         movieResults.success = response2.data.Response === 'True';
 
                         if (movieResults.success === true) {
@@ -298,7 +300,7 @@ io.on('connection', (socket) => {
         }
 
         // Get more information for the chosen movie
-        makeOmdbRequest('i', movieId).then((response) => {
+        makeOmdbRequest('i', movieId, (response) => {
             let result = response.data;
             let movie = {
                 "id": result.imdbID,
