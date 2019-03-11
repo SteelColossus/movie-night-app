@@ -23,6 +23,27 @@ export function appendTableRow(table, objList) {
     return tableRow;
 }
 
+export function getTimeStringFromRuntime(runtime) {
+    const mins = parseInt(runtime.substring(0, runtime.indexOf(' ')), 10);
+    const hours = Math.floor(mins / 60);
+    const minsLeft = mins % 60;
+    let timeString = '';
+
+    if (hours > 0) {
+        timeString += `${hours} hour${hours > 1 ? 's' : ''}`;
+    }
+
+    if (hours > 0 && minsLeft > 0) {
+        timeString += ' ';
+    }
+
+    if (minsLeft > 0) {
+        timeString += `${minsLeft} min${minsLeft > 1 ? 's' : ''}`;
+    }
+
+    return timeString;
+}
+
 export function setBackgroundColorRedToGreen(cell) {
     const num = parseFloat(cell.text());
     const g = Math.round(num * (255 / 10));
