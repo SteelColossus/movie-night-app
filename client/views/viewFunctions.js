@@ -22,3 +22,13 @@ export function appendTableRow(table, objList) {
     table.append(tableRow);
     return tableRow;
 }
+
+export function setBackgroundColorRedToGreen(cell) {
+    const num = parseFloat(cell.text());
+    const g = Math.round(num * (255 / 10));
+    const r = 255 - g;
+    const b = 0;
+    const a = 0.5;
+
+    cell.css('background-color', `rgba(${r},${g},${b},${a})`);
+}

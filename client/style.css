@@ -2,6 +2,10 @@ body {
     padding: 10px;
 }
 
+.table tr > td {
+    vertical-align: middle;
+}
+
 #usernameIndicator {
     position: fixed;
     top: 0;

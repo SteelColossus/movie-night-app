@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow } from './viewFunctions.js';
+import { appendTableRow, setBackgroundColorRedToGreen } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {
@@ -19,7 +19,7 @@ export class SuggestionsView extends View {
             { "text": movie.runtime },
             { "text": movie.genre },
             { "text": movie.plot },
-            { "text": movie.rating },
+            { "text": movie.rating, "func": cell => setBackgroundColorRedToGreen(cell) },
             { "text": movie.awards }
         ]);
 

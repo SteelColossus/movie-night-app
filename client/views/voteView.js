@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow, sumVotes } from './viewFunctions.js';
+import { appendTableRow, sumVotes, setBackgroundColorRedToGreen } from './viewFunctions.js';
 
 export class VoteView extends View {
     constructor(socket, animTime, userToken, isHost, movies, votingSystem, isExactPhase) {
@@ -20,7 +20,7 @@ export class VoteView extends View {
             { "text": movie.runtime },
             { "text": movie.genre },
             { "text": movie.plot },
-            { "text": movie.rating },
+            { "text": movie.rating, "func": cell => setBackgroundColorRedToGreen(cell) },
             {
                 "func": (cell) => {
                     switch (votingSystem) {
