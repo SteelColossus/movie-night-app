@@ -1,3 +1,4 @@
+import { View } from './views/view.js';
 import { UsernameView } from './views/usernameView.js';
 import { HostView } from './views/hostView.js';
 import { SearchView } from './views/searchView.js';
@@ -33,6 +34,70 @@ function switchView(view) {
     }
 }
 
+function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true) {
+    let view = null;
+
+    switch (viewName) {
+        case UsernameView.viewName:
+            view = new UsernameView(socket, animTime, userToken);
+            break;
+        case HostView.viewName:
+            view = new HostView(socket, animTime, data.votingSystems);
+            break;
+        case SearchView.viewName:
+            view = new SearchView(socket, animTime);
+            break;
+        case SuggestionsView.viewName:
+            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
+            break;
+        case VoteView.viewName:
+            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, isExactPhase);
+            break;
+        case ResultsView.viewName:
+            view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
+            break;
+    }
+
+    if (view != null) switchView(view);
+}
+
+function getViewPhase(viewName) {
+    switch (viewName) {
+        case HostView.viewName:
+            return constants.PHASES.HOST;
+        case SearchView.viewName:
+        case SuggestionsView.viewName:
+            return constants.PHASES.SUGGEST;
+        case VoteView.viewName:
+            return constants.PHASES.VOTE;
+        case ResultsView.viewName:
+            return constants.PHASES.RESULTS;
+        default:
+            return null;
+    }
+}
+
+function requestViewDataForHash() {
+    const viewName = location.hash.substring(1);
+
+    // Special case as username has no phase associated with it
+    if (viewName === UsernameView.viewName) {
+        switchViewWithName(UsernameView.viewName);
+    }
+
+    if (currentView != null && viewName === currentView.viewName) return;
+
+    const phaseName = getViewPhase(viewName);
+
+    if (phaseName != null) {
+        socket.emit('get_phase_data', phaseName);
+    }
+}
+
+window.addEventListener('hashchange', () => {
+    requestViewDataForHash();
+});
+
 socket.on('connect', () => {
     console.log('Connected to the app server.');
 });
@@ -44,7 +109,7 @@ socket.on('request_user_token', () => {
 
 socket.on('request_new_user', () => {
     if (authenticated === false) {
-        switchView(new UsernameView(socket, animTime, userToken));
+        switchViewWithName(UsernameView.viewName);
     }
     else if (authenticated === true) {
         // The app server has likely been restarted - refresh the page to prevent side effects
@@ -56,26 +121,40 @@ socket.on('request_new_username', () => {
     errorMessage.text('The name you have entered is already taken.').show(animTime);
 });
 
+socket.on('user_info', (username) => {
+    usernameIndicator.text(username).show(animTime);
+});
+
 socket.on('new_phase', (phaseInfo) => {
     authenticated = true;
 
-    switch (phaseInfo.name) {
-        case constants.HOST: {
-            switchView(new HostView(socket, animTime, phaseInfo.data.votingSystems));
-            break;
+    let switchPhaseView = true;
+
+    // First check if the user has navigated straight to a particular view
+    if (View.isFirst && location.hash.length > 0) {
+        requestViewDataForHash();
+        switchPhaseView = false;
+    }
+
+    if (switchPhaseView === true) {
+        let viewName = null;
+
+        switch (phaseInfo.name) {
+            case constants.PHASES.HOST:
+                viewName = HostView.viewName;
+                break;
+            case constants.PHASES.SUGGEST:
+                viewName = (phaseInfo.data.doneSuggesting === true) ? SuggestionsView.viewName : SearchView.viewName;
+                break;
+            case constants.PHASES.VOTE:
+                viewName = VoteView.viewName;
+                break;
+            case constants.PHASES.RESULTS:
+                viewName = ResultsView.viewName;
+                break;
         }
-        case constants.SUGGEST: {
-            switchView(new SearchView(socket, animTime));
-            break;
-        }
-        case constants.VOTE: {
-            switchView(new VoteView(socket, animTime, userToken, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.votingSystem));
-            break;
-        }
-        case constants.RESULTS: {
-            switchView(new ResultsView(socket, animTime, phaseInfo.isHost, phaseInfo.data.movies, phaseInfo.data.winner));
-            break;
-        }
+
+        if (viewName != null) switchViewWithName(viewName, phaseInfo.data, phaseInfo.isHost);
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
@@ -84,15 +163,13 @@ socket.on('new_phase', (phaseInfo) => {
     else {
         movieNightTitle.hide(animTime);
     }
-
-    if (phaseInfo.username != null) {
-        usernameIndicator.text(phaseInfo.username).show(animTime);
-    }
-    else {
-        usernameIndicator.hide(animTime);
-    }
 });
 
-socket.on('movie_suggestions', (info) => {
-    switchView(new SuggestionsView(socket, animTime, userToken, info.isHost, info.movies));
+socket.on('movie_suggestions', (data) => {
+    switchViewWithName(SuggestionsView.viewName, data, data.isHost);
+});
+
+socket.on('get_phase_data', (data) => {
+    const viewName = location.hash.substring(1);
+    switchViewWithName(viewName, data, data.isHost, data.isExactPhase);
 });

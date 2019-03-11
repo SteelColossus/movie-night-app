@@ -20,7 +20,7 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.14.1",
+    "eslint": "^5.15.1",
     "htmlhint": "^0.11.0"
   }
 }

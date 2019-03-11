@@ -3,7 +3,7 @@ import { appendTableRow } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime) {
-        super('search', socket, animTime);
+        super(SearchView.viewName, socket, animTime);
         this.suggestionInput = $('#suggestion');
         this.searchResults = $('#searchResults');
         this.errorMessage = $('#errorMessage');
@@ -99,3 +99,5 @@ export class SearchView extends View {
         this.searchResults.hide();
     }
 }
+
+SearchView.viewName = 'search';

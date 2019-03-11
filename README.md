@@ -4,7 +4,7 @@ A voting application for movie night.
 ## Running locally
 1. Install [node/npm](https://nodejs.org).
 2. Run `npm install` from the application's base folder.
-3. Run `node .`. If ran in a console window, you should see the line "Listening at http://localhost:3000."
+3. Run `node .`. If ran in a console window, you should see the line "Now listening on: http://localhost:3000"
 4. Go to http://localhost:3000 in a web browser and you should see the app running live.
 
 ## Running from docker
