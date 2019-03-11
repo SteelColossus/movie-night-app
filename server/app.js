@@ -183,13 +183,14 @@ function addUser(socket, token, username = null) {
         if (isExistingUser && newUsername) {
             console.log(`Existing user '${previousUsername}' changed their name to '${username}'.`);
         }
+        else if (isExistingUser) {
+            console.log(`Existing user '${users[token].username}' connected.`);
+        }
         else {
-            console.log(`${isExistingUser ? 'Existing' : 'New'} user '${users[token].username}' connected.`);
+            console.log(`New user '${users[token].username}' connected.`);
         }
 
-        if (newUsername) {
-            socket.emit('user_info', username);
-        }
+        socket.emit('user_info', users[token].username);
 
         // Get newcomers to the same phase as everyone else
         switchPhase(socket, phase, false);
