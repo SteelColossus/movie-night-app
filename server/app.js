@@ -38,8 +38,15 @@ app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'consta
 // Tell the server to listen on the given hostname and port
 http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
 
-function makeOmdbRequest(type, query, callback) {
-    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`)
+function makeOmdbRequest(type, query, callback, data = {}) {
+    let additionalQueryString = '';
+
+    // Add a query param for each key value pair in data
+    Object.entries(data).forEach((entry) => {
+        additionalQueryString += `&${entry[0]}=${entry[1]}`;
+    });
+
+    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie${additionalQueryString}`)
         .then(callback)
         .catch(console.log);
 }
@@ -446,6 +453,30 @@ io.on('connection', (socket) => {
         data.isExactPhase = phase === phaseName;
 
         socket.emit('get_phase_data', data);
+    });
+
+    socket.on('get_movie_details', (movieId) => {
+        makeOmdbRequest('i', movieId, (response) => {
+            if (response.data.Response === 'True') {
+                let result = response.data;
+                const movie = {
+                    "id": result.imdbID,
+                    "title": result.Title,
+                    "year": result.Year,
+                    "runtime": result.Runtime,
+                    "genre": result.Genre,
+                    "plot": result.Plot,
+                    "rating": result.imdbRating,
+                    "awards": result.Awards,
+                    "actors": result.Actors,
+                    "director": result.Director,
+                    "writer": result.Writer,
+                    "poster": result.Poster
+                };
+
+                socket.emit('get_movie_details', movie);
+            }
+        }, { "plot": "full" });
     });
 
     socket.on('disconnect', () => {

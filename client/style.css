@@ -40,6 +40,49 @@ body {
     text-align: center;
 }
 
+#movieView {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+#movieContainer {
+    width: 60%;
+}
+
+.movie-content {
+    width: 100%;
+    font-size: 1.2em;
+}
+
+#movieTitle {
+    margin-bottom: 20px;
+}
+
+#posterImage {
+    align-self: self-start;
+    margin-right: 20px;
+    box-shadow: 4px 4px 4px 0px rgba(0,0,0,0.75);
+}
+
+.rating-text {
+    align-self: flex-end;
+    margin-top: auto;
+    font-weight: bold;
+    font-size: 1.5em;
+    line-height: 1;
+}
+
+#movieImdbRating {
+    font-size: 1.8em;
+}
+
 #ieImage {
     margin-left: 10px;
     vertical-align: top;

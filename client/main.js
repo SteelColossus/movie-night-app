@@ -5,6 +5,7 @@ import { SearchView } from './views/searchView.js';
 import { SuggestionsView } from './views/suggestionsView.js';
 import { VoteView } from './views/voteView.js';
 import { ResultsView } from './views/resultsView.js';
+import { MovieDetailsView } from './views/movieDetailsView.js';
 
 const socket = io();
 const client = new ClientJS();
@@ -23,8 +24,8 @@ let authenticated = false;
 // The view that is currently being shown
 let currentView = null;
 
-function switchView(view) {
-    if (currentView == null || currentView.viewName !== view.viewName) {
+function switchView(view, forceRefresh = false) {
+    if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
         errorMessage.hide(animTime);
 
         if (currentView != null) currentView.hide();
@@ -56,9 +57,12 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
             break;
+        case MovieDetailsView.viewName:
+            view = new MovieDetailsView(socket, animTime);
+            break;
     }
 
-    if (view != null) switchView(view);
+    if (view != null) switchView(view, viewName === MovieDetailsView.viewName);
 }
 
 function getViewPhase(viewName) {
@@ -80,9 +84,13 @@ function getViewPhase(viewName) {
 function requestViewDataForHash() {
     const viewName = location.hash.substring(1);
 
-    // Special case as username has no phase associated with it
+    // Special cases for views that have no phases associated with them
     if (viewName === UsernameView.viewName) {
         switchViewWithName(UsernameView.viewName);
+    }
+    // Movie id is provided as part of the hash so it has to be checked differently
+    else if (viewName.startsWith(MovieDetailsView.viewName)) {
+        switchViewWithName(MovieDetailsView.viewName);
     }
 
     if (currentView != null && viewName === currentView.viewName) return;

@@ -32,9 +32,13 @@ export class View {
         // Since this is emulating an abstract class, we do nothing here
     }
 
+    getHash() {
+        return `#${this.viewName}`;
+    }
+
     // Updates the history of the webpage with this view 
     updateHistory() {
-        const hash = `#${this.viewName}`;
+        const hash = this.getHash();
 
         if (location.hash !== hash) {
             if (View.isFirst === true) {

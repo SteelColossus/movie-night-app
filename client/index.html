@@ -123,6 +123,25 @@
         <canvas id="voteChart" width="1000" height="1000" style="display: none"></canvas>
     </div>
 
+    <div id="movieView" style="display: none">
+        <div id="movieContainer" style="display: none">
+            <h1 id="movieTitle"></h1>
+            <div class="d-flex flex-row">
+                <img id="posterImage" width="300"></img>
+                <div class="d-flex flex-column movie-content">
+                    <p id="moviePlot"></p>
+                    <div><b>Genre:&nbsp;</b><span id="movieGenre"></span></div>
+                    <div class="mb-3"><b>Runtime:&nbsp;</b><span id="movieRuntime"></span></div>
+                    <div><b>Stars:&nbsp;</b><span id="movieActors"></span></div>
+                    <div><b>Director:&nbsp;</b><span id="movieDirector"></span></div>
+                    <div class="mb-3"><b>Writer:&nbsp;</b><span id="movieWriter"></span></div>
+                    <p id="movieAwards" class="font-italic"></p>
+                    <div class="rating-text"><span id="movieImdbRating"></span>/10</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
 
     <!-- Shown when JS is disabled -->
