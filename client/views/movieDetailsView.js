@@ -8,7 +8,7 @@ export class MovieDetailsView extends View {
         const queryString = location.hash.substring(location.hash.indexOf('?'));
         const queryParams = new URLSearchParams(queryString);
         this.movieId = queryParams.get('id');
-        this.imdbLink = `https://www.imdb.com/title/${this.movieId}`;
+        this.imdbLink = `https://www.imdb.com/title/${this.movieId}/`;
 
         this.movieTitle = $('#movieTitle');
         this.posterImage = $('#posterImage');
@@ -24,10 +24,16 @@ export class MovieDetailsView extends View {
     }
 
     updateDetails(movie) {
-        this.movieTitle.text(`${movie.title} (${movie.year})`);
+        this.movieTitle.text(`${movie.title} (${movie.year})`)
+            .addClass('subtle-link')
+            .attr('title', 'Go to the IMDB page for this movie');
 
-        this.posterImage.attr('src', movie.poster);
-        this.posterImage.attr('alt', `${movie.title} Poster`);
+        this.addDOMListener(this.movieTitle, 'click', () => {
+            window.open(this.imdbLink);
+        });
+
+        this.posterImage.attr('src', movie.poster)
+            .attr('alt', `${movie.title} Poster`);
 
         this.moviePlot.text(movie.plot);
         this.movieGenre.text(movie.genre);

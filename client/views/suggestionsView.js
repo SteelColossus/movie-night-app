@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen } from './viewFunctions.js';
+import { appendTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {
@@ -14,7 +14,7 @@ export class SuggestionsView extends View {
 
     appendMovieToTable(movie) {
         const tableRow = appendTableRow(this.movieTable, [
-            { "text": movie.title },
+            { "text": movie.title, "func": cell => setAsMovieDetailsLink(cell, movie.id) },
             { "text": movie.year },
             { "text": getTimeStringFromRuntime(movie.runtime) },
             { "text": movie.genre },

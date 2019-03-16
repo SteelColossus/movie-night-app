@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow } from './viewFunctions.js';
+import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime) {
@@ -38,7 +38,7 @@ export class SearchView extends View {
         // Create the suggestion table from the API results
         searchDataResults.forEach((result) => {
             appendTableRow(suggestTable, [
-                { "text": result.title },
+                { "text": result.title, "func": cell => setAsMovieDetailsLink(cell, result.id) },
                 { "text": result.year },
                 {
                     "func": (cell) => {

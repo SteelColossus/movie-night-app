@@ -53,3 +53,11 @@ export function setBackgroundColorRedToGreen(cell) {
 
     cell.css('background-color', `rgba(${r},${g},${b},${a})`);
 }
+
+export function setAsMovieDetailsLink(cell, movieId) {
+    cell.addClass('subtle-link')
+        .attr('title', 'View more details for this movie')
+        .click(() => {
+            location.hash = `#movie?id=${movieId}`;
+        });
+}

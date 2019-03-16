@@ -32,6 +32,12 @@ body {
     margin-bottom: 0;
 }
 
+.subtle-link:hover {
+    cursor: pointer;
+    color: #0069d9;
+    text-shadow: 0px 0px 0.1px #0069d9;
+}
+
 .suggester-row {
     font-weight: 600;
 }
@@ -75,7 +81,7 @@ body {
     align-self: flex-end;
     margin-top: auto;
     font-weight: bold;
-    font-size: 1.5em;
+    font-size: 1.2em;
     line-height: 1;
 }
 
