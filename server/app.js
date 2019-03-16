@@ -7,8 +7,9 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
 const args = require('minimist')(process.argv.slice(2));
-const keys = require('./api_keys');
+const keys = require('./apiKeys');
 const constants = require('./constants');
+const ObjectCache = require('./objectCache');
 
 // Allow people on the same network to access the app (this will use a different hostname)
 const allowOutsideConnections = args.o === true;
@@ -28,6 +29,8 @@ const orderedPhases = [
     constants.PHASES.VOTE,
     constants.PHASES.RESULTS
 ];
+
+const movieDetailsCache = new ObjectCache(20, 'id');
 
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
@@ -456,27 +459,35 @@ io.on('connection', (socket) => {
     });
 
     socket.on('get_movie_details', (movieId) => {
-        makeOmdbRequest('i', movieId, (response) => {
-            if (response.data.Response === 'True') {
-                let result = response.data;
-                const movie = {
-                    "id": result.imdbID,
-                    "title": result.Title,
-                    "year": result.Year,
-                    "runtime": result.Runtime,
-                    "genre": result.Genre,
-                    "plot": result.Plot,
-                    "rating": result.imdbRating,
-                    "awards": result.Awards,
-                    "actors": result.Actors,
-                    "director": result.Director,
-                    "writer": result.Writer,
-                    "poster": result.Poster
-                };
+        const cachedMovie = movieDetailsCache.get(movieId);
 
-                socket.emit('get_movie_details', movie);
-            }
-        }, { "plot": "full" });
+        if (cachedMovie == null) {
+            makeOmdbRequest('i', movieId, (response) => {
+                if (response.data.Response === 'True') {
+                    let result = response.data;
+                    const movie = {
+                        "id": result.imdbID,
+                        "title": result.Title,
+                        "year": result.Year,
+                        "runtime": result.Runtime,
+                        "genre": result.Genre,
+                        "plot": result.Plot,
+                        "rating": result.imdbRating,
+                        "awards": result.Awards,
+                        "actors": result.Actors,
+                        "director": result.Director,
+                        "writer": result.Writer,
+                        "poster": result.Poster
+                    };
+
+                    movieDetailsCache.set(movie);
+                    socket.emit('get_movie_details', movie);
+                }
+            }, { "plot": "full" });
+        }
+        else {
+            socket.emit('get_movie_details', cachedMovie);
+        }
     });
 
     socket.on('disconnect', () => {

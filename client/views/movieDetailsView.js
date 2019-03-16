@@ -50,8 +50,10 @@ export class MovieDetailsView extends View {
     getHash() {
         return `#${this.viewName}?id=${this.movieId}`;
     }
-    
+
     onViewShown() {
+        this.movieContainer.hide();
+
         this.socket.emit('get_movie_details', this.movieId);
 
         this.addSocketListener('get_movie_details', this.updateDetails);
