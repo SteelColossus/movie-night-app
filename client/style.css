@@ -36,6 +36,10 @@ body {
     font-weight: 600;
 }
 
+.vote-cell {
+    text-align: center;
+}
+
 #ieImage {
     margin-left: 10px;
     vertical-align: top;

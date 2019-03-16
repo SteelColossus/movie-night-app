@@ -48,6 +48,7 @@ export class VoteView extends View {
                                 voteButton.addClass('active').attr('aria-pressed', 'true');
                             }
 
+                            cell.addClass('vote-cell');
                             cell.append(voteButton);
                             break;
                         }
