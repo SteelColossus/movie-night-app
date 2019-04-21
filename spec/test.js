@@ -25,6 +25,7 @@ afterEach(async (done) => {
     done();
 });
 
+// This test should not be guaranteed to pass, it is just an indication of whether any functionality is broken
 describe('integration test', () => {
     it('creates and finishes a movie night', async (done) => {
         const username = await getVisibleElement(By.id('username'));
@@ -32,8 +33,7 @@ describe('integration test', () => {
 
         const usernameIndicator = await (await getVisibleElement(By.id('usernameIndicator'))).getText();
         expect(usernameIndicator).toBe('User 1', 'Username indicator is not displaying the correct text.');
-        const votingSystem = await getVisibleElement(By.id('votingSystem'));
-        await votingSystem.click();
+        await (await getVisibleElement(By.id('votingSystem'))).click();
         await (await getVisibleElement(By.css('option[value="Multi Vote"]'))).click();
         const nightName = await getVisibleElement(By.id('nightName'));
         await nightName.sendKeys('My Movie Night', Key.ENTER);
@@ -42,19 +42,19 @@ describe('integration test', () => {
         expect(movieNightTitle).toBe('My Movie Night', 'Movie night title is not displaying the correct text.');
         const suggestion = await getVisibleElement(By.id('suggestion'));
         await suggestion.sendKeys('Harry Potter', Key.ENTER);
-        const movieToSelect = await getVisibleElement(By.xpath('//tr[./td[text() = \'Harry Potter and the Goblet of Fire\']]'), 1000);
-        await movieToSelect.findElement(By.xpath('./td[text() = \'2005\']'));
+        const movieToSelect = await getVisibleElement(By.xpath('//table[@id="suggestionTable"]//tr[./td[text() = "Harry Potter and the Goblet of Fire"]]'), 3000);
+        await movieToSelect.findElement(By.xpath('./td[text() = "2005"]'));
         const chooseButton = await movieToSelect.findElement(By.xpath('./td/input[@type="button"]'));
         await driver.wait(async () => {
             await chooseButton.click();
             return (await chooseButton.getAttribute('class')).includes('active');
         }, 500);
 
-        await getVisibleElement(By.xpath('//tr/td[text() = \'157 min\']'));
+        await getVisibleElement(By.xpath('//table[@id="movieTable"]//tr/td[text() = "157 min"]'));
         await (await getVisibleElement(By.id('closeSuggestionsButton'))).click();
 
-        const voteButton = await getVisibleElement(By.xpath('//td/input[@type="button" and contains(@value, "Vote")]'));
-        const voteText = await driver.findElement(By.xpath('//td[@votes-for]'));
+        const voteButton = await getVisibleElement(By.css('table#movieTable td > input[type="button"][value="Vote!"]'));
+        const voteText = await driver.findElement(By.css('table#movieTable td[votes-for]'));
         const checkVoting = async (val) => {
             await voteButton.click();
             await driver.sleep(500);

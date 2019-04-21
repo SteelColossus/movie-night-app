@@ -61,7 +61,9 @@ export class VoteView extends View {
     }
 
     buildMovieTable(movies, votingSystem) {
-        const movieTable = $('<table>').addClass('table');
+        const movieTable = $('<table>')
+            .attr('id', 'movieTable')
+            .addClass('table');
 
         const headings = ['Movie', 'Year', 'Runtime', 'Genre', 'Plot', 'IMDB Rating', null, 'Votes'];
 

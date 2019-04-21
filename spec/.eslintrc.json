@@ -2,11 +2,7 @@
     "parserOptions": {
         "ecmaVersion": 2017
     },
-    "globals": {
-        "describe": false,
-        "it": false,
-        "expect": false,
-        "beforeEach": false,
-        "afterEach": false
+    "env": {
+        "jasmine": true
     }
 }
