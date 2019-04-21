@@ -4,7 +4,10 @@
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "node_modules/.bin/eslint **/*.js",
+    "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
   },
   "author": "steelcolossus",
   "repository": {
@@ -20,7 +23,7 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.15.1",
+    "eslint": "^5.16.0",
     "htmlhint": "^0.11.0"
   }
 }
