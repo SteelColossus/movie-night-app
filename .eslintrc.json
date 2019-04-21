@@ -72,7 +72,13 @@
             "error",
             "never"
         ],
-        "eqeqeq": "off",
+        "eqeqeq": [
+            "error",
+            "always",
+            {
+                "null": "never"
+            }
+        ],
         "func-call-spacing": "error",
         "func-name-matching": "error",
         "func-names": "error",
@@ -109,12 +115,14 @@
         "lines-around-comment": "error",
         "lines-around-directive": "error",
         "lines-between-class-members": "error",
-        "max-classes-per-file": "error",
         "max-depth": "error",
         "max-len": "off",
         "max-lines-per-function": "off",
         "max-nested-callbacks": "error",
-        "max-params": "error",
+        "max-params": [
+            "error",
+            10
+        ],
         "max-statements": "off",
         "max-statements-per-line": "error",
         "multiline-comment-style": "error",

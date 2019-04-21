@@ -4,8 +4,10 @@
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
+    "start": "node .",
     "test": "jasmine",
-    "lint": "node_modules/.bin/eslint client server spec"
+    "lint": "node_modules/.bin/eslint **/*.js",
+    "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
   },
   "author": "steelcolossus",
   "repository": {

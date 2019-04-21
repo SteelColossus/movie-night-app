@@ -1,5 +1,7 @@
 # Start from a node image
 FROM node:11
+# Set the node environment variable to production
+ENV NODE_ENV production
 # Expose the default port 3000
 EXPOSE 3000
 # Set the working directory

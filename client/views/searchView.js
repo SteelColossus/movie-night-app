@@ -1,14 +1,14 @@
 import { View } from './view.js';
-import { appendTableRow } from './viewFunctions.js';
+import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime) {
-        super('search', socket, animTime);
+        super(SearchView.viewName, socket, animTime);
         this.suggestionInput = $('#suggestion');
         this.searchResults = $('#searchResults');
+        this.errorMessage = $('#errorMessage');
     }
 
-    // Get suggestion input
     formSubmit() {
         let suggestion = this.suggestionInput.val().toString().trim();
 
@@ -16,7 +16,7 @@ export class SearchView extends View {
             this.socket.emit('movie_search', suggestion);
         }
 
-        // Stops refresh and connect of new user
+        // Stop the page from refreshing
         return false;
     }
 
@@ -28,17 +28,17 @@ export class SearchView extends View {
 
         this.errorMessage.hide(this.animTime);
 
-        // Form suggestion table from API results
         const suggestTable = $('#suggestionTable');
 
         // Remove all the existing suggestions
         suggestTable.find('tr:not(:first-child)').remove();
 
-        let searchResults = searchData.results;
+        const searchDataResults = searchData.results;
 
-        searchResults.forEach((result) => {
+        // Create the suggestion table from the API results
+        searchDataResults.forEach((result) => {
             appendTableRow(suggestTable, [
-                { "text": result.title },
+                { "text": result.title, "func": cell => setAsMovieDetailsLink(cell, result.id) },
                 { "text": result.year },
                 {
                     "func": (cell) => {
@@ -62,6 +62,12 @@ export class SearchView extends View {
         this.searchResults.show(this.animTime);
     }
 
+    handleMovieRejected(message) {
+        const fullMessage = `${message}\nPlease choose a different movie.`;
+
+        alert(fullMessage); // eslint-disable-line no-alert
+    }
+
     onViewShown() {
         $('#movieInfo').popover({
             "trigger": "hover focus",
@@ -70,8 +76,8 @@ export class SearchView extends View {
             "title": "Movie Night Rules:",
             "content": `
                 <ul>
-                    <li>NO documentaries</li>
                     <li>NO shorts</li>
+                    <li>NO documentaries</li>
                     <li>NO anime</li>
                     <li>NO series</li>
                     <li>NO porn</li>
@@ -83,7 +89,9 @@ export class SearchView extends View {
 
         this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
 
-        this.addSocketListener('movie_search', this.handleSearch);
+        this.addSocketListener('movie_search_results', this.handleSearch);
+
+        this.addSocketListener('request_different_movie', this.handleMovieRejected);
     }
 
     onViewHidden() {
@@ -91,3 +99,5 @@ export class SearchView extends View {
         this.searchResults.hide();
     }
 }
+
+SearchView.viewName = 'search';

@@ -1,25 +1,30 @@
 import { View } from './view.js';
-import { appendTableRow, sumVotes } from './viewFunctions.js';
+import { appendTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime) {
-        super('vote', socket, animTime);
+    constructor(socket, animTime, userToken, isHost, movies, votingSystem, isExactPhase) {
+        super(VoteView.viewName, socket, animTime);
+        this.userToken = userToken;
+        this.isHost = isHost;
+        this.movies = movies;
+        this.votingSystem = votingSystem;
+        this.isExactPhase = isExactPhase;
         this.voteDisplay = $('#voteDisplay');
         this.closeVotingButton = $('#closeVotingButton');
     }
 
     appendMovieToTable(movieTable, movie, votingSystem) {
         const tableRow = appendTableRow(movieTable, [
-            { "text": movie.title },
+            { "text": movie.title, "func": cell => setAsMovieDetailsLink(cell, movie.id) },
             { "text": movie.year },
-            { "text": movie.runtime },
+            { "text": getTimeStringFromRuntime(movie.runtime) },
             { "text": movie.genre },
             { "text": movie.plot },
-            { "text": movie.rating },
+            { "text": movie.rating, "func": cell => setBackgroundColorRedToGreen(cell) },
             {
                 "func": (cell) => {
                     switch (votingSystem) {
-                        case constants.MULTI_VOTE: {
+                        case constants.VOTING_SYSTEMS.MULTI_VOTE: {
                             const voteButton = $('<input>')
                                 .prop('type', 'button')
                                 .val('Vote!')
@@ -35,10 +40,15 @@ export class VoteView extends View {
                                     this.socket.emit('votes_changed', voteDeltas);
                                 });
 
+                            if (this.isExactPhase === false) {
+                                voteButton.prop('disabled', true);
+                            }
+
                             if (movie.votes[this.userToken] != null && movie.votes[this.userToken] >= 1) {
                                 voteButton.addClass('active').attr('aria-pressed', 'true');
                             }
 
+                            cell.addClass('vote-cell');
                             cell.append(voteButton);
                             break;
                         }
@@ -108,7 +118,7 @@ export class VoteView extends View {
 
         this.addSocketListener('votes_changed', this.handleVotesChanged);
 
-        if (this.isHost === true) {
+        if (this.isHost === true && this.isExactPhase === true) {
             this.addDOMListener(this.closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
             }).show(this.animTime);
@@ -120,3 +130,5 @@ export class VoteView extends View {
         this.voteDisplay.empty();
     }
 }
+
+VoteView.viewName = 'vote';

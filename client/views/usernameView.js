@@ -1,8 +1,9 @@
 import { View } from './view.js';
 
 export class UsernameView extends View {
-    constructor(socket, animTime) {
-        super('username', socket, animTime);
+    constructor(socket, animTime, userToken) {
+        super(UsernameView.viewName, socket, animTime);
+        this.userToken = userToken;
         this.usernameInput = $('#username');
     }
 
@@ -14,7 +15,7 @@ export class UsernameView extends View {
             "username": username
         });
 
-        // Stops refresh and connect of new user
+        // Stop the page from refreshing
         return false;
     }
 
@@ -26,3 +27,5 @@ export class UsernameView extends View {
         this.usernameInput.val('');
     }
 }
+
+UsernameView.viewName = 'username';

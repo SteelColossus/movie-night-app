@@ -1,8 +1,9 @@
 import { View } from './view.js';
 
 export class HostView extends View {
-    constructor(socket, animTime) {
-        super('host', socket, animTime);
+    constructor(socket, animTime, votingSystems) {
+        super(HostView.viewName, socket, animTime);
+        this.votingSystems = votingSystems;
         this.nightInput = $('#nightName');
         this.votingSystemInput = $('#votingSystem');
     }
@@ -10,19 +11,20 @@ export class HostView extends View {
     formSubmit() {
         let name = this.nightInput.val().toString().trim();
         let votingSystem = this.votingSystemInput.val();
-        let setupDetails = {
+        let nightInfo = {
             "name": name,
             "votingSystem": votingSystem
         };
 
-        // Allow suggestions
-        this.socket.emit('setup_details', setupDetails);
+        this.socket.emit('host_night', nightInfo);
 
-        // Stops refresh and connect of new user
+        // Stop the page from refreshing
         return false;
     }
 
     onViewShown() {
+        this.votingSystemInput.empty();
+
         this.votingSystems.forEach((system) => {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });
@@ -34,3 +36,5 @@ export class HostView extends View {
         this.nightInput.val('');
     }
 }
+
+HostView.viewName = 'host';

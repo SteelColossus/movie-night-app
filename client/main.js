@@ -1,3 +1,4 @@
+import { View } from './views/view.js';
 import { UsernameView } from './views/usernameView.js';
 import { HostView } from './views/hostView.js';
 import { SearchView } from './views/searchView.js';
@@ -22,8 +23,8 @@ let authenticated = false;
 // The view that is currently being shown
 let currentView = null;
 
-function switchView(view) {
-    if (currentView == null || currentView.viewName !== view.viewName) {
+function switchView(view, forceRefresh = false) {
+    if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
         errorMessage.hide(animTime);
 
         if (currentView != null) currentView.hide();
@@ -32,6 +33,70 @@ function switchView(view) {
         currentView = view;
     }
 }
+
+function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true) {
+    let view = null;
+
+    switch (viewName) {
+        case UsernameView.viewName:
+            view = new UsernameView(socket, animTime, userToken);
+            break;
+        case HostView.viewName:
+            view = new HostView(socket, animTime, data.votingSystems);
+            break;
+        case SearchView.viewName:
+            view = new SearchView(socket, animTime);
+            break;
+        case SuggestionsView.viewName:
+            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
+            break;
+        case VoteView.viewName:
+            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, isExactPhase);
+            break;
+        case ResultsView.viewName:
+            view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
+            break;
+    }
+
+    if (view != null) switchView(view, false);
+}
+
+function getViewPhase(viewName) {
+    switch (viewName) {
+        case HostView.viewName:
+            return constants.PHASES.HOST;
+        case SearchView.viewName:
+        case SuggestionsView.viewName:
+            return constants.PHASES.SUGGEST;
+        case VoteView.viewName:
+            return constants.PHASES.VOTE;
+        case ResultsView.viewName:
+            return constants.PHASES.RESULTS;
+        default:
+            return null;
+    }
+}
+
+function requestViewDataForHash() {
+    const viewName = location.hash.substring(1);
+
+    // Special cases for views that have no phases associated with them
+    if (viewName === UsernameView.viewName) {
+        switchViewWithName(UsernameView.viewName);
+    }
+
+    if (currentView != null && viewName === currentView.viewName) return;
+
+    const phaseName = getViewPhase(viewName);
+
+    if (phaseName != null) {
+        socket.emit('get_phase_data', phaseName);
+    }
+}
+
+window.addEventListener('hashchange', () => {
+    requestViewDataForHash();
+});
 
 socket.on('connect', () => {
     console.log('Connected to the app server.');
@@ -44,13 +109,9 @@ socket.on('request_user_token', () => {
 
 socket.on('request_new_user', () => {
     if (authenticated === false) {
-        movieNightTitle.add(usernameIndicator).hide(animTime);
-
-        const usernameView = new UsernameView(socket, animTime);
-        usernameView.userToken = userToken;
-        switchView(usernameView);
+        switchViewWithName(UsernameView.viewName);
     }
-    else {
+    else if (authenticated === true) {
         // The app server has likely been restarted - refresh the page to prevent side effects
         location.reload();
     }
@@ -60,47 +121,40 @@ socket.on('request_new_username', () => {
     errorMessage.text('The name you have entered is already taken.').show(animTime);
 });
 
-socket.on('setup_movies', (info) => {
-    const suggestionsView = new SuggestionsView(socket, animTime);
-    suggestionsView.isHost = info.isHost;
-    suggestionsView.movies = info.movies;
-    suggestionsView.userToken = userToken;
-    switchView(suggestionsView);
+socket.on('user_info', (username) => {
+    usernameIndicator.text(username).show(animTime);
 });
 
 socket.on('new_phase', (phaseInfo) => {
     authenticated = true;
 
-    switch (phaseInfo.name) {
-        case constants.HOST: {
-            const hostView = new HostView(socket, animTime);
-            hostView.votingSystems = phaseInfo.data.votingSystems;
-            switchView(hostView);
-            break;
+    let switchPhaseView = true;
+
+    // First check if the user has navigated straight to a particular view
+    if (View.isFirst && location.hash.length > 0) {
+        requestViewDataForHash();
+        switchPhaseView = false;
+    }
+
+    if (switchPhaseView === true) {
+        let viewName = null;
+
+        switch (phaseInfo.name) {
+            case constants.PHASES.HOST:
+                viewName = HostView.viewName;
+                break;
+            case constants.PHASES.SUGGEST:
+                viewName = (phaseInfo.data.doneSuggesting === true) ? SuggestionsView.viewName : SearchView.viewName;
+                break;
+            case constants.PHASES.VOTE:
+                viewName = VoteView.viewName;
+                break;
+            case constants.PHASES.RESULTS:
+                viewName = ResultsView.viewName;
+                break;
         }
-        case constants.SUGGEST: {
-            const searchView = new SearchView(socket, animTime);
-            searchView.errorMessage = errorMessage;
-            switchView(searchView);
-            break;
-        }
-        case constants.VOTE: {
-            const voteView = new VoteView(socket, animTime);
-            voteView.isHost = phaseInfo.isHost;
-            voteView.movies = phaseInfo.data.movies;
-            voteView.votingSystem = phaseInfo.data.votingSystem;
-            voteView.userToken = userToken;
-            switchView(voteView);
-            break;
-        }
-        case constants.RESULTS: {
-            const resultsView = new ResultsView(socket, animTime);
-            resultsView.isHost = phaseInfo.isHost;
-            resultsView.movies = phaseInfo.data.movies;
-            resultsView.winner = phaseInfo.data.winner;
-            switchView(resultsView);
-            break;
-        }
+
+        if (viewName != null) switchViewWithName(viewName, phaseInfo.data, phaseInfo.isHost);
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
@@ -109,8 +163,13 @@ socket.on('new_phase', (phaseInfo) => {
     else {
         movieNightTitle.hide(animTime);
     }
+});
 
-    if (phaseInfo.username != null) {
-        usernameIndicator.text(phaseInfo.username).show(animTime);
-    }
+socket.on('movie_suggestions', (data) => {
+    switchViewWithName(SuggestionsView.viewName, data, data.isHost);
+});
+
+socket.on('get_phase_data', (data) => {
+    const viewName = location.hash.substring(1);
+    switchViewWithName(viewName, data, data.isHost, data.isExactPhase);
 });
