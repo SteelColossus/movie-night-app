@@ -23,8 +23,8 @@ let authenticated = false;
 // The view that is currently being shown
 let currentView = null;
 
-function switchView(view) {
-    if (currentView == null || currentView.viewName !== view.viewName) {
+function switchView(view, forceRefresh = false) {
+    if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
         errorMessage.hide(animTime);
 
         if (currentView != null) currentView.hide();
@@ -58,7 +58,7 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             break;
     }
 
-    if (view != null) switchView(view);
+    if (view != null) switchView(view, false);
 }
 
 function getViewPhase(viewName) {
@@ -80,7 +80,7 @@ function getViewPhase(viewName) {
 function requestViewDataForHash() {
     const viewName = location.hash.substring(1);
 
-    // Special case as username has no phase associated with it
+    // Special cases for views that have no phases associated with them
     if (viewName === UsernameView.viewName) {
         switchViewWithName(UsernameView.viewName);
     }

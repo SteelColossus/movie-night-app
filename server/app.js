@@ -7,8 +7,9 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
 const args = require('minimist')(process.argv.slice(2));
-const keys = require('./api_keys');
+const keys = require('./apiKeys');
 const constants = require('./constants');
+const ObjectCache = require('./objectCache');
 
 // Allow people on the same network to access the app (this will use a different hostname)
 const allowOutsideConnections = args.o === true;
@@ -29,6 +30,8 @@ const orderedPhases = [
     constants.PHASES.RESULTS
 ];
 
+const movieDetailsCache = new ObjectCache(20, 'id');
+
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
@@ -38,8 +41,15 @@ app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'consta
 // Tell the server to listen on the given hostname and port
 http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
 
-function makeOmdbRequest(type, query, callback) {
-    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie`)
+function makeOmdbRequest(type, query, callback, data = {}) {
+    let additionalQueryString = '';
+
+    // Add a query param for each key value pair in data
+    Object.entries(data).forEach((entry) => {
+        additionalQueryString += `&${entry[0]}=${entry[1]}`;
+    });
+
+    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie${additionalQueryString}`)
         .then(callback)
         .catch(console.log);
 }
@@ -454,4 +464,40 @@ io.on('connection', (socket) => {
             console.log(`User '${userToRemove.username}' disconnected.`);
         }
     });
+});
+
+app.get('/movieDetails/:id', (req, res) => {
+    const movieId = req.params.id;
+    const cachedMovie = movieDetailsCache.get(movieId);
+
+    if (cachedMovie == null) {
+        makeOmdbRequest('i', movieId, (response) => {
+            if (response.data.Response === 'True') {
+                let result = response.data;
+                const movie = {
+                    "id": result.imdbID,
+                    "title": result.Title,
+                    "year": result.Year,
+                    "runtime": result.Runtime,
+                    "genre": result.Genre,
+                    "plot": result.Plot,
+                    "rating": result.imdbRating,
+                    "awards": result.Awards,
+                    "actors": result.Actors,
+                    "director": result.Director,
+                    "writer": result.Writer,
+                    "poster": result.Poster
+                };
+
+                movieDetailsCache.set(movie);
+                res.json(movie);
+            }
+            else {
+                res.status(404).json(response.data.Error);
+            }
+        }, { "plot": "full" });
+    }
+    else {
+        res.json(cachedMovie);
+    }
 });
