@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Information for a movie.">
+
+    <title>Movie Night App</title>
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="../style.css" rel="stylesheet">
+
+    <!-- Local files -->
+    <script src="movieDetails.js" type="module" async></script>
+</head>
+<body>
+    <div id="movieView">
+        <div id="movieContainer" style="display: none">
+            <h1 id="movieTitle" class="subtle-link" title="Go to the IMDB page for this movie"></h1>
+            <div class="d-flex flex-row">
+                <img id="posterImage" width="300">
+                <div class="d-flex flex-column movie-content">
+                    <p id="moviePlot"></p>
+                    <div><b>Genre:&nbsp;</b><span id="movieGenre"></span></div>
+                    <div class="mb-3"><b>Runtime:&nbsp;</b><span id="movieRuntime"></span></div>
+                    <div><b>Stars:&nbsp;</b><span id="movieActors"></span></div>
+                    <div><b>Director:&nbsp;</b><span id="movieDirector"></span></div>
+                    <div class="mb-3"><b>Writer:&nbsp;</b><span id="movieWriter"></span></div>
+                    <p id="movieAwards" class="font-italic"></p>
+                    <div class="rating-text"><span id="movieImdbRating"></span>/10</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

@@ -58,6 +58,6 @@ export function setAsMovieDetailsLink(cell, movieId) {
     cell.addClass('subtle-link')
         .attr('title', 'View more details for this movie')
         .click(() => {
-            location.hash = `#movie?id=${movieId}`;
+            window.open(`/movie?id=${movieId}`);
         });
 }

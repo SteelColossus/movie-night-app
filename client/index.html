@@ -21,6 +21,7 @@
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" defer
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <!-- ClientJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.1.11/client.min.js" defer
         integrity="sha384-GqgJd3JTCce7tBpFEPj+UuMiLkQwNZhU1DeBlo+nFNbuicO3raD0aOq51IeByDue" crossorigin="anonymous"></script>
     <!-- Chart.js -->
@@ -121,25 +122,6 @@
         <input id="endButton" type="button" class="btn btn-danger" value="End Movie Night" style="display: none">
         <input id="newMovieButton" type="button" class="btn btn-primary" value="New Movie" style="display: none">
         <canvas id="voteChart" width="1000" height="1000" style="display: none"></canvas>
-    </div>
-
-    <div id="movieView" style="display: none">
-        <div id="movieContainer" style="display: none">
-            <h1 id="movieTitle"></h1>
-            <div class="d-flex flex-row">
-                <img id="posterImage" width="300">
-                <div class="d-flex flex-column movie-content">
-                    <p id="moviePlot"></p>
-                    <div><b>Genre:&nbsp;</b><span id="movieGenre"></span></div>
-                    <div class="mb-3"><b>Runtime:&nbsp;</b><span id="movieRuntime"></span></div>
-                    <div><b>Stars:&nbsp;</b><span id="movieActors"></span></div>
-                    <div><b>Director:&nbsp;</b><span id="movieDirector"></span></div>
-                    <div class="mb-3"><b>Writer:&nbsp;</b><span id="movieWriter"></span></div>
-                    <p id="movieAwards" class="font-italic"></p>
-                    <div class="rating-text"><span id="movieImdbRating"></span>/10</div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>

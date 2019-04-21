@@ -458,42 +458,46 @@ io.on('connection', (socket) => {
         socket.emit('get_phase_data', data);
     });
 
-    socket.on('get_movie_details', (movieId) => {
-        const cachedMovie = movieDetailsCache.get(movieId);
-
-        if (cachedMovie == null) {
-            makeOmdbRequest('i', movieId, (response) => {
-                if (response.data.Response === 'True') {
-                    let result = response.data;
-                    const movie = {
-                        "id": result.imdbID,
-                        "title": result.Title,
-                        "year": result.Year,
-                        "runtime": result.Runtime,
-                        "genre": result.Genre,
-                        "plot": result.Plot,
-                        "rating": result.imdbRating,
-                        "awards": result.Awards,
-                        "actors": result.Actors,
-                        "director": result.Director,
-                        "writer": result.Writer,
-                        "poster": result.Poster
-                    };
-
-                    movieDetailsCache.set(movie);
-                    socket.emit('get_movie_details', movie);
-                }
-            }, { "plot": "full" });
-        }
-        else {
-            socket.emit('get_movie_details', cachedMovie);
-        }
-    });
-
     socket.on('disconnect', () => {
         if (socket.token != null) {
             const userToRemove = users[socket.token];
             console.log(`User '${userToRemove.username}' disconnected.`);
         }
     });
+});
+
+app.get('/movieDetails/:id', (req, res) => {
+    const movieId = req.params.id;
+    const cachedMovie = movieDetailsCache.get(movieId);
+
+    if (cachedMovie == null) {
+        makeOmdbRequest('i', movieId, (response) => {
+            if (response.data.Response === 'True') {
+                let result = response.data;
+                const movie = {
+                    "id": result.imdbID,
+                    "title": result.Title,
+                    "year": result.Year,
+                    "runtime": result.Runtime,
+                    "genre": result.Genre,
+                    "plot": result.Plot,
+                    "rating": result.imdbRating,
+                    "awards": result.Awards,
+                    "actors": result.Actors,
+                    "director": result.Director,
+                    "writer": result.Writer,
+                    "poster": result.Poster
+                };
+
+                movieDetailsCache.set(movie);
+                res.json(movie);
+            }
+            else {
+                res.status(404).json(response.data.Error);
+            }
+        }, { "plot": "full" });
+    }
+    else {
+        res.json(cachedMovie);
+    }
 });
