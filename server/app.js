@@ -427,7 +427,7 @@ io.on('connection', (socket) => {
 
         if (args.c === true) {
             // Make a copy of the night info
-            const fileOutput = Object.assign({}, nightInfo);
+            const fileOutput = { ...nightInfo };
             fileOutput.host = host;
             fileOutput.users = users;
 
