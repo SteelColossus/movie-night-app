@@ -30,7 +30,7 @@ export function getTimeStringFromRuntime(runtime) {
     let timeString = '';
 
     if (hours > 0) {
-        timeString += `${hours} hour${hours > 1 ? 's' : ''}`;
+        timeString += `${hours} hour${hours !== 1 ? 's' : ''}`;
     }
 
     if (hours > 0 && minsLeft > 0) {
@@ -38,7 +38,7 @@ export function getTimeStringFromRuntime(runtime) {
     }
 
     if (minsLeft > 0) {
-        timeString += `${minsLeft} min${minsLeft > 1 ? 's' : ''}`;
+        timeString += `${minsLeft} min${minsLeft !== 1 ? 's' : ''}`;
     }
 
     return timeString;

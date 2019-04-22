@@ -4,7 +4,9 @@ import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
 export class SearchView extends View {
     constructor(socket, animTime) {
         super(SearchView.viewName, socket, animTime);
+        this.numSuggestions = 2;
         this.suggestionInput = $('#suggestion');
+        this.suggestionsLabel = $('#suggestionsLabel');
         this.searchResults = $('#searchResults');
         this.errorMessage = $('#errorMessage');
     }
@@ -18,6 +20,15 @@ export class SearchView extends View {
 
         // Stop the page from refreshing
         return false;
+    }
+
+    updateSuggestionsLabel() {
+        this.suggestionsLabel.text(`You have ${this.numSuggestions} suggestion${this.numSuggestions !== 1 ? 's' : ''} left.`);
+    }
+
+    clearSearch() {
+        this.suggestionInput.val('');
+        this.searchResults.hide();
     }
 
     handleSearch(searchData) {
@@ -68,7 +79,16 @@ export class SearchView extends View {
         alert(fullMessage); // eslint-disable-line no-alert
     }
 
+    handleSuggestionAdded(movie) {
+        this.clearSearch();
+
+        this.numSuggestions -= 1;
+        this.updateSuggestionsLabel();
+    }
+
     onViewShown() {
+        this.updateSuggestionsLabel();
+
         $('#movieInfo').popover({
             "trigger": "hover focus",
             "placement": "bottom",
@@ -92,11 +112,12 @@ export class SearchView extends View {
         this.addSocketListener('movie_search_results', this.handleSearch);
 
         this.addSocketListener('request_different_movie', this.handleMovieRejected);
+
+        this.addSocketListener('movie_suggestion_added', this.handleSuggestionAdded);
     }
 
     onViewHidden() {
-        this.suggestionInput.val('');
-        this.searchResults.hide();
+        this.clearSearch();
     }
 }
 

@@ -32,6 +32,12 @@ body {
     margin-bottom: 0;
 }
 
+#suggestionsLabel {
+    margin-bottom: 12px;
+    margin-left: 6px;
+    font-style: italic;
+}
+
 .subtle-link:hover {
     cursor: pointer;
     color: #0069d9;

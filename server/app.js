@@ -32,6 +32,8 @@ const orderedPhases = [
 
 const movieDetailsCache = new ObjectCache(20, 'id');
 
+const numSuggestions = 2;
+
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
@@ -351,13 +353,18 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            const removedMovieIds = [];
+            const userMovieIndexes = [];
 
-            // Remove all the previous movie suggestions this user has made
             for (let i = 0; i < nightInfo.movies.length; i++) {
                 if (nightInfo.movies[i].suggester === socket.token) {
-                    removedMovieIds.push(nightInfo.movies[i].id);
-                    nightInfo.movies.splice(i, 1);
+                    userMovieIndexes.push(i);
+                }
+            }
+
+            if (userMovieIndexes.length === numSuggestions) {
+                // Remove all the previous movie suggestions this user has made
+                for (let i = 0; i < userMovieIndexes.length; i++) {
+                    nightInfo.movies.splice(i - userMovieIndexes[i], 1);
                 }
             }
 
@@ -371,12 +378,20 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
-            socket.emit('movie_suggestions', data);
+            if (userMovieIndexes.length + 1 === numSuggestions) {
+                socket.emit('movie_suggestions_done', data);
+            }
+            else {
+                socket.emit('movie_suggestion_added', movie);
+            }
+
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
 
-            removedMovieIds.forEach((removedMovieId) => {
-                socket.broadcast.to(nightInfo.name).emit('removed_movie', removedMovieId);
-            });
+            if (userMovieIndexes.length === numSuggestions) {
+                userMovieIndexes.forEach((i) => {
+                    socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
+                });
+            }
         });
     });
 

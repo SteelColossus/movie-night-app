@@ -165,7 +165,7 @@ socket.on('new_phase', (phaseInfo) => {
     }
 });
 
-socket.on('movie_suggestions', (data) => {
+socket.on('movie_suggestions_done', (data) => {
     switchViewWithName(SuggestionsView.viewName, data, data.isHost);
 });
 
