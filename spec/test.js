@@ -50,7 +50,7 @@ describe('integration test', () => {
             return (await chooseButton.getAttribute('class')).includes('active');
         }, 500);
 
-        await getVisibleElement(By.xpath('//table[@id="movieTable"]//tr/td[text() = "157 min"]'));
+        await getVisibleElement(By.xpath('//table[@id="movieTable"]//tr/td[text() = "2 hours 37 mins"]'));
         await (await getVisibleElement(By.id('closeSuggestionsButton'))).click();
 
         const voteButton = await getVisibleElement(By.css('table#movieTable td > input[type="button"][value="Vote!"]'));
