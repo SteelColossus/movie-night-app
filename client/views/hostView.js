@@ -1,8 +1,9 @@
 import { View } from './view.js';
 
 export class HostView extends View {
-    constructor(socket, animTime) {
-        super('host', socket, animTime);
+    constructor(socket, animTime, votingSystems) {
+        super(HostView.viewName, socket, animTime);
+        this.votingSystems = votingSystems;
         this.nightInput = $('#nightName');
         this.votingSystemInput = $('#votingSystem');
     }
@@ -22,6 +23,8 @@ export class HostView extends View {
     }
 
     onViewShown() {
+        this.votingSystemInput.empty();
+
         this.votingSystems.forEach((system) => {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });
@@ -33,3 +36,5 @@ export class HostView extends View {
         this.nightInput.val('');
     }
 }
+
+HostView.viewName = 'host';

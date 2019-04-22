@@ -5,3 +5,4 @@ README.md
 .eslintrc.json
 node_modules
 .vscode
+spec

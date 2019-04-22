@@ -11,6 +11,7 @@ export class View {
     // Show this page
     show() {
         this.container.show(this.animTime);
+        this.updateHistory();
         this.onViewShown();
     }
 
@@ -31,6 +32,26 @@ export class View {
         // Since this is emulating an abstract class, we do nothing here
     }
 
+    getHash() {
+        return `#${this.viewName}`;
+    }
+
+    // Updates the history of the webpage with this view 
+    updateHistory() {
+        const hash = this.getHash();
+
+        if (location.hash !== hash) {
+            if (View.isFirst === true) {
+                history.replaceState(null, this.viewName, hash);
+            }
+            else {
+                history.pushState(null, this.viewName, hash);
+            }
+        }
+        
+        View.isFirst = false;
+    }
+
     // Adds an event listener for the associated socket - need to call this so the event is removed when the page is hidden
     addSocketListener(eventName, callback) {
         const func = callback.bind(this);
@@ -38,8 +59,8 @@ export class View {
         this.socket.on(eventName, func);
 
         this.socketListeners.push({
-            'name': eventName,
-            'func': func
+            "name": eventName,
+            "func": func
         });
 
         // Return the socket for chaining purposes
@@ -53,9 +74,9 @@ export class View {
         element.on(eventName, func);
 
         this.domListeners.push({
-            'element': element,
-            'name': eventName,
-            'func': func
+            "element": element,
+            "name": eventName,
+            "func": func
         });
 
         // Return the jQuery object for chaining purposes
@@ -70,3 +91,5 @@ export class View {
         this.domListeners.length = 0;
     }
 }
+
+View.isFirst = true;
