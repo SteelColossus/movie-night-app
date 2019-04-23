@@ -2,9 +2,9 @@ import { View } from './view.js';
 import { appendTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SearchView extends View {
-    constructor(socket, animTime, numSuggestions) {
+    constructor(socket, animTime, suggestionsLeft) {
         super(SearchView.viewName, socket, animTime);
-        this.numSuggestions = numSuggestions;
+        this.suggestionsLeft = suggestionsLeft;
         this.suggestionInput = $('#suggestion');
         this.suggestionsLabel = $('#suggestionsLabel');
         this.searchResults = $('#searchResults');
@@ -23,7 +23,7 @@ export class SearchView extends View {
     }
 
     updateSuggestionsLabel() {
-        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.numSuggestions)} left.`);
+        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.suggestionsLeft)} left.`);
     }
 
     clearSearch() {
@@ -82,7 +82,7 @@ export class SearchView extends View {
     handleSuggestionAdded(movie) {
         this.clearSearch();
 
-        this.numSuggestions -= 1;
+        this.suggestionsLeft -= 1;
         this.updateSuggestionsLabel();
     }
 

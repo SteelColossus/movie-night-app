@@ -104,8 +104,7 @@ function getPhaseData(phaseName, token) {
             data = {
                 "name": nightInfo.name,
                 "movies": nightInfo.movies,
-                "numSuggestions": nightInfo.numSuggestions,
-                "doneSuggesting": nightInfo.movies.some(m => m.suggester === token)
+                "suggestionsLeft": users[token].suggestionsLeft > 0 ? users[token].suggestionsLeft : nightInfo.numSuggestions
             };
             break;
         case constants.PHASES.VOTE:
@@ -189,6 +188,10 @@ function addUser(socket, token, username = null) {
             users[token] = {
                 "username": username
             };
+
+            if (nightInfo.numSuggestions != null) {
+                users[token].suggestionsLeft = nightInfo.numSuggestions;
+            }
         }
 
         socket.token = token;
@@ -236,6 +239,10 @@ io.on('connection', (socket) => {
         nightInfo.votingSystem = info.votingSystem;
         nightInfo.numSuggestions = parseInt(info.numSuggestions, 10);
         host = socket.token;
+
+        Object.values(users).forEach((user) => {
+            user.suggestionsLeft = nightInfo.numSuggestions;
+        });
 
         if (nightAlreadyHosted) {
             console.log(`${users[socket.token].username} has restarted the movie night under the new name: '${nightInfo.name}'`);
@@ -353,22 +360,21 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            const userMovieIndexes = [];
-
-            for (let i = 0; i < nightInfo.movies.length; i++) {
-                if (nightInfo.movies[i].suggester === socket.token) {
-                    userMovieIndexes.push(i);
-                }
-            }
-
-            if (userMovieIndexes.length === nightInfo.numSuggestions) {
+            if (users[socket.token].suggestionsLeft === 0) {
                 // Remove all the previous movie suggestions this user has made
-                for (let i = 0; i < userMovieIndexes.length; i++) {
-                    nightInfo.movies.splice(i - userMovieIndexes[i], 1);
+                for (let i = nightInfo.movies.length - 1; i >= 0; i--) {
+                    if (nightInfo.movies[i].suggester === socket.token) {
+                        socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
+                        nightInfo.movies.splice(i, 1);
+                    }
                 }
+
+                users[socket.token].suggestionsLeft = nightInfo.numSuggestions;
             }
 
             nightInfo.movies.push(movie);
+
+            users[socket.token].suggestionsLeft -= 1;
 
             const data = {
                 "movies": nightInfo.movies
@@ -378,7 +384,7 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
-            if (userMovieIndexes.length + 1 === nightInfo.numSuggestions) {
+            if (users[socket.token].suggestionsLeft === 0) {
                 socket.emit('movie_suggestions_done', data);
             }
             else {
@@ -386,12 +392,6 @@ io.on('connection', (socket) => {
             }
 
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
-
-            if (userMovieIndexes.length === nightInfo.numSuggestions) {
-                userMovieIndexes.forEach((i) => {
-                    socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
-                });
-            }
         });
     });
 
