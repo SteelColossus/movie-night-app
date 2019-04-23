@@ -32,8 +32,6 @@ const orderedPhases = [
 
 const movieDetailsCache = new ObjectCache(20, 'id');
 
-const numSuggestions = 2;
-
 // Serve all static files in the /client folder
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
@@ -106,6 +104,7 @@ function getPhaseData(phaseName, token) {
             data = {
                 "name": nightInfo.name,
                 "movies": nightInfo.movies,
+                "numSuggestions": nightInfo.numSuggestions,
                 "doneSuggesting": nightInfo.movies.some(m => m.suggester === token)
             };
             break;
@@ -235,6 +234,7 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
+        nightInfo.numSuggestions = parseInt(info.numSuggestions, 10);
         host = socket.token;
 
         if (nightAlreadyHosted) {
@@ -361,7 +361,7 @@ io.on('connection', (socket) => {
                 }
             }
 
-            if (userMovieIndexes.length === numSuggestions) {
+            if (userMovieIndexes.length === nightInfo.numSuggestions) {
                 // Remove all the previous movie suggestions this user has made
                 for (let i = 0; i < userMovieIndexes.length; i++) {
                     nightInfo.movies.splice(i - userMovieIndexes[i], 1);
@@ -378,7 +378,7 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
-            if (userMovieIndexes.length + 1 === numSuggestions) {
+            if (userMovieIndexes.length + 1 === nightInfo.numSuggestions) {
                 socket.emit('movie_suggestions_done', data);
             }
             else {
@@ -387,7 +387,7 @@ io.on('connection', (socket) => {
 
             socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
 
-            if (userMovieIndexes.length === numSuggestions) {
+            if (userMovieIndexes.length === nightInfo.numSuggestions) {
                 userMovieIndexes.forEach((i) => {
                     socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
                 });

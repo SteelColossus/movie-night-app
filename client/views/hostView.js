@@ -6,14 +6,17 @@ export class HostView extends View {
         this.votingSystems = votingSystems;
         this.nightInput = $('#nightName');
         this.votingSystemInput = $('#votingSystem');
+        this.numSuggestionsInput = $('#numSuggestions');
     }
 
     formSubmit() {
         let name = this.nightInput.val().toString().trim();
         let votingSystem = this.votingSystemInput.val();
+        let numSuggestions = this.numSuggestionsInput.val();
         let nightInfo = {
             "name": name,
-            "votingSystem": votingSystem
+            "votingSystem": votingSystem,
+            "numSuggestions": numSuggestions
         };
 
         this.socket.emit('host_night', nightInfo);

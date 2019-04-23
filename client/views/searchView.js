@@ -2,9 +2,9 @@ import { View } from './view.js';
 import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class SearchView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, numSuggestions) {
         super(SearchView.viewName, socket, animTime);
-        this.numSuggestions = 2;
+        this.numSuggestions = numSuggestions;
         this.suggestionInput = $('#suggestion');
         this.suggestionsLabel = $('#suggestionsLabel');
         this.searchResults = $('#searchResults');
