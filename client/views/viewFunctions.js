@@ -23,6 +23,10 @@ export function appendTableRow(table, objList) {
     return tableRow;
 }
 
+export function pluralize(singular, value) {
+    return `${value} ${singular}${value !== 1 ? 's' : ''}`;
+}
+
 export function getTimeStringFromRuntime(runtime) {
     const mins = parseInt(runtime.substring(0, runtime.indexOf(' ')), 10);
     const hours = Math.floor(mins / 60);
@@ -30,7 +34,7 @@ export function getTimeStringFromRuntime(runtime) {
     let timeString = '';
 
     if (hours > 0) {
-        timeString += `${hours} hour${hours !== 1 ? 's' : ''}`;
+        timeString += pluralize('hour', hours);
     }
 
     if (hours > 0 && minsLeft > 0) {
@@ -38,7 +42,7 @@ export function getTimeStringFromRuntime(runtime) {
     }
 
     if (minsLeft > 0) {
-        timeString += `${minsLeft} min${minsLeft !== 1 ? 's' : ''}`;
+        timeString += pluralize('min', minsLeft);
     }
 
     return timeString;

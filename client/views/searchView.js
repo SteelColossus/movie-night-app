@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
+import { appendTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime, numSuggestions) {
@@ -23,7 +23,7 @@ export class SearchView extends View {
     }
 
     updateSuggestionsLabel() {
-        this.suggestionsLabel.text(`You have ${this.numSuggestions} suggestion${this.numSuggestions !== 1 ? 's' : ''} left.`);
+        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.numSuggestions)} left.`);
     }
 
     clearSearch() {
