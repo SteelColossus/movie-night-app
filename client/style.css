@@ -78,6 +78,11 @@ body {
     box-shadow: 4px 4px 4px 0px rgba(0,0,0,0.75);
 }
 
+#bannedGenreText {
+    color: red;
+    font-weight: bold;
+}
+
 .rating-text {
     align-self: flex-end;
     margin-top: auto;

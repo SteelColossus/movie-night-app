@@ -47,6 +47,13 @@ fetch(`../movieDetails/${movieId}`, {
 
                 document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);
                 document.getElementById('movieGenre').textContent = movie.genre;
+                
+                const bannedGenres = ['Short', 'Documentary'];
+
+                if (bannedGenres.some(genre => movie.genre.includes(genre))) {
+                    document.getElementById('bannedGenreText').style.removeProperty('display');
+                }
+
                 document.getElementById('movieRuntime').textContent = getTimeStringFromRuntime(movie.runtime);
                 document.getElementById('movieActors').textContent = movie.actors;
                 document.getElementById('movieDirector').textContent = movie.director;
@@ -58,7 +65,7 @@ fetch(`../movieDetails/${movieId}`, {
                 posterImage.setAttribute('src', movie.poster);
                 posterImage.setAttribute('alt', `${movie.title} Poster`);
 
-                document.getElementById('movieContainer').style.display = null;
+                document.getElementById('movieContainer').style.removeProperty('display');
             });
         }
     });
