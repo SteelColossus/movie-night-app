@@ -60,6 +60,7 @@ body {
 
 #movieContainer {
     width: 60%;
+    max-height: 100%;
 }
 
 .movie-content {

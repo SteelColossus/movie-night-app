@@ -1,5 +1,23 @@
 import { getTimeStringFromRuntime } from '../views/viewFunctions.js';
 
+function truncateText(text, length) {
+    const ellipsis = '...';
+    let truncatedText = text;
+    const maxTextLength = length - ellipsis.length;
+
+    if (text.length > maxTextLength) {
+        let lastSpaceIndex = maxTextLength;
+
+        while (lastSpaceIndex >= 0 && text[lastSpaceIndex] !== ' ') lastSpaceIndex--;
+
+        if (lastSpaceIndex < 0) lastSpaceIndex = maxTextLength;
+
+        truncatedText = text.substring(0, lastSpaceIndex) + ellipsis;
+    }
+
+    return truncatedText;
+}
+
 const queryParams = new URLSearchParams(location.search);
 const movieId = queryParams.get('id');
 
@@ -27,7 +45,7 @@ fetch(`../movieDetails/${movieId}`, {
                     window.open(`https://www.imdb.com/title/${movieId}/`);
                 });
 
-                document.getElementById('moviePlot').textContent = movie.plot;
+                document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);
                 document.getElementById('movieGenre').textContent = movie.genre;
                 document.getElementById('movieRuntime').textContent = getTimeStringFromRuntime(movie.runtime);
                 document.getElementById('movieActors').textContent = movie.actors;
