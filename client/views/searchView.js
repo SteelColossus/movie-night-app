@@ -2,11 +2,13 @@ import { View } from './view.js';
 import { appendTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SearchView extends View {
-    constructor(socket, animTime, suggestionsLeft) {
+    constructor(socket, animTime, suggestedMovies, maxSuggestions) {
         super(SearchView.viewName, socket, animTime);
-        this.suggestionsLeft = suggestionsLeft;
+        this.suggestedMovies = suggestedMovies;
+        this.maxSuggestions = maxSuggestions;
         this.suggestionInput = $('#suggestion');
         this.suggestionsLabel = $('#suggestionsLabel');
+        this.movieSuggestionsList = $('#movieSuggestionsList');
         this.searchResults = $('#searchResults');
         this.errorMessage = $('#errorMessage');
     }
@@ -23,12 +25,22 @@ export class SearchView extends View {
     }
 
     updateSuggestionsLabel() {
-        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.suggestionsLeft)} left.`);
+        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.maxSuggestions - this.suggestedMovies.length)} left.`);
     }
 
     clearSearch() {
         this.suggestionInput.val('');
         this.searchResults.hide();
+    }
+
+    updateSuggestedMovies() {
+        this.movieSuggestionsList.empty();
+
+        this.suggestedMovies.forEach((movie) => {
+            const listItem = $('<li>').text(`${movie.title} (${movie.year})`);
+            setAsMovieDetailsLink(listItem, movie.id);
+            this.movieSuggestionsList.append(listItem);
+        });
     }
 
     handleSearch(searchData) {
@@ -82,12 +94,18 @@ export class SearchView extends View {
     handleSuggestionAdded(movie) {
         this.clearSearch();
 
-        this.suggestionsLeft -= 1;
+        if (this.suggestedMovies.length >= this.maxSuggestions) {
+            this.suggestedMovies.length = 0;
+        }
+
+        this.suggestedMovies.push(movie);
         this.updateSuggestionsLabel();
+        this.updateSuggestedMovies();
     }
 
     onViewShown() {
         this.updateSuggestionsLabel();
+        this.updateSuggestedMovies();
 
         $('#movieInfo').popover({
             "trigger": "hover focus",

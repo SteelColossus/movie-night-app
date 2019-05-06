@@ -32,7 +32,7 @@ body {
     margin-bottom: 0;
 }
 
-#suggestionsLabel {
+#suggestionsContainer {
     margin-bottom: 12px;
     margin-left: 6px;
     font-style: italic;

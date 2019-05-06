@@ -45,7 +45,7 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             view = new HostView(socket, animTime, data.votingSystems);
             break;
         case SearchView.viewName:
-            view = new SearchView(socket, animTime, data.suggestionsLeft);
+            view = new SearchView(socket, animTime, data.suggestedMovies, data.maxSuggestions);
             break;
         case SuggestionsView.viewName:
             view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
@@ -144,7 +144,7 @@ socket.on('new_phase', (phaseInfo) => {
                 viewName = HostView.viewName;
                 break;
             case constants.PHASES.SUGGEST:
-                viewName = (phaseInfo.data.suggestionsLeft === 0) ? SuggestionsView.viewName : SearchView.viewName;
+                viewName = (phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions) ? SuggestionsView.viewName : SearchView.viewName;
                 break;
             case constants.PHASES.VOTE:
                 viewName = VoteView.viewName;

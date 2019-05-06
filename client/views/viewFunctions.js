@@ -48,18 +48,18 @@ export function getTimeStringFromRuntime(runtime) {
     return timeString;
 }
 
-export function setBackgroundColorRedToGreen(cell) {
-    const num = parseFloat(cell.text());
+export function setBackgroundColorRedToGreen(element) {
+    const num = parseFloat(element.text());
     const g = Math.round(num * (255 / 10));
     const r = 255 - g;
     const b = 0;
     const a = 0.5;
 
-    cell.css('background-color', `rgba(${r},${g},${b},${a})`);
+    element.css('background-color', `rgba(${r},${g},${b},${a})`);
 }
 
-export function setAsMovieDetailsLink(cell, movieId) {
-    cell.addClass('subtle-link')
+export function setAsMovieDetailsLink(element, movieId) {
+    element.addClass('subtle-link')
         .attr('title', 'View more details for this movie')
         .click(() => {
             window.open(`/movie?id=${movieId}`);

@@ -58,6 +58,10 @@ function sumVotes(votesObj) {
     return Object.values(votesObj).reduce((a, b) => a + b, 0);
 }
 
+function getSuggestedMovies(token) {
+    return Object.values(nightInfo.movies).filter(movie => movie.suggester === token);
+}
+
 function setWinner() {
     if (nightInfo.winner != null) {
         return;
@@ -104,7 +108,8 @@ function getPhaseData(phaseName, token) {
             data = {
                 "name": nightInfo.name,
                 "movies": nightInfo.movies,
-                "suggestionsLeft": users[token].suggestionsLeft > 0 ? users[token].suggestionsLeft : nightInfo.numSuggestions
+                "suggestedMovies": getSuggestedMovies(token),
+                "maxSuggestions": nightInfo.maxSuggestions
             };
             break;
         case constants.PHASES.VOTE:
@@ -188,10 +193,6 @@ function addUser(socket, token, username = null) {
             users[token] = {
                 "username": username
             };
-
-            if (nightInfo.numSuggestions != null) {
-                users[token].suggestionsLeft = nightInfo.numSuggestions;
-            }
         }
 
         socket.token = token;
@@ -237,12 +238,8 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
-        nightInfo.numSuggestions = parseInt(info.numSuggestions, 10);
+        nightInfo.maxSuggestions = parseInt(info.numSuggestions, 10);
         host = socket.token;
-
-        Object.values(users).forEach((user) => {
-            user.suggestionsLeft = nightInfo.numSuggestions;
-        });
 
         if (nightAlreadyHosted) {
             console.log(`${users[socket.token].username} has restarted the movie night under the new name: '${nightInfo.name}'`);
@@ -360,7 +357,9 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            if (users[socket.token].suggestionsLeft === 0) {
+            let suggestionsLeft = nightInfo.maxSuggestions - getSuggestedMovies(socket.token).length;
+
+            if (suggestionsLeft <= 0) {
                 // Remove all the previous movie suggestions this user has made
                 for (let i = nightInfo.movies.length - 1; i >= 0; i--) {
                     if (nightInfo.movies[i].suggester === socket.token) {
@@ -369,12 +368,12 @@ io.on('connection', (socket) => {
                     }
                 }
 
-                users[socket.token].suggestionsLeft = nightInfo.numSuggestions;
+                suggestionsLeft = nightInfo.maxSuggestions;
             }
 
             nightInfo.movies.push(movie);
 
-            users[socket.token].suggestionsLeft -= 1;
+            suggestionsLeft -= 1;
 
             const data = {
                 "movies": nightInfo.movies
@@ -384,7 +383,7 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
-            if (users[socket.token].suggestionsLeft === 0) {
+            if (suggestionsLeft <= 0) {
                 socket.emit('movie_suggestions_done', data);
             }
             else {
