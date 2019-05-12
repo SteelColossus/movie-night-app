@@ -14,13 +14,19 @@ export class SuggestionsView extends View {
 
     appendMovieToTable(movie) {
         const tableRow = appendTableRow(this.movieTable, [
-            { "text": movie.title, "func": cell => setAsMovieDetailsLink(cell, movie.id) },
-            { "text": movie.year },
-            { "text": getTimeStringFromRuntime(movie.runtime) },
-            { "text": movie.genre },
-            { "text": movie.plot },
-            { "text": movie.rating, "func": cell => setBackgroundColorRedToGreen(cell) },
-            { "text": movie.awards }
+            {
+                text: movie.title,
+                func: (cell) => setAsMovieDetailsLink(cell, movie.id)
+            },
+            { text: movie.year },
+            { text: getTimeStringFromRuntime(movie.runtime) },
+            { text: movie.genre },
+            { text: movie.plot },
+            {
+                text: movie.rating,
+                func: (cell) => setBackgroundColorRedToGreen(cell)
+            },
+            { text: movie.awards }
         ]);
 
         if (movie.suggester === this.userToken) {
@@ -33,7 +39,7 @@ export class SuggestionsView extends View {
     }
 
     buildSuggestionsTable(movies) {
-        movies.forEach(movie => this.appendMovieToTable(movie));
+        movies.forEach((movie) => this.appendMovieToTable(movie));
     }
 
     handleNewMovie(movie) {

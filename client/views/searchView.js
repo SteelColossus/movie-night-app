@@ -15,7 +15,7 @@ export class SearchView extends View {
     }
 
     formSubmit() {
-        let suggestion = this.suggestionInput.val().toString().trim();
+        const suggestion = this.suggestionInput.val().toString().trim();
 
         if (suggestion.length > 0) {
             this.socket.emit('movie_search', suggestion);
@@ -32,8 +32,7 @@ export class SearchView extends View {
 
         if (suggestionsLeft > 0) {
             this.noSuggestionsLabel.hide();
-        }
-        else {
+        } else {
             this.noSuggestionsLabel.show();
         }
     }
@@ -71,10 +70,13 @@ export class SearchView extends View {
         // Create the suggestion table from the API results
         searchDataResults.forEach((result) => {
             appendTableRow(suggestTable, [
-                { "text": result.title, "func": cell => setAsMovieDetailsLink(cell, result.id) },
-                { "text": result.year },
                 {
-                    "func": (cell) => {
+                    text: result.title,
+                    func: (cell) => setAsMovieDetailsLink(cell, result.id)
+                },
+                { text: result.year },
+                {
+                    func: (cell) => {
                         const chooseButton = $('<input>')
                             .prop('type', 'button')
                             .val('Choose!')
@@ -118,11 +120,11 @@ export class SearchView extends View {
         this.updateSuggestedMovies();
 
         $('#movieInfo').popover({
-            "trigger": "hover focus",
-            "placement": "bottom",
-            "html": true,
-            "title": "Movie Night Rules:",
-            "content": `
+            trigger: 'hover focus',
+            placement: 'bottom',
+            html: true,
+            title: 'Movie Night Rules:',
+            content: `
                 <ul>
                     <li>NO shorts</li>
                     <li>NO documentaries</li>

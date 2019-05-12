@@ -27,7 +27,9 @@ function switchView(view, forceRefresh = false) {
     if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
         errorMessage.hide(animTime);
 
-        if (currentView != null) currentView.hide();
+        if (currentView != null) {
+            currentView.hide();
+        }
         view.show();
 
         currentView = view;
@@ -56,9 +58,13 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
             break;
+        default:
+            throw new Error(`Unknown view name '${viewName}'.`);
     }
 
-    if (view != null) switchView(view, false);
+    if (view != null) {
+        switchView(view, false);
+    }
 }
 
 function getViewPhase(viewName) {
@@ -85,7 +91,9 @@ function requestViewDataForHash() {
         switchViewWithName(UsernameView.viewName);
     }
 
-    if (currentView != null && viewName === currentView.viewName) return;
+    if (currentView != null && viewName === currentView.viewName) {
+        return;
+    }
 
     const phaseName = getViewPhase(viewName);
 
@@ -99,7 +107,7 @@ window.addEventListener('hashchange', () => {
 });
 
 socket.on('connect', () => {
-    console.log('Connected to the app server.');
+    console.log('Connected to the app server.'); // eslint-disable-line no-console
 });
 
 socket.on('request_user_token', () => {
@@ -110,8 +118,7 @@ socket.on('request_user_token', () => {
 socket.on('request_new_user', () => {
     if (authenticated === false) {
         switchViewWithName(UsernameView.viewName);
-    }
-    else if (authenticated === true) {
+    } else if (authenticated === true) {
         // The app server has likely been restarted - refresh the page to prevent side effects
         location.reload();
     }
@@ -152,15 +159,18 @@ socket.on('new_phase', (phaseInfo) => {
             case constants.PHASES.RESULTS:
                 viewName = ResultsView.viewName;
                 break;
+            default:
+                throw new Error(`Unknown phase name '${phaseInfo.name}'.`);
         }
 
-        if (viewName != null) switchViewWithName(viewName, phaseInfo.data, phaseInfo.isHost);
+        if (viewName != null) {
+            switchViewWithName(viewName, phaseInfo.data, phaseInfo.isHost);
+        }
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
         movieNightTitle.text(phaseInfo.data.name).show(animTime);
-    }
-    else {
+    } else {
         movieNightTitle.hide(animTime);
     }
 });

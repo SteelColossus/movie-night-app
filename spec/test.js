@@ -1,3 +1,5 @@
+'use strict';
+
 const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
 const { spawn } = require('child_process');
 
@@ -42,7 +44,10 @@ describe('integration test', () => {
         expect(movieNightTitle).toBe('My Movie Night', 'Movie night title is not displaying the correct text.');
         const suggestion = await getVisibleElement(By.id('suggestion'));
         await suggestion.sendKeys('Harry Potter', Key.ENTER);
-        const movieToSelect = await getVisibleElement(By.xpath('//table[@id="suggestionTable"]//tr[./td[text() = "Harry Potter and the Goblet of Fire"]]'), 3000);
+        const movieToSelect = await getVisibleElement(
+            By.xpath('//table[@id="suggestionTable"]//tr[./td[text() = "Harry Potter and the Goblet of Fire"]]'),
+            3000
+        );
         await movieToSelect.findElement(By.xpath('./td[text() = "2005"]'));
         const chooseButton = await movieToSelect.findElement(By.xpath('./td/input[@type="button"]'));
         await driver.wait(async () => {
@@ -55,11 +60,11 @@ describe('integration test', () => {
 
         const voteButton = await getVisibleElement(By.css('table#movieTable td > input[type="button"][value="Vote!"]'));
         const voteText = await driver.findElement(By.css('table#movieTable td[votes-for]'));
-        const checkVoting = async (val) => {
+        async function checkVoting(val) {
             await voteButton.click();
             await driver.sleep(500);
             expect(await voteText.getText()).toBe(val, 'Movie does not have the correct number of votes.');
-        };
+        }
         await checkVoting('1');
         await checkVoting('0');
         await checkVoting('1');

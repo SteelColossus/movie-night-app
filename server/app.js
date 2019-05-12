@@ -1,3 +1,5 @@
+'use strict';
+
 const os = require('os');
 const path = require('path');
 const express = require('express');
@@ -59,7 +61,7 @@ function sumVotes(votesObj) {
 }
 
 function getSuggestedMovies(token) {
-    return Object.values(nightInfo.movies).filter(movie => movie.suggester === token);
+    return Object.values(nightInfo.movies).filter((movie) => movie.suggester === token);
 }
 
 function setWinner() {
@@ -67,15 +69,15 @@ function setWinner() {
         return;
     }
 
-    const movieResults = nightInfo.movies.map(movie => ({
-        "title": movie.title,
-        "votes": sumVotes(movie.votes)
+    const movieResults = nightInfo.movies.map((movie) => ({
+        title: movie.title,
+        votes: sumVotes(movie.votes)
     }));
 
     const highestVotes = movieResults.reduce((max, movie) => (movie.votes > max ? movie.votes : max), 0);
 
     if (highestVotes > 0) {
-        const winners = movieResults.filter(movie => movie.votes === highestVotes);
+        const winners = movieResults.filter((movie) => movie.votes === highestVotes);
 
         // Pick a random winner - this is only temporary until something more visual gets added
         nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
@@ -92,7 +94,9 @@ function isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) {
 
 // Perform some checks before proceeding with a socket request
 function preCheck(token, requiredPhase, requireHost, requireExactPhase = false) {
-    return isLoggedIn(token) && (requireExactPhase ? phase === requiredPhase : isCurrentPhaseBeforeOrSameAsPhase(requiredPhase)) && (!requireHost || host === token);
+    return isLoggedIn(token)
+        && (requireExactPhase ? phase === requiredPhase : isCurrentPhaseBeforeOrSameAsPhase(requiredPhase))
+        && (!requireHost || host === token);
 }
 
 function getPhaseData(phaseName, token) {
@@ -101,29 +105,29 @@ function getPhaseData(phaseName, token) {
     switch (phaseName) {
         case constants.PHASES.HOST:
             data = {
-                "votingSystems": Object.values(constants.VOTING_SYSTEMS)
+                votingSystems: Object.values(constants.VOTING_SYSTEMS)
             };
             break;
         case constants.PHASES.SUGGEST:
             data = {
-                "name": nightInfo.name,
-                "movies": nightInfo.movies,
-                "suggestedMovies": getSuggestedMovies(token),
-                "maxSuggestions": nightInfo.maxSuggestions
+                name: nightInfo.name,
+                movies: nightInfo.movies,
+                suggestedMovies: getSuggestedMovies(token),
+                maxSuggestions: nightInfo.maxSuggestions
             };
             break;
         case constants.PHASES.VOTE:
             data = {
-                "name": nightInfo.name,
-                "movies": nightInfo.movies,
-                "votingSystem": nightInfo.votingSystem
+                name: nightInfo.name,
+                movies: nightInfo.movies,
+                votingSystem: nightInfo.votingSystem
             };
             break;
         case constants.PHASES.RESULTS:
             data = {
-                "name": nightInfo.name,
-                "movies": nightInfo.movies,
-                "winner": nightInfo.winner
+                name: nightInfo.name,
+                movies: nightInfo.movies,
+                winner: nightInfo.winner
             };
             break;
         default:
@@ -143,15 +147,14 @@ function switchPhase(socket, phaseName, sendToAll = true) {
                     sock.join(nightInfo.name);
                 }
             });
-        }
-        else if (sendToAll === false) {
+        } else if (sendToAll === false) {
             socket.join(nightInfo.name);
         }
     }
 
     const phaseInfo = {
-        "name": phaseName,
-        "data": getPhaseData(phaseName, socket.token)
+        name: phaseName,
+        data: getPhaseData(phaseName, socket.token)
     };
 
     if (host != null) {
@@ -179,7 +182,7 @@ function addUser(socket, token, username = null) {
         let previousUsername = null;
 
         if (newUsername) {
-            let usernameExists = Object.keys(users).some(userToken => userToken !== token.toString() && users[userToken].username === username);
+            const usernameExists = Object.keys(users).some((userToken) => userToken !== token.toString() && users[userToken].username === username);
 
             if (usernameExists === true) {
                 socket.emit('request_new_username');
@@ -191,7 +194,7 @@ function addUser(socket, token, username = null) {
             }
 
             users[token] = {
-                "username": username
+                username
             };
         }
 
@@ -199,11 +202,9 @@ function addUser(socket, token, username = null) {
 
         if (isExistingUser && newUsername) {
             console.log(`Existing user '${previousUsername}' changed their name to '${username}'.`);
-        }
-        else if (isExistingUser) {
+        } else if (isExistingUser) {
             console.log(`Existing user '${users[token].username}' connected.`);
-        }
-        else {
+        } else {
             console.log(`New user '${users[token].username}' connected.`);
         }
 
@@ -211,8 +212,7 @@ function addUser(socket, token, username = null) {
 
         // Get newcomers to the same phase as everyone else
         switchPhase(socket, phase, false);
-    }
-    else {
+    } else {
         socket.emit('request_new_user');
     }
 }
@@ -233,7 +233,9 @@ io.on('connection', (socket) => {
     socket.on('host_night', (info) => {
         const nightAlreadyHosted = host != null;
 
-        if (!preCheck(socket.token, constants.PHASES.HOST, nightAlreadyHosted)) return;
+        if (!preCheck(socket.token, constants.PHASES.HOST, nightAlreadyHosted)) {
+            return;
+        }
 
         nightInfo.movies = [];
         nightInfo.name = info.name;
@@ -243,8 +245,7 @@ io.on('connection', (socket) => {
 
         if (nightAlreadyHosted) {
             console.log(`${users[socket.token].username} has restarted the movie night under the new name: '${nightInfo.name}'`);
-        }
-        else {
+        } else {
             console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
         }
 
@@ -253,10 +254,12 @@ io.on('connection', (socket) => {
 
     // When a movie is searched for, check the API for results
     socket.on('movie_search', (suggestion) => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) return;
+        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) {
+            return;
+        }
 
         // Need to encode the URL for the API key to understand it
-        let encodedSuggestion = encodeURIComponent(suggestion);
+        const encodedSuggestion = encodeURIComponent(suggestion);
 
         /*
          * Weird syntax - create a promise that will eventually resolve with either a list of results or an error message.
@@ -265,37 +268,36 @@ io.on('connection', (socket) => {
          */
         const movieResultsPromise = new Promise((resolve) => {
             makeOmdbRequest('s', encodedSuggestion, (response) => {
-                let movieResults = {
-                    "success": response.data.Response === 'True'
+                const movieResults = {
+                    success: response.data.Response === 'True'
                 };
 
-                let movieMapFunction = result => ({
-                    "id": result.imdbID,
-                    "title": result.Title,
-                    "year": result.Year
-                });
+                function movieMapFunction(result) {
+                    return {
+                        id: result.imdbID,
+                        title: result.Title,
+                        year: result.Year
+                    };
+                }
 
                 if (movieResults.success === true) {
                     movieResults.results = response.data.Search.map(movieMapFunction);
 
                     resolve(movieResults);
-                }
-                else if (response.data.Error === 'Too many results.') {
+                } else if (response.data.Error === 'Too many results.') {
                     // If the API says we get too many results, then instead try to search by the exact title
                     makeOmdbRequest('t', encodedSuggestion, (response2) => {
                         movieResults.success = response2.data.Response === 'True';
 
                         if (movieResults.success === true) {
                             movieResults.results = [movieMapFunction(response2.data)];
-                        }
-                        else if (movieResults.success === false) {
-                            movieResults.errorMessage = response.data.Error + ' ' + response2.data.Error;
+                        } else if (movieResults.success === false) {
+                            movieResults.errorMessage = `${response.data.Error} ${response2.data.Error}`;
                         }
 
                         resolve(movieResults);
                     });
-                }
-                else {
+                } else {
                     movieResults.errorMessage = response.data.Error;
 
                     resolve(movieResults);
@@ -303,38 +305,40 @@ io.on('connection', (socket) => {
             });
         });
 
-        movieResultsPromise.then(movieResults => socket.emit('movie_search_results', movieResults));
+        movieResultsPromise.then((movieResults) => socket.emit('movie_search_results', movieResults));
     });
 
     socket.on('movie_chosen', (movieId) => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) return;
+        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) {
+            return;
+        }
 
         // Disallow multiple people from choosing the same movie
-        if (nightInfo.movies.some(x => x.id === movieId)) {
+        if (nightInfo.movies.some((x) => x.id === movieId)) {
             socket.emit('request_different_movie', 'Someone has already chosen that movie.');
             return;
         }
 
         // Get more information for the chosen movie
         makeOmdbRequest('i', movieId, (response) => {
-            let result = response.data;
-            let movie = {
-                "id": result.imdbID,
-                "title": result.Title,
-                "year": result.Year,
-                "runtime": result.Runtime,
-                "genre": result.Genre,
-                "plot": result.Plot,
-                "rating": result.imdbRating,
-                "awards": result.Awards,
-                "suggester": socket.token,
-                "votes": {}
+            const result = response.data;
+            const movie = {
+                id: result.imdbID,
+                title: result.Title,
+                year: result.Year,
+                runtime: result.Runtime,
+                genre: result.Genre,
+                plot: result.Plot,
+                rating: result.imdbRating,
+                awards: result.Awards,
+                suggester: socket.token,
+                votes: {}
             };
 
             const bannedGenres = ['Short', 'Documentary'];
             const movieGenres = movie.genre.split(', ');
 
-            const sharedGenres = bannedGenres.filter(genre => movieGenres.includes(genre));
+            const sharedGenres = bannedGenres.filter((genre) => movieGenres.includes(genre));
 
             // Disallow anyone from choosing a movie that is one of the banned genres
             if (sharedGenres.length > 0) {
@@ -345,11 +349,21 @@ io.on('connection', (socket) => {
             const missing = 'N/A';
             const missingInfo = [];
 
-            if (movie.year === missing) missingInfo.push('Year');
-            if (movie.runtime === missing) missingInfo.push('Runtime');
-            if (movie.genre === missing) missingInfo.push('Genre');
-            if (movie.plot === missing) missingInfo.push('Plot');
-            if (movie.rating === missing) missingInfo.push('Rating');
+            if (movie.year === missing) {
+                missingInfo.push('Year');
+            }
+            if (movie.runtime === missing) {
+                missingInfo.push('Runtime');
+            }
+            if (movie.genre === missing) {
+                missingInfo.push('Genre');
+            }
+            if (movie.plot === missing) {
+                missingInfo.push('Plot');
+            }
+            if (movie.rating === missing) {
+                missingInfo.push('Rating');
+            }
 
             // Disallow movies which have key pieces of information missing (likely obscure movies that no-one really wants to watch)
             if (missingInfo.length > 0) {
@@ -376,7 +390,7 @@ io.on('connection', (socket) => {
             suggestionsLeft -= 1;
 
             const data = {
-                "movies": nightInfo.movies
+                movies: nightInfo.movies
             };
 
             if (host != null) {
@@ -385,8 +399,7 @@ io.on('connection', (socket) => {
 
             if (suggestionsLeft <= 0) {
                 socket.emit('movie_suggestions_done', data);
-            }
-            else {
+            } else {
                 socket.emit('movie_suggestion_added', movie);
             }
 
@@ -395,19 +408,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('votes_changed', (voteDeltas) => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) {
+            return;
+        }
 
         const newVotes = {};
 
         Object.keys(voteDeltas).forEach((key) => {
             const value = voteDeltas[key];
-            const movie = nightInfo.movies.find(x => x.id === key);
+            const movie = nightInfo.movies.find((x) => x.id === key);
 
             if (movie != null) {
                 if (movie.votes.hasOwnProperty(socket.token)) {
                     movie.votes[socket.token] += value;
-                }
-                else {
+                } else {
                     movie.votes[socket.token] = value;
                 }
                 if (movie.votes[socket.token] < 0) {
@@ -422,13 +436,17 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, true, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.SUGGEST, true, true)) {
+            return;
+        }
 
         switchPhase(socket, constants.PHASES.VOTE);
     });
 
     socket.on('close_voting', () => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) {
+            return;
+        }
 
         setWinner();
 
@@ -436,7 +454,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('end_night', () => {
-        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) {
+            return;
+        }
 
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
@@ -450,7 +470,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('new_round', () => {
-        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) return;
+        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) {
+            return;
+        }
 
         nightInfo.movies = [];
         nightInfo.winner = null;
@@ -459,7 +481,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('get_phase_data', (phaseName) => {
-        if (!preCheck(socket.token, phaseName, false)) return;
+        if (!preCheck(socket.token, phaseName, false)) {
+            return;
+        }
 
         const data = getPhaseData(phaseName, socket.token);
 
@@ -487,31 +511,29 @@ app.get('/movieDetails/:id', (req, res) => {
     if (cachedMovie == null) {
         makeOmdbRequest('i', movieId, (response) => {
             if (response.data.Response === 'True') {
-                let result = response.data;
+                const result = response.data;
                 const movie = {
-                    "id": result.imdbID,
-                    "title": result.Title,
-                    "year": result.Year,
-                    "runtime": result.Runtime,
-                    "genre": result.Genre,
-                    "plot": result.Plot,
-                    "rating": result.imdbRating,
-                    "awards": result.Awards,
-                    "actors": result.Actors,
-                    "director": result.Director,
-                    "writer": result.Writer,
-                    "poster": result.Poster
+                    id: result.imdbID,
+                    title: result.Title,
+                    year: result.Year,
+                    runtime: result.Runtime,
+                    genre: result.Genre,
+                    plot: result.Plot,
+                    rating: result.imdbRating,
+                    awards: result.Awards,
+                    actors: result.Actors,
+                    director: result.Director,
+                    writer: result.Writer,
+                    poster: result.Poster
                 };
 
                 movieDetailsCache.set(movie);
                 res.json(movie);
-            }
-            else {
+            } else {
                 res.status(404).json(response.data.Error);
             }
-        }, { "plot": "full" });
-    }
-    else {
+        }, { plot: 'full' });
+    } else {
         res.json(cachedMovie);
     }
 });

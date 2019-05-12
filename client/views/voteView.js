@@ -15,14 +15,20 @@ export class VoteView extends View {
 
     appendMovieToTable(movieTable, movie, votingSystem) {
         const tableRow = appendTableRow(movieTable, [
-            { "text": movie.title, "func": cell => setAsMovieDetailsLink(cell, movie.id) },
-            { "text": movie.year },
-            { "text": getTimeStringFromRuntime(movie.runtime) },
-            { "text": movie.genre },
-            { "text": movie.plot },
-            { "text": movie.rating, "func": cell => setBackgroundColorRedToGreen(cell) },
             {
-                "func": (cell) => {
+                text: movie.title,
+                func: (cell) => setAsMovieDetailsLink(cell, movie.id)
+            },
+            { text: movie.year },
+            { text: getTimeStringFromRuntime(movie.runtime) },
+            { text: movie.genre },
+            { text: movie.plot },
+            {
+                text: movie.rating,
+                func: (cell) => setBackgroundColorRedToGreen(cell)
+            },
+            {
+                func: (cell) => {
                     switch (votingSystem) {
                         case constants.VOTING_SYSTEMS.MULTI_VOTE: {
                             const voteButton = $('<input>')
@@ -52,12 +58,14 @@ export class VoteView extends View {
                             cell.append(voteButton);
                             break;
                         }
+                        default:
+                            throw new Error(`Unknown voting system name '${votingSystem}'.`);
                     }
                 }
             },
             {
-                "text": sumVotes(movie.votes),
-                "func": (cell) => {
+                text: sumVotes(movie.votes),
+                func: (cell) => {
                     cell.attr('votes-for', movie.id);
                 }
             }
@@ -91,7 +99,7 @@ export class VoteView extends View {
 
         movieTable.append(headingRow);
 
-        movies.forEach(movie => this.appendMovieToTable(movieTable, movie, votingSystem));
+        movies.forEach((movie) => this.appendMovieToTable(movieTable, movie, votingSystem));
 
         this.voteDisplay.append(movieTable);
     }

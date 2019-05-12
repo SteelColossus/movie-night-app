@@ -1,3 +1,5 @@
+'use strict';
+
 class ObjectCache {
     constructor(size, keyProp) {
         this.cache = [];
@@ -7,11 +9,11 @@ class ObjectCache {
     }
 
     has(key) {
-        return this.cache.some(cacheValue => cacheValue[this.keyProp] === key);
+        return this.cache.some((cacheValue) => cacheValue[this.keyProp] === key);
     }
 
     get(key) {
-        return this.cache.find(cacheValue => cacheValue[this.keyProp] === key);
+        return this.cache.find((cacheValue) => cacheValue[this.keyProp] === key);
     }
 
     set(value) {
@@ -20,8 +22,7 @@ class ObjectCache {
                 this.cache[this.index] = value;
                 this.index = (this.index + 1) % this.size;
             }
-        }
-        else {
+        } else {
             throw new Error(`Invalid value to set - must be a non-null object with property '${this.keyProp}'.`);
         }
     }

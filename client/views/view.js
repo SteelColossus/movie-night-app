@@ -36,19 +36,18 @@ export class View {
         return `#${this.viewName}`;
     }
 
-    // Updates the history of the webpage with this view 
+    // Updates the history of the webpage with this view
     updateHistory() {
         const hash = this.getHash();
 
         if (location.hash !== hash) {
             if (View.isFirst === true) {
                 history.replaceState(null, this.viewName, hash);
-            }
-            else {
+            } else {
                 history.pushState(null, this.viewName, hash);
             }
         }
-        
+
         View.isFirst = false;
     }
 
@@ -59,8 +58,8 @@ export class View {
         this.socket.on(eventName, func);
 
         this.socketListeners.push({
-            "name": eventName,
-            "func": func
+            name: eventName,
+            func
         });
 
         // Return the socket for chaining purposes
@@ -74,9 +73,9 @@ export class View {
         element.on(eventName, func);
 
         this.domListeners.push({
-            "element": element,
-            "name": eventName,
-            "func": func
+            element,
+            name: eventName,
+            func
         });
 
         // Return the jQuery object for chaining purposes
@@ -85,9 +84,9 @@ export class View {
 
     // Clear out all of the event listeners
     clearListeners() {
-        this.socketListeners.forEach(listener => this.socket.off(listener.name, listener.func));
+        this.socketListeners.forEach((listener) => this.socket.off(listener.name, listener.func));
         this.socketListeners.length = 0;
-        this.domListeners.forEach(listener => listener.element.off(listener.name, listener.func));
+        this.domListeners.forEach((listener) => listener.element.off(listener.name, listener.func));
         this.domListeners.length = 0;
     }
 }

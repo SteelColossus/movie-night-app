@@ -8,9 +8,13 @@ function truncateText(text, length) {
     if (text.length > maxTextLength) {
         let lastSpaceIndex = maxTextLength;
 
-        while (lastSpaceIndex >= 0 && text[lastSpaceIndex] !== ' ') lastSpaceIndex--;
+        while (lastSpaceIndex >= 0 && text[lastSpaceIndex] !== ' ') {
+            lastSpaceIndex -= 1;
+        }
 
-        if (lastSpaceIndex < 0) lastSpaceIndex = maxTextLength;
+        if (lastSpaceIndex < 0) {
+            lastSpaceIndex = maxTextLength;
+        }
 
         truncatedText = text.substring(0, lastSpaceIndex) + ellipsis;
     }
@@ -24,7 +28,7 @@ const movieId = queryParams.get('id');
 fetch(`../movieDetails/${movieId}`, {
     method: 'GET',
     headers: {
-        "Accept": "application/json"
+        Accept: 'application/json'
     }
 })
     .then((res) => {
@@ -32,8 +36,7 @@ fetch(`../movieDetails/${movieId}`, {
             res.json().then((err) => {
                 alert(err); // eslint-disable-line no-alert
             });
-        }
-        else {
+        } else {
             res.json().then((movie) => {
                 const title = `${movie.title} (${movie.year})`;
 
@@ -47,10 +50,10 @@ fetch(`../movieDetails/${movieId}`, {
 
                 document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);
                 document.getElementById('movieGenre').textContent = movie.genre;
-                
+
                 const bannedGenres = ['Short', 'Documentary'];
 
-                if (bannedGenres.some(genre => movie.genre.includes(genre))) {
+                if (bannedGenres.some((genre) => movie.genre.includes(genre))) {
                     document.getElementById('bannedGenreText').style.removeProperty('display');
                 }
 
@@ -58,7 +61,9 @@ fetch(`../movieDetails/${movieId}`, {
                 document.getElementById('movieActors').textContent = movie.actors;
                 document.getElementById('movieDirector').textContent = movie.director;
                 document.getElementById('movieWriter').textContent = movie.writer;
-                if (movie.awards !== 'N/A') document.getElementById('movieAwards').textContent = movie.awards;
+                if (movie.awards !== 'N/A') {
+                    document.getElementById('movieAwards').textContent = movie.awards;
+                }
                 document.getElementById('movieImdbRating').textContent = movie.rating;
 
                 const posterImage = document.getElementById('posterImage');
