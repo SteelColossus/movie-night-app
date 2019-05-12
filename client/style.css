@@ -38,6 +38,14 @@ body {
     font-style: italic;
 }
 
+#movieSuggestionsList {
+    margin-bottom: 6px;
+}
+
+#noSuggestionsLabel {
+    font-weight: bold;
+}
+
 .subtle-link:hover {
     cursor: pointer;
     color: #0069d9;

@@ -9,6 +9,7 @@ export class SearchView extends View {
         this.suggestionInput = $('#suggestion');
         this.suggestionsLabel = $('#suggestionsLabel');
         this.movieSuggestionsList = $('#movieSuggestionsList');
+        this.noSuggestionsLabel = $('#noSuggestionsLabel');
         this.searchResults = $('#searchResults');
         this.errorMessage = $('#errorMessage');
     }
@@ -25,7 +26,16 @@ export class SearchView extends View {
     }
 
     updateSuggestionsLabel() {
-        this.suggestionsLabel.text(`You have ${pluralize('suggestion', this.maxSuggestions - this.suggestedMovies.length)} left.`);
+        const suggestionsLeft = this.maxSuggestions - this.suggestedMovies.length;
+
+        this.suggestionsLabel.text(`You have ${pluralize('suggestion', suggestionsLeft)} left.`);
+
+        if (suggestionsLeft > 0) {
+            this.noSuggestionsLabel.hide();
+        }
+        else {
+            this.noSuggestionsLabel.show();
+        }
     }
 
     clearSearch() {
