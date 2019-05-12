@@ -65,6 +65,12 @@
                     required pattern=".*\S.*">
                 <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
                 <select id="votingSystem" class="form-control ml-2 mr-2" name="votingSystem"></select>
+                <label id="numSuggestionsLabel" for="numSuggestions">Choose number of suggestions:</label>
+                <select id="numSuggestions" class="form-control ml-2 mr-2" name="numSuggestions">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
                 <input type="submit" class="btn btn-primary" value="Start!">
             </div>
         </form>
@@ -82,6 +88,12 @@
                 </a>
             </div>
         </form>
+
+        <div id="suggestionsContainer">
+            <span id="suggestionsLabel"></span>
+            <ul id="movieSuggestionsList"></ul>
+            <span id="noSuggestionsLabel" style="display: none">If you suggest another movie, your current suggestions will be cleared.</span>
+        </div>
 
         <div id="searchResults" style="display: none">
             <h5>Choose a movie to suggest below:</h5>

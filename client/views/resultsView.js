@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { sumVotes } from './viewFunctions.js';
+import { sumVotes, pluralize } from './viewFunctions.js';
 
 export class ResultsView extends View {
     constructor(socket, animTime, isHost, movies, winner) {
@@ -63,7 +63,7 @@ export class ResultsView extends View {
 
     onViewShown() {
         // Show different text if there were no votes for any movies
-        $('#winner').text((this.winner != null) ? `Winner is ${this.winner.title} with ${this.winner.votes} vote${this.winner.votes !== 1 ? 's' : ''}!` : 'No one voted for any movies!');
+        $('#winner').text((this.winner != null) ? `Winner is ${this.winner.title} with ${pluralize('vote', this.winner.votes)}!` : 'No one voted for any movies!');
 
         if (this.winner != null) {
             this.createChart(this.movies);

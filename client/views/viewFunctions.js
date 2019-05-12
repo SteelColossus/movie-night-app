@@ -23,6 +23,10 @@ export function appendTableRow(table, objList) {
     return tableRow;
 }
 
+export function pluralize(singular, value) {
+    return `${value} ${singular}${value !== 1 ? 's' : ''}`;
+}
+
 export function getTimeStringFromRuntime(runtime) {
     const mins = parseInt(runtime.substring(0, runtime.indexOf(' ')), 10);
     const hours = Math.floor(mins / 60);
@@ -30,7 +34,7 @@ export function getTimeStringFromRuntime(runtime) {
     let timeString = '';
 
     if (hours > 0) {
-        timeString += `${hours} hour${hours > 1 ? 's' : ''}`;
+        timeString += pluralize('hour', hours);
     }
 
     if (hours > 0 && minsLeft > 0) {
@@ -38,24 +42,24 @@ export function getTimeStringFromRuntime(runtime) {
     }
 
     if (minsLeft > 0) {
-        timeString += `${minsLeft} min${minsLeft > 1 ? 's' : ''}`;
+        timeString += pluralize('min', minsLeft);
     }
 
     return timeString;
 }
 
-export function setBackgroundColorRedToGreen(cell) {
-    const num = parseFloat(cell.text());
+export function setBackgroundColorRedToGreen(element) {
+    const num = parseFloat(element.text());
     const g = Math.round(num * (255 / 10));
     const r = 255 - g;
     const b = 0;
     const a = 0.5;
 
-    cell.css('background-color', `rgba(${r},${g},${b},${a})`);
+    element.css('background-color', `rgba(${r},${g},${b},${a})`);
 }
 
-export function setAsMovieDetailsLink(cell, movieId) {
-    cell.addClass('subtle-link')
+export function setAsMovieDetailsLink(element, movieId) {
+    element.addClass('subtle-link')
         .attr('title', 'View more details for this movie')
         .click(() => {
             window.open(`/movie?id=${movieId}`);

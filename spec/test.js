@@ -33,8 +33,8 @@ describe('integration test', () => {
 
         const usernameIndicator = await (await getVisibleElement(By.id('usernameIndicator'))).getText();
         expect(usernameIndicator).toBe('User 1', 'Username indicator is not displaying the correct text.');
-        await (await getVisibleElement(By.id('votingSystem'))).click();
-        await (await getVisibleElement(By.css('option[value="Multi Vote"]'))).click();
+        await (await getVisibleElement(By.css('#votingSystem > option[value="Multi Vote"]'))).click();
+        await (await getVisibleElement(By.css('#numSuggestions > option[value="1"]'))).click();
         const nightName = await getVisibleElement(By.id('nightName'));
         await nightName.sendKeys('My Movie Night', Key.ENTER);
 

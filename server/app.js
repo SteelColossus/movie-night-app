@@ -58,6 +58,10 @@ function sumVotes(votesObj) {
     return Object.values(votesObj).reduce((a, b) => a + b, 0);
 }
 
+function getSuggestedMovies(token) {
+    return Object.values(nightInfo.movies).filter(movie => movie.suggester === token);
+}
+
 function setWinner() {
     if (nightInfo.winner != null) {
         return;
@@ -104,7 +108,8 @@ function getPhaseData(phaseName, token) {
             data = {
                 "name": nightInfo.name,
                 "movies": nightInfo.movies,
-                "doneSuggesting": nightInfo.movies.some(m => m.suggester === token)
+                "suggestedMovies": getSuggestedMovies(token),
+                "maxSuggestions": nightInfo.maxSuggestions
             };
             break;
         case constants.PHASES.VOTE:
@@ -233,6 +238,7 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
+        nightInfo.maxSuggestions = parseInt(info.numSuggestions, 10);
         host = socket.token;
 
         if (nightAlreadyHosted) {
@@ -305,7 +311,7 @@ io.on('connection', (socket) => {
 
         // Disallow multiple people from choosing the same movie
         if (nightInfo.movies.some(x => x.id === movieId)) {
-            socket.emit('request_different_movie', 'Someone else has already chosen that movie.');
+            socket.emit('request_different_movie', 'Someone has already chosen that movie.');
             return;
         }
 
@@ -351,17 +357,23 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            const removedMovieIds = [];
+            let suggestionsLeft = nightInfo.maxSuggestions - getSuggestedMovies(socket.token).length;
 
-            // Remove all the previous movie suggestions this user has made
-            for (let i = 0; i < nightInfo.movies.length; i++) {
-                if (nightInfo.movies[i].suggester === socket.token) {
-                    removedMovieIds.push(nightInfo.movies[i].id);
-                    nightInfo.movies.splice(i, 1);
+            if (suggestionsLeft <= 0) {
+                // Remove all the previous movie suggestions this user has made
+                for (let i = nightInfo.movies.length - 1; i >= 0; i--) {
+                    if (nightInfo.movies[i].suggester === socket.token) {
+                        socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
+                        nightInfo.movies.splice(i, 1);
+                    }
                 }
+
+                suggestionsLeft = nightInfo.maxSuggestions;
             }
 
             nightInfo.movies.push(movie);
+
+            suggestionsLeft -= 1;
 
             const data = {
                 "movies": nightInfo.movies
@@ -371,12 +383,14 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
-            socket.emit('movie_suggestions', data);
-            socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
+            if (suggestionsLeft <= 0) {
+                socket.emit('movie_suggestions_done', data);
+            }
+            else {
+                socket.emit('movie_suggestion_added', movie);
+            }
 
-            removedMovieIds.forEach((removedMovieId) => {
-                socket.broadcast.to(nightInfo.name).emit('removed_movie', removedMovieId);
-            });
+            socket.broadcast.to(nightInfo.name).emit('new_movie', movie);
         });
     });
 

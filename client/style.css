@@ -19,7 +19,7 @@ body {
     text-align: right;
 }
 
-#votingSystemLabel {
+#votingSystemLabel, #numSuggestionsLabel {
     font-weight: bold;
 }
 
@@ -30,6 +30,20 @@ body {
 .popover-body ul {
     padding-left: 20px;
     margin-bottom: 0;
+}
+
+#suggestionsContainer {
+    margin-bottom: 12px;
+    margin-left: 6px;
+    font-style: italic;
+}
+
+#movieSuggestionsList {
+    margin-bottom: 6px;
+}
+
+#noSuggestionsLabel {
+    font-weight: bold;
 }
 
 .subtle-link:hover {

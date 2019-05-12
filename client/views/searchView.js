@@ -1,10 +1,15 @@
 import { View } from './view.js';
-import { appendTableRow, setAsMovieDetailsLink } from './viewFunctions.js';
+import { appendTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SearchView extends View {
-    constructor(socket, animTime) {
+    constructor(socket, animTime, suggestedMovies, maxSuggestions) {
         super(SearchView.viewName, socket, animTime);
+        this.suggestedMovies = suggestedMovies;
+        this.maxSuggestions = maxSuggestions;
         this.suggestionInput = $('#suggestion');
+        this.suggestionsLabel = $('#suggestionsLabel');
+        this.movieSuggestionsList = $('#movieSuggestionsList');
+        this.noSuggestionsLabel = $('#noSuggestionsLabel');
         this.searchResults = $('#searchResults');
         this.errorMessage = $('#errorMessage');
     }
@@ -18,6 +23,34 @@ export class SearchView extends View {
 
         // Stop the page from refreshing
         return false;
+    }
+
+    updateSuggestionsLabel() {
+        const suggestionsLeft = this.maxSuggestions - this.suggestedMovies.length;
+
+        this.suggestionsLabel.text(`You have ${pluralize('suggestion', suggestionsLeft)} left.`);
+
+        if (suggestionsLeft > 0) {
+            this.noSuggestionsLabel.hide();
+        }
+        else {
+            this.noSuggestionsLabel.show();
+        }
+    }
+
+    clearSearch() {
+        this.suggestionInput.val('');
+        this.searchResults.hide();
+    }
+
+    updateSuggestedMovies() {
+        this.movieSuggestionsList.empty();
+
+        this.suggestedMovies.forEach((movie) => {
+            const listItem = $('<li>').text(`${movie.title} (${movie.year})`);
+            setAsMovieDetailsLink(listItem, movie.id);
+            this.movieSuggestionsList.append(listItem);
+        });
     }
 
     handleSearch(searchData) {
@@ -68,7 +101,22 @@ export class SearchView extends View {
         alert(fullMessage); // eslint-disable-line no-alert
     }
 
+    handleSuggestionAdded(movie) {
+        this.clearSearch();
+
+        if (this.suggestedMovies.length >= this.maxSuggestions) {
+            this.suggestedMovies.length = 0;
+        }
+
+        this.suggestedMovies.push(movie);
+        this.updateSuggestionsLabel();
+        this.updateSuggestedMovies();
+    }
+
     onViewShown() {
+        this.updateSuggestionsLabel();
+        this.updateSuggestedMovies();
+
         $('#movieInfo').popover({
             "trigger": "hover focus",
             "placement": "bottom",
@@ -92,11 +140,12 @@ export class SearchView extends View {
         this.addSocketListener('movie_search_results', this.handleSearch);
 
         this.addSocketListener('request_different_movie', this.handleMovieRejected);
+
+        this.addSocketListener('movie_suggestion_added', this.handleSuggestionAdded);
     }
 
     onViewHidden() {
-        this.suggestionInput.val('');
-        this.searchResults.hide();
+        this.clearSearch();
     }
 }
 
