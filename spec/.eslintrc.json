@@ -1,8 +1,9 @@
 {
     "parserOptions": {
-        "ecmaVersion": 2017
+        "ecmaVersion": 8
     },
     "env": {
-        "jasmine": true
+        "jasmine": true,
+        "node": true
     }
 }

@@ -1,4 +1,11 @@
 {
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "env": {
+        "browser": true,
+        "jquery": true
+    },
     "globals": {
         "io": false,
         "Chart": false,
