@@ -10,13 +10,13 @@ export class HostView extends View {
     }
 
     formSubmit() {
-        let name = this.nightInput.val().toString().trim();
-        let votingSystem = this.votingSystemInput.val();
-        let numSuggestions = this.numSuggestionsInput.val();
-        let nightInfo = {
-            "name": name,
-            "votingSystem": votingSystem,
-            "numSuggestions": numSuggestions
+        const name = this.nightInput.val().toString().trim();
+        const votingSystem = this.votingSystemInput.val();
+        const numSuggestions = this.numSuggestionsInput.val();
+        const nightInfo = {
+            name,
+            votingSystem,
+            numSuggestions
         };
 
         this.socket.emit('host_night', nightInfo);

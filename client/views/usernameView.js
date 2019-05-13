@@ -8,11 +8,11 @@ export class UsernameView extends View {
     }
 
     formSubmit() {
-        let username = this.usernameInput.val().toString().trim();
+        const username = this.usernameInput.val().toString().trim();
 
         this.socket.emit('new_user', {
-            "token": this.userToken,
-            "username": username
+            token: this.userToken,
+            username
         });
 
         // Stop the page from refreshing
