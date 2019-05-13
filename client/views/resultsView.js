@@ -50,6 +50,7 @@ export class ResultsView extends View {
                 ]
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     yAxes: [
                         {

@@ -113,3 +113,9 @@ body {
     margin-left: 10px;
     vertical-align: top;
 }
+
+#voteChartContainer {
+    position: relative;
+    width: 100%;
+    height: 75vh;
+}
