@@ -36,7 +36,7 @@ function switchView(view, forceRefresh = false) {
     }
 }
 
-function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true) {
+function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true, forceRefresh = false) {
     let view = null;
 
     switch (viewName) {
@@ -63,7 +63,7 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
     }
 
     if (view != null) {
-        switchView(view, false);
+        switchView(view, forceRefresh);
     }
 }
 
@@ -182,4 +182,8 @@ socket.on('movie_suggestions_done', (data) => {
 socket.on('get_phase_data', (data) => {
     const viewName = location.hash.substring(1);
     switchViewWithName(viewName, data, data.isHost, data.isExactPhase);
+});
+
+socket.on('new_voting_stage', (data) => {
+    switchViewWithName(VoteView.viewName, data, data.isHost, true, true);
 });

@@ -6,7 +6,7 @@ export class ResultsView extends View {
         super(ResultsView.viewName, socket, animTime);
         this.isHost = isHost;
         this.movies = movies;
-        this.winner = winner;
+        this.winner = movies.find((movie) => movie.id === winner);
         this.canvas = $('#voteChart');
         this.endButton = $('#endButton');
         this.newMovieButton = $('#newMovieButton');
@@ -81,7 +81,8 @@ export class ResultsView extends View {
             if (numRemainingMovies === 1) {
                 winnerText = `Winner is ${this.winner.title}!`;
             } else {
-                winnerText = `Winner is ${this.winner.title} with ${pluralize('vote', this.winner.votes)}!`;
+                const totalVotes = sumVotes(this.winner.votes);
+                winnerText = `Winner is ${this.winner.title} with ${pluralize('vote', totalVotes)}!`;
             }
         }
         $('#winner').text(winnerText);

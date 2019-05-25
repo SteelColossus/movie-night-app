@@ -64,32 +64,34 @@ function getSuggestedMovies(token) {
     return Object.values(nightInfo.movies).filter((movie) => movie.suggester === token);
 }
 
-function setWinner() {
+function getWinners() {
     if (nightInfo.winner != null) {
-        return;
+        return [nightInfo.winner];
     }
 
     // There are two ways you can be crowned the winning movie of a movie night - either by getting the most votes, or being the last one remaining.
-    const movieResults = nightInfo.movies.filter((movie) => movie.removed === false)
-        .map((movie) => ({
-            title: movie.title,
-            votes: sumVotes(movie.votes)
-        }));
+    const nonRemovedMovies = nightInfo.movies.filter((movie) => movie.removed === false);
 
-    if (movieResults.length === 1) {
+    if (nonRemovedMovies.length === 1) {
         // If there's only one movie remaining, the winner is the one remaining
-        nightInfo.winner = movieResults[0];
-    } else {
-        // Otherwise, we have to see which one has the most votes
-        const highestVotes = movieResults.reduce((max, movie) => (movie.votes > max ? movie.votes : max), 0);
-
-        if (highestVotes > 0) {
-            const winners = movieResults.filter((movie) => movie.votes === highestVotes);
-
-            // Pick a random winner - this is only temporary until something more visual gets added
-            nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
-        }
+        return [nonRemovedMovies[0].id];
     }
+
+    const movieResults = nonRemovedMovies.map((movie) => ({
+        id: movie.id,
+        totalVotes: sumVotes(movie.votes)
+    }));
+
+    // Otherwise, we have to see which one has the most votes
+    const highestVotes = movieResults.reduce((max, movie) => (movie.totalVotes > max ? movie.totalVotes : max), 0);
+
+    if (highestVotes > 0) {
+        const winners = movieResults.filter((movie) => movie.totalVotes === highestVotes);
+
+        return winners.map((movie) => movie.id);
+    }
+
+    return [];
 }
 
 function isLoggedIn(token) {
@@ -474,9 +476,22 @@ io.on('connection', (socket) => {
             return;
         }
 
-        setWinner();
+        const winners = getWinners();
 
-        switchPhase(socket, constants.PHASES.RESULTS);
+        if (winners.length > 1) {
+            // If there's multiple movies tied as winners, we need to go to the random voting stage to decide a winner
+            socket.emit('new_voting_stage', {
+                movies: nightInfo.movies.filter((movie) => winners.includes(movie.id)),
+                votingSystem: constants.VOTING_SYSTEMS.RANDOM,
+                isHost: host === socket.token
+            });
+        } else {
+            if (winners.length === 1) {
+                nightInfo.winner = winners[0];
+            }
+
+            switchPhase(socket, constants.PHASES.RESULTS);
+        }
     });
 
     socket.on('end_night', () => {
