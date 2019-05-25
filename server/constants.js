@@ -9,7 +9,8 @@ if (typeof module === 'undefined') {
 // Stores all constants used by both the client and server
 
 exports.VOTING_SYSTEMS = {
-    MULTI_VOTE: 'Multi Vote'
+    MULTI_VOTE: 'Multi Vote',
+    RANDOM: 'Random'
 };
 
 exports.PHASES = {

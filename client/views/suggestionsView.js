@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
+import { createTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {
@@ -8,12 +8,12 @@ export class SuggestionsView extends View {
         this.isHost = isHost;
         this.movies = movies;
         this.isExactPhase = isExactPhase;
-        this.movieTable = $('#movieTable');
+        this.movieTableBody = $('#movieTable > tbody');
         this.closeSuggestionsButton = $('#closeSuggestionsButton');
     }
 
     appendMovieToTable(movie) {
-        const tableRow = appendTableRow(this.movieTable, [
+        const tableRow = createTableRow([
             {
                 text: movie.title,
                 func: (cell) => setAsMovieDetailsLink(cell, movie.id)
@@ -35,6 +35,8 @@ export class SuggestionsView extends View {
 
         tableRow.attr('movie-id', movie.id);
 
+        this.movieTableBody.append(tableRow);
+
         return tableRow;
     }
 
@@ -48,7 +50,7 @@ export class SuggestionsView extends View {
     }
 
     handleRemovedMovie(movieId) {
-        const movieRow = this.movieTable.find(`tr[movie-id="${movieId}"]`);
+        const movieRow = this.movieTableBody.find(`tr[movie-id="${movieId}"]`);
         movieRow.remove();
     }
 
@@ -68,7 +70,7 @@ export class SuggestionsView extends View {
     onViewHidden() {
         this.closeSuggestionsButton.hide();
         // Remove all the existing movies
-        this.movieTable.find('tr:not(:first-child)').remove();
+        this.movieTableBody.empty();
     }
 }
 

@@ -2,7 +2,7 @@ export function sumVotes(votesObj) {
     return Object.values(votesObj).reduce((a, b) => a + b, 0);
 }
 
-export function appendTableRow(table, objList) {
+export function createTableRow(objList) {
     const tableRow = $('<tr>');
 
     objList.forEach((obj) => {
@@ -19,7 +19,6 @@ export function appendTableRow(table, objList) {
         tableRow.append(cell);
     });
 
-    table.append(tableRow);
     return tableRow;
 }
 

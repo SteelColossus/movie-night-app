@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { appendTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
+import { createTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SearchView extends View {
     constructor(socket, animTime, suggestedMovies, maxSuggestions) {
@@ -60,16 +60,16 @@ export class SearchView extends View {
 
         this.errorMessage.hide(this.animTime);
 
-        const suggestTable = $('#suggestionTable');
+        const suggestTableBody = $('#suggestionTable > tbody');
 
         // Remove all the existing suggestions
-        suggestTable.find('tr:not(:first-child)').remove();
+        suggestTableBody.empty();
 
         const searchDataResults = searchData.results;
 
         // Create the suggestion table from the API results
         searchDataResults.forEach((result) => {
-            appendTableRow(suggestTable, [
+            const tableRow = createTableRow([
                 {
                     text: result.title,
                     func: (cell) => setAsMovieDetailsLink(cell, result.id)
@@ -92,6 +92,8 @@ export class SearchView extends View {
                     }
                 }
             ]);
+
+            suggestTableBody.append(tableRow);
         });
 
         this.searchResults.show(this.animTime);

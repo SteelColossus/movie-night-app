@@ -98,36 +98,38 @@
         <div id="searchResults" style="display: none">
             <h5>Choose a movie to suggest below:</h5>
             <table id="suggestionTable" class="table">
-                <tr>
-                    <th scope="col">Suggestion</th>
-                    <th scope="col">Year</th>
-                    <th></th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th scope="col">Suggestion</th>
+                        <th scope="col">Year</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
             </table>
         </div>
     </div>
 
     <div id="suggestionsView" style="display: none">
         <table id="movieTable" class="table">
-            <tr>
-                <th scope="col">Movie</th>
-                <th scope="col">Year</th>
-                <th scope="col">Runtime</th>
-                <th scope="col">Genre</th>
-                <th scope="col">Plot</th>
-                <th scope="col">IMDB Rating</th>
-                <th scope="col">Awards</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th scope="col">Movie</th>
+                    <th scope="col">Year</th>
+                    <th scope="col">Runtime</th>
+                    <th scope="col">Genre</th>
+                    <th scope="col">Plot</th>
+                    <th scope="col">IMDB Rating</th>
+                    <th scope="col">Awards</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
         </table>
 
         <input id="closeSuggestionsButton" type="button" class="btn btn-danger mb-2" value="Close Suggestions" style="display: none">
     </div>
 
-    <div id="voteView" style="display: none">
-        <h5>Choose a movie to vote for below:</h5>
-        <div id="voteDisplay"></div>
-        <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
-    </div>
+    <div id="voteView" style="display: none"></div>
 
     <div id="resultsView" style="display: none">
         <div id="winner" class="mb-2"></div>

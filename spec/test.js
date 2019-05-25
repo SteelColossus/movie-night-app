@@ -58,8 +58,8 @@ describe('integration test', () => {
         await getVisibleElement(By.xpath('//table[@id="movieTable"]//tr/td[text() = "2 hours 37 mins"]'));
         await (await getVisibleElement(By.id('closeSuggestionsButton'))).click();
 
-        const voteButton = await getVisibleElement(By.css('table#movieTable td > input[type="button"][value="Vote!"]'));
-        const voteText = await driver.findElement(By.css('table#movieTable td[votes-for]'));
+        const voteButton = await getVisibleElement(By.css('table#voteTable td > input[type="button"][value="Vote!"]'));
+        const voteText = await driver.findElement(By.css('table#voteTable td[votes-for]'));
         async function checkVoting(val) {
             await voteButton.click();
             await driver.sleep(500);
@@ -72,7 +72,6 @@ describe('integration test', () => {
 
         const winnerText = await (await getVisibleElement(By.id('winner'))).getText();
         expect(winnerText).toContain('Harry Potter and the Goblet of Fire', 'The winner is incorrectly displayed.');
-        expect(winnerText).toContain('1', 'The winner is incorrectly displayed.');
         await getVisibleElement(By.id('voteChart'), 1000);
         await (await driver.findElement(By.id('endButton'))).click();
 

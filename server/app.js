@@ -69,18 +69,26 @@ function setWinner() {
         return;
     }
 
-    const movieResults = nightInfo.movies.map((movie) => ({
-        title: movie.title,
-        votes: sumVotes(movie.votes)
-    }));
+    // There are two ways you can be crowned the winning movie of a movie night - either by getting the most votes, or being the last one remaining.
+    const movieResults = nightInfo.movies.filter((movie) => movie.removed === false)
+        .map((movie) => ({
+            title: movie.title,
+            votes: sumVotes(movie.votes)
+        }));
 
-    const highestVotes = movieResults.reduce((max, movie) => (movie.votes > max ? movie.votes : max), 0);
+    if (movieResults.length === 1) {
+        // If there's only one movie remaining, the winner is the one remaining
+        nightInfo.winner = movieResults[0];
+    } else {
+        // Otherwise, we have to see which one has the most votes
+        const highestVotes = movieResults.reduce((max, movie) => (movie.votes > max ? movie.votes : max), 0);
 
-    if (highestVotes > 0) {
-        const winners = movieResults.filter((movie) => movie.votes === highestVotes);
+        if (highestVotes > 0) {
+            const winners = movieResults.filter((movie) => movie.votes === highestVotes);
 
-        // Pick a random winner - this is only temporary until something more visual gets added
-        nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
+            // Pick a random winner - this is only temporary until something more visual gets added
+            nightInfo.winner = winners[Math.floor(Math.random() * winners.length)];
+        }
     }
 }
 
@@ -332,7 +340,8 @@ io.on('connection', (socket) => {
                 rating: result.imdbRating,
                 awards: result.Awards,
                 suggester: socket.token,
-                votes: {}
+                votes: {},
+                removed: false
             };
 
             const bannedGenres = ['Short', 'Documentary'];
@@ -433,6 +442,23 @@ io.on('connection', (socket) => {
         });
 
         io.to(nightInfo.name).emit('votes_changed', newVotes);
+    });
+
+    socket.on('remove_random_movie', () => {
+        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) {
+            return;
+        }
+
+        const nonRemovedMovies = nightInfo.movies.filter((movie) => movie.removed === false);
+
+        if (nonRemovedMovies.length > 1) {
+            const randomMovie = nonRemovedMovies[Math.floor(Math.random() * nonRemovedMovies.length)];
+
+            // Remove the chosen movie from the night
+            randomMovie.removed = true;
+
+            io.to(nightInfo.name).emit('movie_removed', randomMovie.id);
+        }
     });
 
     socket.on('close_suggestions', () => {

@@ -67,10 +67,24 @@ export class ResultsView extends View {
     }
 
     onViewShown() {
-        // Show different text if there were no votes for any movies
-        $('#winner').text((this.winner != null)
-            ? `Winner is ${this.winner.title} with ${pluralize('vote', this.winner.votes)}!`
-            : 'No one voted for any movies!');
+        let winnerText = 'No one voted for any movies!';
+        let numRemainingMovies = 0;
+
+        this.movies.forEach((movie) => {
+            if (movie.removed === false) {
+                numRemainingMovies += 1;
+            }
+        });
+
+        // Show different text depending on the outcome
+        if (this.winner != null) {
+            if (numRemainingMovies === 1) {
+                winnerText = `Winner is ${this.winner.title}!`;
+            } else {
+                winnerText = `Winner is ${this.winner.title} with ${pluralize('vote', this.winner.votes)}!`;
+            }
+        }
+        $('#winner').text(winnerText);
 
         if (this.winner != null) {
             this.createChart(this.movies);
