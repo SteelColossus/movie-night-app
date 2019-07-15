@@ -85,6 +85,36 @@ export class VoteView extends View {
         return tableRow;
     }
 
+    createRankedTableRow(movie, rank) {
+        const tableRow = createTableRow([
+            {
+                text: movie.title,
+                func: (cell) => setAsMovieDetailsLink(cell, movie.id)
+            },
+            { text: movie.year },
+            { text: getTimeStringFromRuntime(movie.runtime) },
+            { text: movie.genre },
+            { text: movie.plot },
+            {
+                text: movie.rating,
+                func: (cell) => setBackgroundColorRedToGreen(cell)
+            },
+            {
+                text: rank,
+                func: (cell) => {
+                    cell.addClass('rank-cell')
+                        .data('movie-id', movie.id);
+                }
+            }
+        ]);
+
+        if (movie.suggester === this.userToken) {
+            tableRow.addClass('suggester-row');
+        }
+
+        return tableRow;
+    }
+
     handleVotesChanged(newVotes) {
         Object.keys(newVotes).forEach((key) => {
             const votesCell = this.voteView.find(`td[votes-for=${key}]`);
@@ -198,6 +228,94 @@ export class VoteView extends View {
         }
     }
 
+    setupRankedView() {
+        const viewHtml = `
+            <link href="/views/external/jquery-ui.min.css" rel="stylesheet">
+
+            <style>
+            #voteTable > tbody > tr:hover {
+                cursor: move;
+                background-color: #e5e5e5;
+            }
+            </style>
+
+            <h5>Re-arrange the movies in the order you most want to watch them:</h5>
+            <table id="voteTable" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Movie</th>
+                        <th scope="col">Year</th>
+                        <th scope="col">Runtime</th>
+                        <th scope="col">Genre</th>
+                        <th scope="col">Plot</th>
+                        <th scope="col">IMDB Rating</th>
+                        <th scope="col">Rank</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
+
+            <script src="/views/external/jquery-ui.min.js"></script>
+        `;
+
+        this.voteView.html(viewHtml);
+
+        const voteTableBody = $('#voteTable > tbody');
+
+        let rank = 1;
+
+        const initialVoteDeltas = {};
+
+        this.movies.forEach((movie) => {
+            if (movie.removed === false) {
+                if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
+                    initialVoteDeltas[movie.id] = this.movies.length - rank + 1;
+                }
+
+                const tableRow = this.createRankedTableRow(movie, rank);
+                voteTableBody.append(tableRow);
+
+                rank += 1;
+            }
+        });
+
+        if (Object.keys(initialVoteDeltas).length !== 0) {
+            this.socket.emit('votes_changed', initialVoteDeltas);
+        }
+
+        voteTableBody.sortable({
+            update: () => {
+                const rankCells = voteTableBody.find('.rank-cell');
+
+                const changedVoteDeltas = {};
+
+                for (let i = 0; i < rankCells.length; i++) {
+                    const rankCell = $(rankCells[i]);
+                    const currentRank = Number.parseInt(rankCell.text(), 10);
+                    const newRank = i + 1;
+
+                    if (newRank !== currentRank) {
+                        const movieId = rankCell.data('movie-id');
+                        changedVoteDeltas[movieId] = currentRank - newRank;
+                    }
+                }
+
+                if (Object.keys(changedVoteDeltas).length !== 0) {
+                    this.socket.emit('votes_changed', changedVoteDeltas);
+                }
+            }
+        });
+
+        if (this.isHost === true && this.isExactPhase === true) {
+            const closeVotingButton = $('#closeVotingButton');
+
+            this.addDOMListener(closeVotingButton, 'click', () => {
+                this.socket.emit('close_voting');
+            }).show(this.animTime);
+        }
+    }
+
     onViewShown() {
         switch (this.votingSystem) {
             case constants.VOTING_SYSTEMS.MULTI_VOTE:
@@ -205,6 +323,9 @@ export class VoteView extends View {
                 break;
             case constants.VOTING_SYSTEMS.RANDOM:
                 this.setupRandomView();
+                break;
+            case constants.VOTING_SYSTEMS.RANKED:
+                this.setupRankedView();
                 break;
             default:
                 throw new Error(`Unknown voting system '${this.votingSystem}'.`);

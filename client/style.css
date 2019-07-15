@@ -56,7 +56,7 @@ body {
     font-weight: 600;
 }
 
-.vote-cell {
+.vote-cell, .rank-cell {
     text-align: center;
 }
 
