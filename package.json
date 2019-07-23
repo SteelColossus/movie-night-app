@@ -9,23 +9,26 @@
     "lint": "node_modules/.bin/eslint **/*.js",
     "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
   },
-  "author": "steelcolossus",
+  "author": "Michael Winkworth",
+  "contributors": [
+    "Will Thorpe"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/SteelColossus/movie-night-app.git"
   },
   "private": true,
   "dependencies": {
-    "axios": "^0.18.0",
-    "express": "^4.17.0",
+    "axios": "^0.19.0",
+    "express": "^4.17.1",
     "minimist": "^1.2.0",
     "serve-favicon": "^2.5.0",
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
+    "eslint": "^6.1.0",
     "htmlhint": "^0.11.0",
     "jasmine": "^3.4.0",
-    "selenium-webdriver": "^4.0.0-alpha.1"
+    "selenium-webdriver": "^4.0.0-alpha.4"
   }
 }
