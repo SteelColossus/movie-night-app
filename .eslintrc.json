@@ -102,6 +102,7 @@
                 "allowForLoopAfterthoughts": true
             }
         ],
-        "no-confusing-arrow": "off"
+        "no-confusing-arrow": "off",
+        "function-call-argument-newline": "off"
     }
 }
