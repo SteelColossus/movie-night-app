@@ -53,7 +53,7 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
             break;
         case VoteView.viewName:
-            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, isExactPhase);
+            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, data.numUsers, isExactPhase);
             break;
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);

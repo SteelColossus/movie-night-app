@@ -2,12 +2,13 @@ import { View } from './view.js';
 import { createTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime, userToken, isHost, movies, votingSystem, isExactPhase) {
+    constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, isExactPhase) {
         super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
         this.movies = movies;
         this.votingSystem = votingSystem;
+        this.numUsers = numUsers;
         this.isExactPhase = isExactPhase;
         this.voteView = $('#voteView');
     }
@@ -111,6 +112,46 @@ export class VoteView extends View {
         if (movie.suggester === this.userToken) {
             tableRow.addClass('suggester-row');
         }
+
+        return tableRow;
+    }
+
+    createVetoTableRow(movie) {
+        const tableRow = createTableRow([
+            {
+                text: movie.title,
+                func: (cell) => setAsMovieDetailsLink(cell, movie.id)
+            },
+            { text: movie.year },
+            { text: getTimeStringFromRuntime(movie.runtime) },
+            { text: movie.genre },
+            { text: movie.plot },
+            {
+                text: movie.rating,
+                func: (cell) => setBackgroundColorRedToGreen(cell)
+            },
+            {
+                func: (cell) => {
+                    const vetoButton = $('<input>')
+                        .prop('type', 'button')
+                        .val('Veto!')
+                        .addClass('btn btn-primary veto-button')
+                        .prop('disabled', true)
+                        .click(() => {
+                            this.socket.emit('remove_movie', movie.id);
+                        });
+
+                    cell.addClass('veto-cell');
+                    cell.append(vetoButton);
+                }
+            }
+        ]);
+
+        if (movie.suggester === this.userToken) {
+            tableRow.addClass('suggester-row');
+        }
+
+        tableRow.attr('movie-id', movie.id);
 
         return tableRow;
     }
@@ -316,6 +357,61 @@ export class VoteView extends View {
         }
     }
 
+    setupVetoView() {
+        const viewHtml = `
+            <h5>Choose a movie to veto below:</h5>
+            <table id="voteTable" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Movie</th>
+                        <th scope="col">Year</th>
+                        <th scope="col">Runtime</th>
+                        <th scope="col">Genre</th>
+                        <th scope="col">Plot</th>
+                        <th scope="col">IMDB Rating</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        `;
+
+        this.voteView.html(viewHtml);
+
+        const voteTableBody = $('#voteTable > tbody');
+
+        this.movies.forEach((movie) => {
+            if (movie.removed === false) {
+                const tableRow = this.createVetoTableRow(movie);
+                voteTableBody.append(tableRow);
+            }
+        });
+
+        this.addSocketListener('movie_removed', (removedMovieId) => {
+            this.handleMovieRemoved(removedMovieId);
+
+            let numRemainingMovies = 0;
+
+            this.movies.forEach((movie) => {
+                if (movie.removed === false) {
+                    numRemainingMovies += 1;
+                }
+            });
+
+            if (numRemainingMovies <= this.numUsers) {
+                this.socket.emit('close_voting');
+            }
+        });
+
+        this.addSocketListener('get_chosen_user', (userToken) => {
+            const enableButtons = this.isExactPhase === true && this.userToken === userToken;
+
+            $('.veto-button').prop('disabled', !enableButtons);
+        });
+
+        this.socket.emit('get_chosen_user');
+    }
+
     onViewShown() {
         switch (this.votingSystem) {
             case constants.VOTING_SYSTEMS.MULTI_VOTE:
@@ -326,6 +422,9 @@ export class VoteView extends View {
                 break;
             case constants.VOTING_SYSTEMS.RANKED:
                 this.setupRankedView();
+                break;
+            case constants.VOTING_SYSTEMS.VETO:
+                this.setupVetoView();
                 break;
             default:
                 throw new Error(`Unknown voting system '${this.votingSystem}'.`);

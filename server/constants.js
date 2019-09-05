@@ -11,7 +11,8 @@ if (typeof module === 'undefined') {
 exports.VOTING_SYSTEMS = {
     MULTI_VOTE: 'Multi Vote',
     RANDOM: 'Random',
-    RANKED: 'Ranked'
+    RANKED: 'Ranked',
+    VETO: 'Veto'
 };
 
 exports.PHASES = {

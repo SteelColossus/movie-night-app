@@ -25,6 +25,10 @@ let host = null;
 const users = {};
 const nightInfo = {};
 
+const usersToChooseFrom = [];
+let chosenUserIndex = null;
+let chooseOrderIsForward = true;
+
 const orderedPhases = [
     constants.PHASES.HOST,
     constants.PHASES.SUGGEST,
@@ -85,7 +89,7 @@ function getWinners() {
     // Otherwise, we have to see which one has the most votes
     const highestVotes = movieResults.reduce((max, movie) => (movie.totalVotes > max ? movie.totalVotes : max), 0);
 
-    if (highestVotes > 0) {
+    if (highestVotes > 0 || nonRemovedMovies.length < nightInfo.movies.length) {
         const winners = movieResults.filter((movie) => movie.totalVotes === highestVotes);
 
         return winners.map((movie) => movie.id);
@@ -130,7 +134,8 @@ function getPhaseData(phaseName, token) {
             data = {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
-                votingSystem: nightInfo.votingSystem
+                votingSystem: nightInfo.votingSystem,
+                numUsers: Object.keys(usersToChooseFrom).length
             };
             break;
         case constants.PHASES.RESULTS:
@@ -224,6 +229,22 @@ function addUser(socket, token, username = null) {
         switchPhase(socket, phase, false);
     } else {
         socket.emit('request_new_user');
+    }
+}
+
+function chooseNewUser() {
+    if (chooseOrderIsForward) {
+        if (chosenUserIndex + 1 >= usersToChooseFrom.length - 1) {
+            chooseOrderIsForward = false;
+            chosenUserIndex = usersToChooseFrom.length - 1;
+        } else {
+            chosenUserIndex += 1;
+        }
+    } else if (chosenUserIndex - 1 <= 0) {
+        chooseOrderIsForward = true;
+        chosenUserIndex = 0;
+    } else {
+        chosenUserIndex -= 1;
     }
 }
 
@@ -409,6 +430,14 @@ io.on('connection', (socket) => {
             }
 
             if (suggestionsLeft <= 0) {
+                if (!usersToChooseFrom.includes(socket.token)) {
+                    usersToChooseFrom.push(socket.token);
+
+                    if (chosenUserIndex == null) {
+                        chosenUserIndex = 0;
+                    }
+                }
+
                 socket.emit('movie_suggestions_done', data);
             } else {
                 socket.emit('movie_suggestion_added', movie);
@@ -446,6 +475,26 @@ io.on('connection', (socket) => {
         io.to(nightInfo.name).emit('votes_changed', newVotes);
     });
 
+    socket.on('remove_movie', (id) => {
+        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) {
+            return;
+        }
+
+        const movieToRemove = nightInfo.movies.find((movie) => movie.id === id);
+
+        if (movieToRemove != null) {
+            movieToRemove.removed = true;
+
+            io.to(nightInfo.name).emit('movie_removed', id);
+
+            if (nightInfo.votingSystem === constants.VOTING_SYSTEMS.VETO) {
+                chooseNewUser();
+
+                io.to(nightInfo.name).emit('get_chosen_user', usersToChooseFrom[chosenUserIndex]);
+            }
+        }
+    });
+
     socket.on('remove_random_movie', () => {
         if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) {
             return;
@@ -479,12 +528,18 @@ io.on('connection', (socket) => {
         const winners = getWinners();
 
         if (winners.length > 1) {
-            // If there's multiple movies tied as winners, we need to go to the random voting stage to decide a winner
-            socket.emit('new_voting_stage', {
+            const newStageData = {
                 movies: nightInfo.movies.filter((movie) => winners.includes(movie.id)),
                 votingSystem: constants.VOTING_SYSTEMS.RANDOM,
                 isHost: host === socket.token
-            });
+            };
+
+            // If there's multiple movies tied as winners, we need to go to the random voting stage to decide a winner
+            socket.emit('new_voting_stage', newStageData);
+
+            newStageData.isHost = false;
+
+            socket.broadcast.emit('new_voting_stage', newStageData);
         } else {
             if (winners.length === 1) {
                 nightInfo.winner = winners[0];
@@ -535,6 +590,10 @@ io.on('connection', (socket) => {
         data.isExactPhase = phase === phaseName;
 
         socket.emit('get_phase_data', data);
+    });
+
+    socket.on('get_chosen_user', () => {
+        socket.emit('get_chosen_user', usersToChooseFrom[chosenUserIndex]);
     });
 
     socket.on('disconnect', () => {
