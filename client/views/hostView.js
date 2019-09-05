@@ -32,6 +32,12 @@ export class HostView extends View {
             this.votingSystemInput.append($('<option>').val(system).text(system));
         });
 
+        this.numSuggestionsInput.empty();
+
+        for (let i = 1; i <= 3; i++) {
+            this.numSuggestionsInput.append($('<option>').val(i).text(i));
+        }
+
         this.addDOMListener($('#startVotingForm'), 'submit', this.formSubmit);
     }
 
