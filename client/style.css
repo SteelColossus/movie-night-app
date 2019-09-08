@@ -94,8 +94,14 @@ body.dark-mode .table {
 }
 
 #movieContainer {
-    width: 60%;
+    width: 90%;
     max-height: 100%;
+}
+
+@media (min-width: 992px) {
+    #movieContainer {
+        width: 60%;
+    }
 }
 
 .movie-content {
