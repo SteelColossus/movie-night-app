@@ -122,6 +122,7 @@ export class SearchView extends View {
         this.updateSuggestedMovies();
 
         $('#movieInfo').popover({
+            container: 'html',
             trigger: 'hover focus',
             placement: 'bottom',
             html: true,

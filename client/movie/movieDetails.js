@@ -25,6 +25,10 @@ function truncateText(text, length) {
 const queryParams = new URLSearchParams(location.search);
 const movieId = queryParams.get('id');
 
+if (localStorage.getItem('darkMode') === true.toString()) {
+    document.body.classList.add('dark-mode');
+}
+
 fetch(`../movieDetails/${movieId}`, {
     method: 'GET',
     headers: {

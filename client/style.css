@@ -2,6 +2,27 @@ body {
     padding: 10px;
 }
 
+body.dark-mode {
+    background-color: #1E1E1E;
+    color: #E1E1E1;
+}
+
+body.dark-mode .table {
+    color: #E1E1E1;
+}
+
+#darkModeButton {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+    
+#darkModeButton:hover {
+    color: #0069d9;
+}
+
 .table tr > td {
     vertical-align: middle;
 }

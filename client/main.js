@@ -13,6 +13,7 @@ const client = new ClientJS();
 const movieNightTitle = $('#movieNightTitle');
 const errorMessage = $('#errorMessage');
 const usernameIndicator = $('#usernameIndicator');
+const darkModeButton = $('#darkModeButton');
 
 const animTime = 400;
 
@@ -22,6 +23,9 @@ let userToken = null;
 let authenticated = false;
 // The view that is currently being shown
 let currentView = null;
+
+// Whether the page is currently in dark mode
+let darkMode = localStorage.getItem('darkMode') === true.toString();
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
@@ -101,6 +105,29 @@ function requestViewDataForHash() {
         socket.emit('get_phase_data', phaseName);
     }
 }
+
+function setDarkMode(isDarkMode) {
+    localStorage.setItem('darkMode', darkMode);
+
+    if (isDarkMode) {
+        $(document.body).addClass('dark-mode');
+        darkModeButton.find('.fa-moon')
+            .removeClass('fa-moon')
+            .addClass('fa-sun');
+    } else {
+        $(document.body).removeClass('dark-mode');
+        darkModeButton.find('.fa-sun')
+            .removeClass('fa-sun')
+            .addClass('fa-moon');
+    }
+}
+
+setDarkMode(darkMode);
+
+darkModeButton.click(() => {
+    darkMode = !darkMode;
+    setDarkMode(darkMode);
+});
 
 window.addEventListener('hashchange', () => {
     requestViewDataForHash();
