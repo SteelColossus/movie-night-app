@@ -11,6 +11,24 @@ body.dark-mode .table {
     color: #E1E1E1;
 }
 
+@media (max-width: 576px) {
+    #movieTable th:last-child, #movieTable td:last-child {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    #movieTable th:nth-child(5), #movieTable td:nth-child(5) {
+        display: none;
+    }
+}
+
+@media (max-width: 992px) {
+    #movieContainer {
+        width: 90%;
+    }
+}
+
 #darkModeButton {
     position: fixed;
     right: 10px;
@@ -94,14 +112,8 @@ body.dark-mode .table {
 }
 
 #movieContainer {
-    width: 90%;
+    width: 60%;
     max-height: 100%;
-}
-
-@media (min-width: 992px) {
-    #movieContainer {
-        width: 60%;
-    }
 }
 
 .movie-content {
