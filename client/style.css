@@ -3,12 +3,12 @@ body {
 }
 
 body.dark-mode {
-    background-color: #1E1E1E;
-    color: #E1E1E1;
+    background-color: #1e1e1e;
+    color: #e1e1e1;
 }
 
 body.dark-mode .table {
-    color: #E1E1E1;
+    color: #e1e1e1;
 }
 
 @media (max-width: 576px) {

@@ -276,7 +276,11 @@ export class VoteView extends View {
             <style>
             #voteTable > tbody > tr:hover {
                 cursor: move;
-                background-color: #e5e5e5;
+                background-color: #e1e1e1;
+            }
+
+            body.dark-mode #voteTable > tbody > tr:hover {
+                background-color: #3c3c3c;
             }
             </style>
 
