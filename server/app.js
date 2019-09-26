@@ -275,9 +275,9 @@ io.on('connection', (socket) => {
         host = socket.token;
 
         if (nightAlreadyHosted) {
-            console.log(`${users[socket.token].username} has restarted the movie night under the new name: '${nightInfo.name}'`);
+            console.log(`User '${users[socket.token].username}' has restarted the movie night under the new name: '${nightInfo.name}'`);
         } else {
-            console.log(`${users[socket.token].username} has started the movie night: '${nightInfo.name}'`);
+            console.log(`User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'`);
         }
 
         switchPhase(socket, constants.PHASES.SUGGEST);
