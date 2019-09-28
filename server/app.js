@@ -15,9 +15,13 @@ const ObjectCache = require('./objectCache');
 
 // Allow people on the same network to access the app (this will use a different hostname)
 const allowOutsideConnections = args.o === true;
+// Whether a password is required to host a movie night
+const requirePassword = args.password !== false;
 
 const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
 const port = 3000;
+
+let password = null;
 
 let phase = constants.PHASES.HOST;
 let host = null;
@@ -46,6 +50,27 @@ app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'consta
 
 // Tell the server to listen on the given hostname and port
 http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
+
+function getRandomPassword() {
+    const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+    const passwordLength = 8;
+
+    let randomPassword = '';
+
+    for (let i = 0; i < passwordLength; i++) {
+        const randomChar = chars[Math.floor(Math.random() * chars.length)];
+        randomPassword += randomChar;
+    }
+
+    return randomPassword;
+}
+
+if (requirePassword === true) {
+    password = getRandomPassword();
+    console.log(`Password is required and has been set as '${password}'.`);
+} else {
+    console.log('Password is not required.');
+}
 
 function makeOmdbRequest(type, query, callback, data = {}) {
     let additionalQueryString = '';
@@ -119,7 +144,8 @@ function getPhaseData(phaseName, token) {
     switch (phaseName) {
         case constants.PHASES.HOST:
             data = {
-                votingSystems: Object.values(constants.VOTING_SYSTEMS)
+                votingSystems: Object.values(constants.VOTING_SYSTEMS),
+                isPasswordRequired: password != null
             };
             break;
         case constants.PHASES.SUGGEST:
@@ -268,6 +294,11 @@ io.on('connection', (socket) => {
             return;
         }
 
+        if (password != null && (info.password == null || info.password.toLowerCase() !== password)) {
+            socket.emit('wrong_password');
+            return;
+        }
+
         nightInfo.movies = [];
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
@@ -275,9 +306,9 @@ io.on('connection', (socket) => {
         host = socket.token;
 
         if (nightAlreadyHosted) {
-            console.log(`User '${users[socket.token].username}' has restarted the movie night under the new name: '${nightInfo.name}'`);
+            console.log(`User '${users[socket.token].username}' has restarted the movie night under the new name: '${nightInfo.name}'.`);
         } else {
-            console.log(`User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'`);
+            console.log(`User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'.`);
         }
 
         switchPhase(socket, constants.PHASES.SUGGEST);

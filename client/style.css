@@ -58,7 +58,7 @@ body.dark-mode .table {
     text-align: right;
 }
 
-#votingSystemLabel, #numSuggestionsLabel {
+#votingSystemLabel, #numSuggestionsLabel, #passwordLabel {
     font-weight: bold;
 }
 

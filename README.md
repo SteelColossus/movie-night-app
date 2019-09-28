@@ -21,3 +21,6 @@ You can allow anyone on the same network to access the app by passing the `-o` f
 You should now be able to see the app at the address that it lists in the console. The hostname will be the name of your machine and the port will be 3000. Using the local IP address as listed by commands like `ipconfig` with port 3000 will also work.  
 
 If running through docker, instead map port 3000 on the container to your local hostname/IP, e.g. put the port flag as `-p <local IP>:3000:3000`.  
+
+## Running the app without a password
+By default the movie night app requires a password to be entered to host a movie night. This password is randomly generated and outputted in the logs. If you do not want the app to require a password, pass the `--no-password` argument to the run command.  
