@@ -302,6 +302,7 @@ export class VoteView extends View {
             <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
 
             <script src="/views/external/jquery-ui.min.js"></script>
+            <script src="/views/external/jquery.ui.touch-punch.min.js"></script>
         `;
 
         this.voteView.html(viewHtml);
