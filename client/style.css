@@ -18,7 +18,7 @@ body.dark-mode .table {
 }
 
 @media (max-width: 768px) {
-    #movieTable th:nth-child(5), #movieTable td:nth-child(5) {
+    #movieTable th:nth-child(5), #movieTable td:nth-child(5), #voteTable th:nth-child(5), #voteTable td:nth-child(5) {
         display: none;
     }
 }
