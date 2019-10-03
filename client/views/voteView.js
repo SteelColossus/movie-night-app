@@ -205,10 +205,8 @@ export class VoteView extends View {
         const voteTableBody = $('#voteTable > tbody');
 
         this.movies.forEach((movie) => {
-            if (movie.removed === false) {
-                const tableRow = this.createMultiVoteTableRow(movie);
-                voteTableBody.append(tableRow);
-            }
+            const tableRow = this.createMultiVoteTableRow(movie);
+            voteTableBody.append(tableRow);
         });
 
         if (this.liveVoting === true) {
@@ -245,10 +243,8 @@ export class VoteView extends View {
         const voteTableBody = $('#voteTable > tbody');
 
         this.movies.forEach((movie) => {
-            if (movie.removed === false) {
-                const tableRow = this.createRandomTableRow(movie);
-                voteTableBody.append(tableRow);
-            }
+            const tableRow = this.createRandomTableRow(movie);
+            voteTableBody.append(tableRow);
         });
 
         this.addSocketListener('movie_removed', this.handleMovieRemoved);
@@ -318,17 +314,17 @@ export class VoteView extends View {
 
         const initialVoteDeltas = {};
 
+        this.movies = this.movies.sort((movie) => movie.votes[this.userToken]);
+
         this.movies.forEach((movie) => {
-            if (movie.removed === false) {
-                if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
-                    initialVoteDeltas[movie.id] = this.movies.length - rank + 1;
-                }
-
-                const tableRow = this.createRankedTableRow(movie, rank);
-                voteTableBody.append(tableRow);
-
-                rank += 1;
+            if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
+                initialVoteDeltas[movie.id] = this.movies.length - rank + 1;
             }
+
+            const tableRow = this.createRankedTableRow(movie, rank);
+            voteTableBody.append(tableRow);
+
+            rank += 1;
         });
 
         if (Object.keys(initialVoteDeltas).length !== 0) {
@@ -349,6 +345,7 @@ export class VoteView extends View {
                     if (newRank !== currentRank) {
                         const movieId = rankCell.data('movie-id');
                         changedVoteDeltas[movieId] = currentRank - newRank;
+                        rankCell.text(newRank);
                     }
                 }
 
@@ -391,10 +388,8 @@ export class VoteView extends View {
         const voteTableBody = $('#voteTable > tbody');
 
         this.movies.forEach((movie) => {
-            if (movie.removed === false) {
-                const tableRow = this.createVetoTableRow(movie);
-                voteTableBody.append(tableRow);
-            }
+            const tableRow = this.createVetoTableRow(movie);
+            voteTableBody.append(tableRow);
         });
 
         this.addSocketListener('movie_removed', (removedMovieId) => {
@@ -423,6 +418,8 @@ export class VoteView extends View {
     }
 
     onViewShown() {
+        this.movies = this.movies.filter((movie) => movie.removed === false);
+
         switch (this.votingSystem) {
             case constants.VOTING_SYSTEMS.MULTI_VOTE:
                 this.setupMultiVoteView();
