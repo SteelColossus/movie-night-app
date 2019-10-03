@@ -2,13 +2,14 @@ import { View } from './view.js';
 import { createTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, isExactPhase) {
+    constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, liveVoting, isExactPhase) {
         super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
         this.movies = movies;
         this.votingSystem = votingSystem;
         this.numUsers = numUsers;
+        this.liveVoting = liveVoting;
         this.isExactPhase = isExactPhase;
         this.voteView = $('#voteView');
     }
@@ -57,7 +58,7 @@ export class VoteView extends View {
                 }
             },
             {
-                text: sumVotes(movie.votes),
+                text: this.liveVoting === true ? sumVotes(movie.votes) : 0,
                 func: (cell) => cell.attr('votes-for', movie.id)
             }
         ]);
@@ -210,7 +211,11 @@ export class VoteView extends View {
             }
         });
 
-        this.addSocketListener('votes_changed', this.handleVotesChanged);
+        if (this.liveVoting === true) {
+            this.addSocketListener('votes_changed', this.handleVotesChanged);
+        } else {
+            voteTableBody.parent().addClass('not-live');
+        }
 
         if (this.isHost === true && this.isExactPhase === true) {
             const closeVotingButton = $('#closeVotingButton');

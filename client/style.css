@@ -99,6 +99,10 @@ body.dark-mode .table {
     text-align: center;
 }
 
+#voteTable.not-live th:last-child, #voteTable.not-live td:last-child {
+    display: none;
+}
+
 #movieView {
     display: flex;
     justify-content: center;

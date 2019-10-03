@@ -17,6 +17,8 @@ const ObjectCache = require('./objectCache');
 const allowOutsideConnections = args.o === true;
 // Whether a password is required to host a movie night
 const requirePassword = args.password !== false;
+// Whether the users get the votes for movies live in real time
+const liveVoting = args.live === true;
 
 const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
 const port = 3000;
@@ -161,7 +163,8 @@ function getPhaseData(phaseName, token) {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
                 votingSystem: nightInfo.votingSystem,
-                numUsers: Object.keys(usersToChooseFrom).length
+                numUsers: Object.keys(usersToChooseFrom).length,
+                liveVoting
             };
             break;
         case constants.PHASES.RESULTS:
@@ -503,7 +506,9 @@ io.on('connection', (socket) => {
             }
         });
 
-        io.to(nightInfo.name).emit('votes_changed', newVotes);
+        if (liveVoting === true) {
+            io.to(nightInfo.name).emit('votes_changed', newVotes);
+        }
     });
 
     socket.on('remove_movie', (id) => {
