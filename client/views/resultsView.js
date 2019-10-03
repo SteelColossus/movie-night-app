@@ -26,7 +26,25 @@ export class ResultsView extends View {
         });
 
         if (votes.length > 0) {
-            this.voteChart = new Chart(this.canvas, {
+            const chartColors = [
+                [255, 99, 132],
+                [54, 162, 235],
+                [255, 206, 86],
+                [75, 192, 192],
+                [153, 102, 255],
+                [255, 159, 64]
+            ];
+
+            const backgroundColors = [];
+            const borderColors = [];
+
+            for (let i = 0; i < labels.length; i++) {
+                const color = chartColors[i % chartColors.length];
+                backgroundColors.push(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`);
+                borderColors.push(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+            }
+
+            window.voteChart = new Chart(this.canvas, {
                 type: 'bar',
                 data: {
                     labels,
@@ -34,22 +52,8 @@ export class ResultsView extends View {
                         {
                             label: '# of Votes',
                             data: votes,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
                             borderWidth: 1
                         }
                     ]
