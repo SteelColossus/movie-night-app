@@ -13,7 +13,7 @@ async function getVisibleElement(locator, timeout = 500) {
 }
 
 beforeEach(async (done) => {
-    appProcess = spawn('node', ['.']);
+    appProcess = spawn('node', ['.', '--no-password', '--live']);
 
     driver = new Builder().forBrowser(Browser.CHROME).build();
     await driver.get('http://localhost:3000');
@@ -29,7 +29,9 @@ afterEach(async (done) => {
 
 // This test should not be guaranteed to pass, it is just an indication of whether any functionality is broken
 describe('integration test', () => {
-    it('creates and finishes a movie night', async (done) => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+
+    it('creates and finishes a movie night', async () => {
         const username = await getVisibleElement(By.id('username'));
         await username.sendKeys('User 1', Key.ENTER);
 
@@ -79,6 +81,5 @@ describe('integration test', () => {
         await driver.sleep(500);
         const movieNightTitle2 = await driver.findElement((By.id('movieNightTitle')));
         expect(await movieNightTitle2.isDisplayed()).toBeFalsy('Movie night title is displaying when it shouldn\'t be.');
-        done();
-    }, 15000);
+    });
 });
