@@ -60,7 +60,7 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, data.numUsers, data.liveVoting, isExactPhase);
             break;
         case ResultsView.viewName:
-            view = new ResultsView(socket, animTime, isHost, data.movies, data.winner);
+            view = new ResultsView(socket, animTime, isHost, data.movies, data.winner, data.users);
             break;
         default:
             throw new Error(`Unknown view name '${viewName}'.`);

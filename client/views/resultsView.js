@@ -2,30 +2,43 @@ import { View } from './view.js';
 import { sumVotes, pluralize } from './viewFunctions.js';
 
 export class ResultsView extends View {
-    constructor(socket, animTime, isHost, movies, winner) {
+    constructor(socket, animTime, isHost, movies, winner, users) {
         super(ResultsView.viewName, socket, animTime);
         this.isHost = isHost;
         this.movies = movies;
         this.winner = movies.find((movie) => movie.id === winner);
+        this.users = users;
         this.canvas = $('#voteChart');
         this.endButton = $('#endButton');
         this.newMovieButton = $('#newMovieButton');
     }
 
-    createChart(movies) {
-        const labels = [];
-        const votes = [];
+    createChart(users, movies) {
+        const datasets = [];
+        let noneHaveVotes = true;
 
-        movies.forEach((movie) => {
-            const numVotes = sumVotes(movie.votes);
+        const labels = movies.map((movie) => movie.title);
 
-            if (numVotes > 0) {
-                labels.push(movie.title);
-                votes.push(numVotes);
-            }
-        });
+        for (const [id, user] of Object.entries(users)) {
+            const dataset = {
+                label: user.username,
+                data: []
+            };
 
-        if (votes.length > 0) {
+            // eslint-disable-next-line no-loop-func
+            movies.forEach((movie) => {
+                const numVotes = movie.votes[id] || 0;
+                dataset.data.push(numVotes);
+
+                if (numVotes > 0) {
+                    noneHaveVotes = false;
+                }
+            });
+
+            datasets.push(dataset);
+        }
+
+        if (noneHaveVotes === false) {
             const chartColors = [
                 [255, 99, 132],
                 [54, 162, 235],
@@ -35,36 +48,35 @@ export class ResultsView extends View {
                 [255, 159, 64]
             ];
 
-            const backgroundColors = [];
-            const borderColors = [];
-
-            for (let i = 0; i < labels.length; i++) {
+            for (let i = 0; i < datasets.length; i++) {
                 const color = chartColors[i % chartColors.length];
-                backgroundColors.push(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`);
-                borderColors.push(`rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+                const dataset = datasets[i];
+
+                dataset.backgroundColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+                dataset.borderColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                dataset.borderWidth = 1;
             }
 
-            window.voteChart = new Chart(this.canvas, {
+            this.voteChart = new Chart(this.canvas, {
                 type: 'bar',
                 data: {
                     labels,
-                    datasets: [
-                        {
-                            label: '# of Votes',
-                            data: votes,
-                            backgroundColor: backgroundColors,
-                            borderColor: borderColors,
-                            borderWidth: 1
-                        }
-                    ]
+                    datasets
                 },
                 options: {
                     maintainAspectRatio: false,
                     scales: {
+                        xAxes: [
+                            {
+                                stacked: true
+                            }
+                        ],
                         yAxes: [
                             {
+                                stacked: true,
                                 ticks: {
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                    stepSize: 1
                                 }
                             }
                         ]
@@ -99,7 +111,7 @@ export class ResultsView extends View {
         $('#winner').text(winnerText);
 
         if (this.winner != null) {
-            this.createChart(this.movies);
+            this.createChart(this.users, this.movies);
         }
 
         if (this.isHost === true) {

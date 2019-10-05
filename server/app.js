@@ -171,7 +171,8 @@ function getPhaseData(phaseName, token) {
             data = {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
-                winner: nightInfo.winner
+                winner: nightInfo.winner,
+                users
             };
             break;
         default:
