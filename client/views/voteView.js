@@ -275,6 +275,13 @@ export class VoteView extends View {
             <link href="/views/external/jquery-ui.min.css" rel="stylesheet">
 
             <style>
+            @media (max-width: 992px) {
+                #rankedTableContainer {
+                    margin-left: 20px;
+                    margin-right: 20px;
+                }
+            }
+
             #voteTable > tbody > tr:hover {
                 cursor: move;
                 background-color: #e1e1e1;
@@ -286,20 +293,22 @@ export class VoteView extends View {
             </style>
 
             <h5>Re-arrange the movies in the order you most want to watch them:</h5>
-            <table id="voteTable" class="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Movie</th>
-                        <th scope="col">Year</th>
-                        <th scope="col">Runtime</th>
-                        <th scope="col">Genre</th>
-                        <th scope="col">Plot</th>
-                        <th scope="col">IMDB Rating</th>
-                        <th scope="col">Rank</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+            <div id="rankedTableContainer">
+                <table id="voteTable" class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Movie</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Runtime</th>
+                            <th scope="col">Genre</th>
+                            <th scope="col">Plot</th>
+                            <th scope="col">IMDB Rating</th>
+                            <th scope="col">Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
             <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
 
             <script src="/views/external/jquery-ui.min.js"></script>
