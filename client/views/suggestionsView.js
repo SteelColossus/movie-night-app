@@ -48,7 +48,7 @@ export class SuggestionsView extends View {
 
     updateNumMoviesSuggested(numSuggested) {
         this.numMoviesSuggested = numSuggested;
-        this.numMoviesSuggestedLabel.text(`${pluralize('movie', this.numMoviesSuggested)} have been suggested.`);
+        this.numMoviesSuggestedLabel.text(`${pluralize('movie', this.numMoviesSuggested)} suggested.`);
     }
 
     handleNewMovie(movie) {
@@ -65,6 +65,11 @@ export class SuggestionsView extends View {
 
     onViewShown() {
         this.buildSuggestionsTable(this.movies);
+
+        this.addDOMListener($('#backToSearchButton'), 'click', () => {
+            // Slight hack here, just set the hash instead of going through the proper internal function to navigate to the search page
+            window.location.hash = 'search';
+        });
 
         this.addSocketListener('new_movie', this.handleNewMovie);
         this.addSocketListener('removed_movie', this.handleRemovedMovie);

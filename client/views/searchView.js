@@ -142,6 +142,11 @@ export class SearchView extends View {
 
         this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
 
+        this.addDOMListener($('#viewSuggestionsButton'), 'click', () => {
+            // Slight hack here, just set the hash instead of going through the proper internal function to navigate to the suggestions page
+            window.location.hash = 'suggestions';
+        });
+
         this.addSocketListener('movie_search_results', this.handleSearch);
 
         this.addSocketListener('request_different_movie', this.handleMovieRejected);
