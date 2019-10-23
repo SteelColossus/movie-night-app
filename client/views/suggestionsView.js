@@ -1,5 +1,5 @@
 import { View } from './view.js';
-import { createTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
+import { createTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {
@@ -9,7 +9,9 @@ export class SuggestionsView extends View {
         this.movies = movies;
         this.isExactPhase = isExactPhase;
         this.movieTableBody = $('#movieTable > tbody');
+        this.numMoviesSuggestedLabel = $('#numMoviesSuggested');
         this.closeSuggestionsButton = $('#closeSuggestionsButton');
+        this.numSuggestions = 0;
     }
 
     appendMovieToTable(movie) {
@@ -44,14 +46,21 @@ export class SuggestionsView extends View {
         movies.forEach((movie) => this.appendMovieToTable(movie));
     }
 
+    updateNumMoviesSuggested(numSuggested) {
+        this.numMoviesSuggested = numSuggested;
+        this.numMoviesSuggestedLabel.text(`${pluralize('movie', this.numMoviesSuggested)} have been suggested.`);
+    }
+
     handleNewMovie(movie) {
         const movieRow = this.appendMovieToTable(movie);
         movieRow.hide().show(this.animTime);
+        this.updateNumMoviesSuggested(this.numMoviesSuggested + 1);
     }
 
     handleRemovedMovie(movieId) {
         const movieRow = this.movieTableBody.find(`tr[movie-id="${movieId}"]`);
         movieRow.remove();
+        this.updateNumMoviesSuggested(this.numMoviesSuggested - 1);
     }
 
     onViewShown() {
@@ -59,6 +68,8 @@ export class SuggestionsView extends View {
 
         this.addSocketListener('new_movie', this.handleNewMovie);
         this.addSocketListener('removed_movie', this.handleRemovedMovie);
+
+        this.updateNumMoviesSuggested(this.movies.length);
 
         if (this.isHost === true && this.isExactPhase === true) {
             this.addDOMListener(this.closeSuggestionsButton, 'click', () => {

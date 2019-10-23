@@ -95,6 +95,11 @@ body.dark-mode .table {
     font-weight: 600;
 }
 
+#numMoviesSuggested {
+    margin-bottom: 12px;
+    font-style: italic;
+}
+
 .vote-cell, .rank-cell {
     text-align: center;
 }
