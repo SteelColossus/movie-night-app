@@ -323,7 +323,7 @@ export class VoteView extends View {
 
         const initialVoteDeltas = {};
 
-        this.movies = this.movies.sort((movie) => movie.votes[this.userToken]);
+        this.movies = this.movies.sort((movieA, movieB) => movieB.votes[this.userToken] - movieA.votes[this.userToken]);
 
         this.movies.forEach((movie) => {
             if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
