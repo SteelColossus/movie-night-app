@@ -33,7 +33,7 @@ export class VoteView extends View {
                     const voteButton = $('<input>')
                         .prop('type', 'button')
                         .val('Vote!')
-                        .addClass('btn btn-primary')
+                        .addClass('btn btn-primary vote-button')
                         .attr('data-toggle', 'button')
                         .attr('aria-pressed', 'false')
                         .click(() => {
@@ -197,7 +197,10 @@ export class VoteView extends View {
                 </thead>
                 <tbody></tbody>
             </table>
-            <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
+            <div>
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
+            </div>
         `;
 
         this.voteView.html(viewHtml);
@@ -214,6 +217,12 @@ export class VoteView extends View {
         } else {
             voteTableBody.parent().addClass('not-live');
         }
+
+        const lockInButton = $('#lockInButton')
+            .click(() => {
+                const disabled = lockInButton.is('.active') === false;
+                $('.vote-button').prop('disabled', disabled);
+            });
 
         if (this.isHost === true && this.isExactPhase === true) {
             const closeVotingButton = $('#closeVotingButton');
@@ -282,12 +291,12 @@ export class VoteView extends View {
                 }
             }
 
-            #voteTable > tbody > tr:hover {
+            #voteTable > tbody.rank-sortable > tr:hover {
                 cursor: move;
                 background-color: #e1e1e1;
             }
 
-            body.dark-mode #voteTable > tbody > tr:hover {
+            body.dark-mode #voteTable > tbody.rank-sortable > tr:hover {
                 background-color: #3c3c3c;
             }
             </style>
@@ -309,7 +318,10 @@ export class VoteView extends View {
                     <tbody></tbody>
                 </table>
             </div>
-            <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
+            <div>
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
+            </div>
 
             <script src="/views/external/jquery-ui.min.js"></script>
             <script src="/views/external/jquery.ui.touch-punch.min.js"></script>
@@ -318,6 +330,7 @@ export class VoteView extends View {
         this.voteView.html(viewHtml);
 
         const voteTableBody = $('#voteTable > tbody');
+        voteTableBody.addClass('rank-sortable');
 
         let rank = 1;
 
@@ -363,6 +376,13 @@ export class VoteView extends View {
                 }
             }
         });
+
+        const lockInButton = $('#lockInButton')
+            .click(() => {
+                const disabled = lockInButton.is('.active') === false;
+                voteTableBody.sortable(disabled ? 'disable' : 'enable');
+                voteTableBody.toggleClass('rank-sortable');
+            });
 
         if (this.isHost === true && this.isExactPhase === true) {
             const closeVotingButton = $('#closeVotingButton');
