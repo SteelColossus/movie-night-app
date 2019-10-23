@@ -1,6 +1,6 @@
 {
   "name": "movie-night-app",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "A voting application for movie night.",
   "main": "server/app.js",
   "scripts": {
@@ -23,12 +23,12 @@
     "express": "^4.17.1",
     "minimist": "^1.2.0",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "eslint": "^6.2.2",
+    "eslint": "^6.5.1",
     "htmlhint": "^0.11.0",
-    "jasmine": "^3.4.0",
-    "selenium-webdriver": "^4.0.0-alpha.4"
+    "jasmine": "^3.5.0",
+    "selenium-webdriver": "^4.0.0-alpha.5"
   }
 }
