@@ -464,6 +464,8 @@ io.on('connection', (socket) => {
                 data.isHost = (host === socket.token);
             }
 
+            console.log(`User '${users[socket.token].username}' has suggested the movie: '${movie.title}' (${movie.id}).`);
+
             if (suggestionsLeft <= 0) {
                 if (!usersToChooseFrom.includes(socket.token)) {
                     usersToChooseFrom.push(socket.token);
@@ -563,6 +565,9 @@ io.on('connection', (socket) => {
         }
 
         const winners = getWinners();
+
+        console.log('Final results are:');
+        nightInfo.movies.forEach((movie) => console.log(`'${movie.title}' (${movie.id}): ${JSON.stringify(movie.votes)}`));
 
         if (winners.length > 1) {
             const newStageData = {

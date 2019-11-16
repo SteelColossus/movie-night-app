@@ -76,7 +76,7 @@ export class ResultsView extends View {
                                 stacked: true,
                                 ticks: {
                                     beginAtZero: true,
-                                    stepSize: 1
+                                    precision: 1
                                 }
                             }
                         ]
