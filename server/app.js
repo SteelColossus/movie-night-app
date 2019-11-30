@@ -33,7 +33,6 @@ const nightInfo = {};
 
 const usersToChooseFrom = [];
 let chosenUserIndex = null;
-let chooseOrderIsForward = true;
 
 const orderedPhases = [
     constants.PHASES.HOST,
@@ -263,19 +262,12 @@ function addUser(socket, token, username = null) {
 }
 
 function chooseNewUser() {
-    if (chooseOrderIsForward) {
-        if (chosenUserIndex + 1 >= usersToChooseFrom.length - 1) {
-            chooseOrderIsForward = false;
-            chosenUserIndex = usersToChooseFrom.length - 1;
-        } else {
-            chosenUserIndex += 1;
-        }
-    } else if (chosenUserIndex - 1 <= 0) {
-        chooseOrderIsForward = true;
-        chosenUserIndex = 0;
-    } else {
-        chosenUserIndex -= 1;
-    }
+    chosenUserIndex = (chosenUserIndex + 1) % usersToChooseFrom.length;
+}
+
+function resetUserChooser() {
+    usersToChooseFrom.length = 0;
+    chosenUserIndex = null;
 }
 
 io.on('connection', (socket) => {
@@ -468,7 +460,8 @@ io.on('connection', (socket) => {
 
             if (suggestionsLeft <= 0) {
                 if (!usersToChooseFrom.includes(socket.token)) {
-                    usersToChooseFrom.push(socket.token);
+                    // Add user to the front of the array (as picking last is more advantageous)
+                    usersToChooseFrom.unshift(socket.token);
 
                     if (chosenUserIndex == null) {
                         chosenUserIndex = 0;
@@ -596,6 +589,8 @@ io.on('connection', (socket) => {
             return;
         }
 
+        resetUserChooser();
+
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
         nightInfo.winner = null;
@@ -611,6 +606,8 @@ io.on('connection', (socket) => {
         if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) {
             return;
         }
+
+        resetUserChooser();
 
         nightInfo.movies = [];
         nightInfo.winner = null;
