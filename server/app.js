@@ -247,7 +247,8 @@ function addUser(socket, token, username = null) {
         if (isExistingUser && newUsername) {
             console.log(`Existing user '${previousUsername}' changed their name to '${username}'.`);
         } else if (isExistingUser) {
-            console.log(`Existing user '${users[token].username}' connected.`);
+            // Commenting out for now as it clutters up the logs
+            // console.log(`Existing user '${users[token].username}' reconnected.`);
         } else {
             console.log(`New user '${users[token].username}' connected.`);
         }
@@ -523,6 +524,8 @@ io.on('connection', (socket) => {
                 chooseNewUser();
 
                 io.to(nightInfo.name).emit('get_chosen_user', usersToChooseFrom[chosenUserIndex]);
+
+                console.log(`User '${users[socket.token].username}' has vetoed the movie: '${movieToRemove.title}' (${movieToRemove.id}).`);
             }
         }
     });
@@ -541,6 +544,8 @@ io.on('connection', (socket) => {
             randomMovie.removed = true;
 
             io.to(nightInfo.name).emit('movie_removed', randomMovie.id);
+
+            console.log(`The movie '${randomMovie.title}' (${randomMovie.id}) has been removed.`);
         }
     });
 
@@ -560,7 +565,7 @@ io.on('connection', (socket) => {
         const winners = getWinners();
 
         console.log('Final results are:');
-        nightInfo.movies.forEach((movie) => console.log(`'${movie.title}' (${movie.id}): ${JSON.stringify(movie.votes)}`));
+        nightInfo.movies.forEach((movie) => console.log(`'${movie.title}' (${movie.id}): ${movie.removed ? 'removed' : JSON.stringify(movie.votes)}`));
 
         if (winners.length > 1) {
             const newStageData = {
@@ -638,7 +643,8 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         if (socket.token != null) {
             const userToRemove = users[socket.token];
-            console.log(`User '${userToRemove.username}' disconnected.`);
+            // Commenting out for now as it clutters up the logs
+            // console.log(`User '${userToRemove.username}' disconnected.`);
         }
     });
 });
