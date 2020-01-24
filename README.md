@@ -15,6 +15,8 @@ docker run -d --name movie-night-app -p 3000:3000 steelcolossus/movie-night-app
 You can then go to http://localhost:3000 as normal to see the app running live.  
 _(**Note**: You will need pull access to the docker repository in order to do this.)_
 
+If you are running the app on a Raspberry Pi or another arm32 device, then use the image `steelcolossus/movie-night-app:arm32v7` instead.
+
 ## Exposing the app to everyone on the same network
 You can allow anyone on the same network to access the app by passing the `-o` flag to the `node` command, e.g. `node . -o`.  
 
