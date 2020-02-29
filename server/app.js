@@ -245,12 +245,12 @@ function addUser(socket, token, username = null) {
         socket.token = token;
 
         if (isExistingUser && newUsername) {
-            console.log(`Existing user '${previousUsername}' changed their name to '${username}'.`);
+            console.log(`Existing user '${previousUsername}' (${token}) changed their name to '${username}'.`);
         } else if (isExistingUser) {
             // Commenting out for now as it clutters up the logs
-            // console.log(`Existing user '${users[token].username}' reconnected.`);
+            // console.log(`Existing user '${users[token].username}' (${token}) reconnected.`);
         } else {
-            console.log(`New user '${users[token].username}' connected.`);
+            console.log(`New user '${users[token].username}' (${token}) connected.`);
         }
 
         socket.emit('user_info', users[token].username);
@@ -647,7 +647,7 @@ io.on('connection', (socket) => {
         if (socket.token != null) {
             const userToRemove = users[socket.token];
             // Commenting out for now as it clutters up the logs
-            // console.log(`User '${userToRemove.username}' disconnected.`);
+            // console.log(`User '${userToRemove.username}' (${socket.token}) disconnected.`);
         }
     });
 });
