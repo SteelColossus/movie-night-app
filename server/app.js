@@ -372,8 +372,10 @@ io.on('connection', (socket) => {
             return;
         }
 
+        let suggestionsLeft = nightInfo.maxSuggestions - getSuggestedMovies(socket.token).length;
+
         // Disallow multiple people from choosing the same movie
-        if (nightInfo.movies.some((x) => x.id === movieId)) {
+        if (nightInfo.movies.some((x) => x.id === movieId && !(suggestionsLeft <= 0 && x.suggester === socket.token))) {
             socket.emit('request_different_movie', 'Someone has already chosen that movie.');
             return;
         }
@@ -430,8 +432,6 @@ io.on('connection', (socket) => {
                 socket.emit('request_different_movie', `The movie you have picked is missing the following key information: ${missingInfo.join(', ')}.`);
                 return;
             }
-
-            let suggestionsLeft = nightInfo.maxSuggestions - getSuggestedMovies(socket.token).length;
 
             if (suggestionsLeft <= 0) {
                 // Remove all the previous movie suggestions this user has made
