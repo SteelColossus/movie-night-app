@@ -460,9 +460,12 @@ io.on('connection', (socket) => {
             console.log(`User '${users[socket.token].username}' has suggested the movie: '${movie.title}' (${movie.id}).`);
 
             if (suggestionsLeft <= 0) {
-                if (!usersToChooseFrom.includes(socket.token)) {
+                if (usersToChooseFrom.findIndex((x) => x.token === socket.token) === -1) {
                     // Add user to the front of the array (as picking last is more advantageous)
-                    usersToChooseFrom.unshift(socket.token);
+                    usersToChooseFrom.unshift({
+                        token: socket.token,
+                        username: users[socket.token].username
+                    });
 
                     if (chosenUserIndex == null) {
                         chosenUserIndex = 0;

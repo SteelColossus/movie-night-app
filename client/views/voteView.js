@@ -395,7 +395,7 @@ export class VoteView extends View {
 
     setupVetoView() {
         const viewHtml = `
-            <h5>Choose a movie to veto below:</h5>
+            <h5>It is <span id="vetoUser" class="font-weight-bold"></span>'s turn to choose a movie to veto:</h5>
             <table id="voteTable" class="table">
                 <thead>
                     <tr>
@@ -415,6 +415,7 @@ export class VoteView extends View {
         this.voteView.html(viewHtml);
 
         const voteTableBody = $('#voteTable > tbody');
+        const vetoUserText = $('#vetoUser');
 
         this.movies.forEach((movie) => {
             const tableRow = this.createVetoTableRow(movie);
@@ -437,10 +438,11 @@ export class VoteView extends View {
             }
         });
 
-        this.addSocketListener('get_chosen_user', (userToken) => {
-            const enableButtons = this.isExactPhase === true && this.userToken === userToken;
+        this.addSocketListener('get_chosen_user', (user) => {
+            const enableButtons = this.isExactPhase === true && this.userToken === user.token;
 
             $('.veto-button').prop('disabled', !enableButtons);
+            vetoUserText.text(user.username);
         });
 
         this.socket.emit('get_chosen_user');
