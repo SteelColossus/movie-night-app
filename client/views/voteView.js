@@ -221,6 +221,7 @@ export class VoteView extends View {
         const lockInButton = $('#lockInButton')
             .click(() => {
                 const disabled = lockInButton.is('.active') === false;
+                lockInButton.blur();
                 $('.vote-button').prop('disabled', disabled);
             });
 
@@ -380,6 +381,7 @@ export class VoteView extends View {
         const lockInButton = $('#lockInButton')
             .click(() => {
                 const disabled = lockInButton.is('.active') === false;
+                lockInButton.blur();
                 voteTableBody.sortable(disabled ? 'disable' : 'enable');
                 voteTableBody.toggleClass('rank-sortable');
             });

@@ -81,8 +81,6 @@ export class SearchView extends View {
                             .prop('type', 'button')
                             .val('Choose!')
                             .addClass('btn btn-primary')
-                            .attr('data-toggle', 'button')
-                            .attr('aria-pressed', 'false')
                             .data('movie-id', result.id)
                             .click(() => {
                                 this.socket.emit('movie_chosen', chooseButton.data('movie-id'));
