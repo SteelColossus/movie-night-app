@@ -1,6 +1,7 @@
 'use strict';
 
 const os = require('os');
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const favicon = require('serve-favicon');
@@ -30,6 +31,8 @@ let host = null;
 
 const users = {};
 const nightInfo = {};
+
+const nightHistory = [];
 
 const usersToChooseFrom = [];
 let chosenUserIndex = null;
@@ -599,6 +602,40 @@ io.on('connection', (socket) => {
 
         resetUserChooser();
 
+        // Store a copy of the night info
+        nightHistory.push({ ...nightInfo });
+
+        if (args.c === true) {
+            const fileOutput = {
+                rounds: nightHistory,
+                host,
+                users
+            };
+
+            const currentDate = new Date();
+
+            // Construct a filename by replacing spaces with dashes in the night name and assembling the current date
+            const filename = `${nightInfo.name.replace(/ /gu, '-')}-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}.json`;
+            const directory = 'logs';
+
+            // eslint-disable-next-line no-sync
+            if (!fs.existsSync(directory)) {
+                // eslint-disable-next-line no-sync
+                fs.mkdirSync(directory);
+            }
+
+            // Output all of the info to a file
+            fs.writeFile(`${directory}/${filename}`, JSON.stringify(fileOutput), (err) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log(`Dump file saved as ${filename}.`);
+                }
+            });
+        }
+
+        nightHistory.length = 0;
+
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
         nightInfo.winner = null;
@@ -616,6 +653,9 @@ io.on('connection', (socket) => {
         }
 
         resetUserChooser();
+
+        // Store a copy of the night info
+        nightHistory.push({ ...nightInfo });
 
         nightInfo.movies = [];
         nightInfo.winner = null;

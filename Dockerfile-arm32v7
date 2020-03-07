@@ -13,4 +13,4 @@ RUN npm install --only=prod
 # Set the user as the node user
 USER node
 # Run the node command
-CMD ["node", ".", "-o"]
+CMD ["node", ".", "-o", "-c"]
