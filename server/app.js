@@ -274,6 +274,17 @@ function resetUserChooser() {
     chosenUserIndex = null;
 }
 
+function dumpFile(filePath, fileOutput) {
+    // Output all of the info to a file
+    fs.writeFile(filePath, JSON.stringify(fileOutput), (err) => {
+        if (!err) {
+            console.log(`Dump file saved to ${filePath}.`);
+        } else {
+            console.log(err);
+        }
+    });
+}
+
 io.on('connection', (socket) => {
     // Ask for the user's token so we can authenticate them
     socket.emit('request_user_token');
@@ -607,7 +618,7 @@ io.on('connection', (socket) => {
 
         if (args.c === true) {
             const fileOutput = {
-                rounds: nightHistory,
+                rounds: nightHistory.slice(),
                 host,
                 users
             };
@@ -617,19 +628,19 @@ io.on('connection', (socket) => {
             // Construct a filename by replacing spaces with dashes in the night name and assembling the current date
             const filename = `${nightInfo.name.replace(/ /gu, '-')}-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}.json`;
             const directory = 'logs';
+            const filePath = `${directory}/${filename}`;
 
-            // eslint-disable-next-line no-sync
-            if (!fs.existsSync(directory)) {
-                // eslint-disable-next-line no-sync
-                fs.mkdirSync(directory);
-            }
-
-            // Output all of the info to a file
-            fs.writeFile(`${directory}/${filename}`, JSON.stringify(fileOutput), (err) => {
-                if (err) {
-                    console.log(err);
+            fs.access(directory, (existErr) => {
+                if (existErr) {
+                    fs.mkdir(directory, (mkErr) => {
+                        if (!mkErr) {
+                            dumpFile(filePath, fileOutput);
+                        } else {
+                            console.log(mkErr);
+                        }
+                    });
                 } else {
-                    console.log(`Dump file saved as ${filename}.`);
+                    dumpFile(filePath, fileOutput);
                 }
             });
         }
