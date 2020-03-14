@@ -1,8 +1,12 @@
 .dockerignore
 Dockerfile
+Dockerfile-arm32v7
 README.md
+.git
 .gitignore
+.eslintignore
 .eslintrc.json
 node_modules
 .vscode
 spec
+logs
