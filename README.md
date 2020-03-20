@@ -7,6 +7,9 @@ A voting application for movie night.
 3. Run `npm start`. If ran in a console window, you should see the line "Now listening on: http://localhost:3000"
 4. Go to http://localhost:3000 in a web browser and you should see the app running live.
 
+## Running on a different port
+If you want the app to run on a port other than 3000, you can use the `$PORT` environment variable to specify a different port number.
+
 ## Running from docker
 You can run the latest version of the app from docker by running the following command:
 ```

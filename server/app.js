@@ -24,7 +24,7 @@ const requirePassword = args.password !== false;
 const liveVoting = args.live === true;
 
 const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 let password = null;
 
