@@ -10,6 +10,8 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
 const args = require('minimist')(process.argv.slice(2));
+const sanitize = require('sanitize-filename');
+
 const keys = require('./apiKeys');
 const constants = require('./constants');
 const ObjectCache = require('./objectCache');
@@ -314,6 +316,7 @@ io.on('connection', (socket) => {
         nightInfo.name = info.name;
         nightInfo.votingSystem = info.votingSystem;
         nightInfo.maxSuggestions = parseInt(info.numSuggestions, 10);
+        nightInfo.startDate = new Date();
         host = socket.token;
 
         if (nightAlreadyHosted) {
@@ -623,10 +626,10 @@ io.on('connection', (socket) => {
                 users
             };
 
-            const currentDate = new Date();
+            const sanitizedNightName = sanitize(nightInfo.name.replace(/ /gu, '_'));
 
             // Construct a filename by replacing spaces with dashes in the night name and assembling the current date
-            const filename = `${nightInfo.name.replace(/ /gu, '-')}-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}.json`;
+            const filename = `${sanitizedNightName}-${nightInfo.startDate.toISOString().split('.')[0].replace(/:/gu, ';')}.json`;
             const directory = 'logs';
             const filePath = `${directory}/${filename}`;
 
@@ -650,6 +653,7 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.votingSystem = null;
         nightInfo.winner = null;
+        nightInfo.startDate = new Date();
         host = null;
 
         switchPhase(socket, constants.PHASES.HOST);
