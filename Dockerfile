@@ -10,10 +10,12 @@ WORKDIR /home/node/movie-night-app
 COPY [".", "."]
 # Install all the required node packages
 RUN npm install --only=prod
-# Make a directory for the logs 
+# Make a directory for the logs
 RUN mkdir logs
 # Change the owner of the logs directory to the running user (node) so that it can be written into
 RUN chown node logs
+# Create a volume for the logs
+VOLUME /home/node/movie-night-app/logs
 # Set the user as the node user
 USER node
 # Run the node command
