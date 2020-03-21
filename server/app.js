@@ -16,6 +16,8 @@ const keys = require('./apiKeys');
 const constants = require('./constants');
 const ObjectCache = require('./objectCache');
 
+const verboseLogging = args.verbose === true;
+
 // Allow people on the same network to access the app (this will use a different hostname)
 const allowOutsideConnections = args.o === true;
 // Whether a password is required to host a movie night
@@ -252,8 +254,9 @@ function addUser(socket, token, username = null) {
         if (isExistingUser && newUsername) {
             console.log(`Existing user '${previousUsername}' (${token}) changed their name to '${username}'.`);
         } else if (isExistingUser) {
-            // Commenting out for now as it clutters up the logs
-            // console.log(`Existing user '${users[token].username}' (${token}) reconnected.`);
+            if (verboseLogging) {
+                console.log(`Existing user '${users[token].username}' (${token}) reconnected.`);
+            }
         } else {
             console.log(`New user '${users[token].username}' (${token}) connected.`);
         }
@@ -700,9 +703,10 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         if (socket.token != null) {
-            const userToRemove = users[socket.token];
-            // Commenting out for now as it clutters up the logs
-            // console.log(`User '${userToRemove.username}' (${socket.token}) disconnected.`);
+            if (verboseLogging) {
+                const userToRemove = users[socket.token];
+                console.log(`User '${userToRemove.username}' (${socket.token}) disconnected.`);
+            }
         }
     });
 });
