@@ -52,10 +52,7 @@ describe('integration test', () => {
         );
         await movieToSelect.findElement(By.xpath('./td[text() = "2005"]'));
         const chooseButton = await movieToSelect.findElement(By.xpath('./td/input[@type="button"]'));
-        await driver.wait(async () => {
-            await chooseButton.click();
-            return (await chooseButton.getAttribute('class')).includes('active');
-        }, 500);
+        await chooseButton.click();
 
         await getVisibleElement(By.xpath('//table[@id="movieTable"]//tr/td[text() = "2 hours 37 mins"]'));
         await (await getVisibleElement(By.id('closeSuggestionsButton'))).click();
