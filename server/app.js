@@ -54,7 +54,7 @@ const movieDetailsCache = new ObjectCache(20, 'id');
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 // Serve the constants file
-app.get('/constants.js', (req, res) => res.sendFile(path.join(__dirname, 'constants.js')));
+app.use('/constants.js', express.static(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given hostname and port
 http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
