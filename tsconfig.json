@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "module": "es6",
+        "moduleResolution": "node"
+    },
+    "include": [
+        "client/**/*",
+        "server/**/*",
+        "spec/**/*"
+    ]
+}

@@ -1,14 +1,15 @@
-'use strict';
+import type { ThenableWebDriver, Locator, WebElement } from 'selenium-webdriver';
+import type { ChildProcess } from 'child_process';
 
-const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
-const { spawn } = require('child_process');
+import { Builder, Browser, By, Key, until } from 'selenium-webdriver';
+import { spawn } from 'child_process';
 
-let driver = null;
-let appProcess = null;
+let driver: ThenableWebDriver | null = null;
+let appProcess: ChildProcess | null = null;
 
-async function getVisibleElement(locator, timeout = 500) {
-    const element = await driver.wait(until.elementLocated(locator), timeout);
-    await driver.wait(until.elementIsVisible(element), timeout);
+async function getVisibleElement(locator: Locator, timeout = 500): Promise<WebElement> {
+    const element = await driver!.wait(until.elementLocated(locator), timeout);
+    await driver!.wait(until.elementIsVisible(element), timeout);
     return element;
 }
 
@@ -22,8 +23,8 @@ beforeEach(async (done) => {
 });
 
 afterEach(async (done) => {
-    await driver.quit();
-    appProcess.kill();
+    //await driver!.quit();
+    appProcess!.kill();
     done();
 });
 
@@ -58,25 +59,25 @@ describe('integration test', () => {
         await (await getVisibleElement(By.id('closeSuggestionsButton'))).click();
 
         const voteButton = await getVisibleElement(By.css('table#voteTable td > input[type="button"][value="Vote!"]'));
-        const voteText = await driver.findElement(By.css('table#voteTable td[votes-for]'));
-        async function checkVoting(val) {
+        const voteText = await driver!.findElement(By.css('table#voteTable td[votes-for]'));
+        async function checkVoting(val: string): Promise<void> {
             await voteButton.click();
-            await driver.sleep(500);
+            await driver!.sleep(500);
             expect(await voteText.getText()).toBe(val, 'Movie does not have the correct number of votes.');
         }
         await checkVoting('1');
         await checkVoting('0');
         await checkVoting('1');
-        await (await driver.findElement(By.id('closeVotingButton'))).click();
+        await (await driver!.findElement(By.id('closeVotingButton'))).click();
 
         const winnerText = await (await getVisibleElement(By.id('winner'))).getText();
         expect(winnerText).toContain('Harry Potter and the Goblet of Fire', 'The winner is incorrectly displayed.');
         await getVisibleElement(By.id('voteChart'), 1000);
-        await (await driver.findElement(By.id('endButton'))).click();
+        await (await driver!.findElement(By.id('endButton'))).click();
 
-        await (await getVisibleElement(By.id('nightName')));
-        await driver.sleep(500);
-        const movieNightTitle2 = await driver.findElement((By.id('movieNightTitle')));
+        await getVisibleElement(By.id('nightName'));
+        await driver!.sleep(500);
+        const movieNightTitle2 = await driver!.findElement((By.id('movieNightTitle')));
         expect(await movieNightTitle2.isDisplayed()).toBeFalsy('Movie night title is displaying when it shouldn\'t be.');
     });
 });

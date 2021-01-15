@@ -1,8 +1,21 @@
-export function sumVotes(votesObj) {
-    return Object.values(votesObj).reduce((a, b) => a + b, 0);
+type CellCallback = (cell: JQuery) => void;
+
+interface CellFunction {
+    text?: string;
+    func?: CellCallback;
 }
 
-export function createTableRow(objList) {
+export function sumVotes(votes: Map<number, number>): number {
+    let sum = 0;
+
+    votes.forEach((value) => {
+        sum += value;
+    });
+
+    return sum;
+}
+
+export function createTableRow(objList: CellFunction[]): JQuery {
     const tableRow = $('<tr>');
 
     objList.forEach((obj) => {
@@ -22,11 +35,11 @@ export function createTableRow(objList) {
     return tableRow;
 }
 
-export function pluralize(singular, value) {
+export function pluralize(singular: string, value: number): string {
     return `${value} ${singular}${value !== 1 ? 's' : ''}`;
 }
 
-export function getTimeStringFromRuntime(runtime) {
+export function getTimeStringFromRuntime(runtime: string): string {
     const mins = parseInt(runtime.substring(0, runtime.indexOf(' ')), 10);
     const hours = Math.floor(mins / 60);
     const minsLeft = mins % 60;
@@ -47,7 +60,7 @@ export function getTimeStringFromRuntime(runtime) {
     return timeString;
 }
 
-export function setBackgroundColorRedToGreen(element) {
+export function setBackgroundColorRedToGreen(element: JQuery): void {
     const num = parseFloat(element.text());
     const g = Math.round(num * (255 / 10));
     const r = 255 - g;
@@ -57,7 +70,7 @@ export function setBackgroundColorRedToGreen(element) {
     element.css('background-color', `rgba(${r},${g},${b},${a})`);
 }
 
-export function setAsMovieDetailsLink(element, movieId) {
+export function setAsMovieDetailsLink(element: JQuery, movieId: string): void {
     element.addClass('subtle-link')
         .attr('title', 'View more details for this movie')
         .click(() => {
