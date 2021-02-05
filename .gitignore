@@ -82,5 +82,5 @@ typings/
 client/**/*.js
 !client/views/external
 server/**/*.js
-spec/**/*.mjs
+spec/**/*.js
 **/*.js.map

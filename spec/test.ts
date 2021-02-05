@@ -23,7 +23,7 @@ beforeEach(async (done) => {
 });
 
 afterEach(async (done) => {
-    //await driver!.quit();
+    await driver!.quit();
     appProcess!.kill();
     done();
 });
