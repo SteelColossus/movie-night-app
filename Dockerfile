@@ -1,5 +1,5 @@
 # Start from a node image
-FROM node:10
+FROM node:lts-alpine
 # Set the node environment variable to production
 ENV NODE_ENV production
 # Expose the default port 3000
