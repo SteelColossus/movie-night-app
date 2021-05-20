@@ -12,19 +12,17 @@ async function getVisibleElement(locator, timeout = 500) {
     return element;
 }
 
-beforeEach(async (done) => {
+beforeEach(async () => {
     appProcess = spawn('node', ['.', '--no-password', '--live']);
 
     driver = new Builder().forBrowser(Browser.CHROME).build();
     await driver.get('http://localhost:3000');
     await driver.wait(until.titleIs('Movie Night App'), 1000);
-    done();
 });
 
-afterEach(async (done) => {
+afterEach(async () => {
     await driver.quit();
     appProcess.kill();
-    done();
 });
 
 // This test should not be guaranteed to pass, it is just an indication of whether any functionality is broken
