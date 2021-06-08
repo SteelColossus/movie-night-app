@@ -27,7 +27,7 @@
     "socket.io": "^2.4.1"
   },
   "devDependencies": {
-    "eslint": "^7.27.0",
+    "eslint": "^7.28.0",
     "htmlhint": "^0.14.2",
     "jasmine": "^3.7.0",
     "selenium-webdriver": "^4.0.0-beta.3"
