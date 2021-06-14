@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "eslint": "^7.28.0",
-    "htmlhint": "^0.14.2",
+    "htmlhint": "^0.15.1",
     "jasmine": "^3.7.0",
     "selenium-webdriver": "^4.0.0-beta.3"
   }
