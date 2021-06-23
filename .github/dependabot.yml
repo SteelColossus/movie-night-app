@@ -7,5 +7,7 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    # schedule:
-    #   interval: "monthly"
+    schedule:
+      interval: "monthly"
+    # Disable PRs
+    open-pull-requests-limit: 0
