@@ -7,7 +7,8 @@
     "start": "node .",
     "test": "jasmine",
     "lint": "node_modules/.bin/eslint **/*.js",
-    "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
+    "lint:fix": "node_modules/.bin/eslint **/*.js --fix",
+    "lint:html": "node_modules/.bin/htmlhint **/*.html"
   },
   "author": "Michael Winkworth",
   "contributors": [
@@ -19,17 +20,17 @@
   },
   "private": true,
   "dependencies": {
-    "axios": "^0.21.2",
-    "express": "^4.17.1",
+    "axios": "^0.21.4",
+    "express": "^4.17.2",
     "minimist": "^1.2.5",
     "sanitize-filename": "^1.6.3",
     "serve-favicon": "^2.5.0",
     "socket.io": "^2.4.1"
   },
   "devDependencies": {
-    "eslint": "^7.29.0",
-    "htmlhint": "^0.15.1",
-    "jasmine": "^3.7.0",
-    "selenium-webdriver": "^4.0.0-beta.4"
+    "eslint": "^8.7.0",
+    "htmlhint": "^1.1.0",
+    "jasmine": "^4.0.2",
+    "selenium-webdriver": "^4.1.1"
   }
 }
