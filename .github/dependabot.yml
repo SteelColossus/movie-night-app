@@ -11,3 +11,8 @@ updates:
       interval: "monthly"
     # Disable PRs
     open-pull-requests-limit: 0
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
