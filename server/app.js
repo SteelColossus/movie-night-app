@@ -6,9 +6,8 @@ const path = require('path');
 const express = require('express');
 const favicon = require('serve-favicon');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http, { cookie: false });
-const axios = require('axios');
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, { cookie: false });
 const args = require('minimist')(process.argv.slice(2));
 const sanitize = require('sanitize-filename');
 
@@ -57,7 +56,7 @@ app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 app.use('/constants.js', express.static(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given hostname and port
-http.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
+server.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
 
 function getRandomPassword() {
     const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -88,9 +87,15 @@ function makeOmdbRequest(type, query, callback, data = {}) {
         additionalQueryString += `&${entry[0]}=${entry[1]}`;
     });
 
-    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie${additionalQueryString}`)
-        .then(callback)
-        .catch(console.log);
+    return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie${additionalQueryString}`)
+        .then(async (response) => {
+            if (response.ok) {
+                callback(await response.json());
+            } else {
+                console.error(response.status);
+            }
+        })
+        .catch(console.error);
 }
 
 function sumVotes(votesObj) {
@@ -285,7 +290,7 @@ function dumpFile(filePath, fileOutput) {
         if (!err) {
             console.log(`Dump file saved to ${filePath}.`);
         } else {
-            console.log(err);
+            console.error(err);
         }
     });
 }
@@ -346,9 +351,9 @@ io.on('connection', (socket) => {
          * When we get the results we send them back to the user.
          */
         const movieResultsPromise = new Promise((resolve) => {
-            makeOmdbRequest('s', encodedSuggestion, (response) => {
+            makeOmdbRequest('s', encodedSuggestion, (responseJson) => {
                 const movieResults = {
-                    success: response.data.Response === 'True'
+                    success: responseJson.Response === 'True'
                 };
 
                 function movieMapFunction(result) {
@@ -360,24 +365,24 @@ io.on('connection', (socket) => {
                 }
 
                 if (movieResults.success === true) {
-                    movieResults.results = response.data.Search.map(movieMapFunction);
+                    movieResults.results = responseJson.Search.map(movieMapFunction);
 
                     resolve(movieResults);
-                } else if (response.data.Error === 'Too many results.') {
+                } else if (responseJson.Error === 'Too many results.') {
                     // If the API says we get too many results, then instead try to search by the exact title
-                    makeOmdbRequest('t', encodedSuggestion, (response2) => {
-                        movieResults.success = response2.data.Response === 'True';
+                    makeOmdbRequest('t', encodedSuggestion, (responseJson2) => {
+                        movieResults.success = responseJson2.Response === 'True';
 
                         if (movieResults.success === true) {
-                            movieResults.results = [movieMapFunction(response2.data)];
+                            movieResults.results = [movieMapFunction(responseJson2)];
                         } else if (movieResults.success === false) {
-                            movieResults.errorMessage = `${response.data.Error} ${response2.data.Error}`;
+                            movieResults.errorMessage = `${responseJson.Error} ${responseJson2.Error}`;
                         }
 
                         resolve(movieResults);
                     });
                 } else {
-                    movieResults.errorMessage = response.data.Error;
+                    movieResults.errorMessage = responseJson.Error;
 
                     resolve(movieResults);
                 }
@@ -401,17 +406,16 @@ io.on('connection', (socket) => {
         }
 
         // Get more information for the chosen movie
-        makeOmdbRequest('i', movieId, (response) => {
-            const result = response.data;
+        makeOmdbRequest('i', movieId, (responseJson) => {
             const movie = {
-                id: result.imdbID,
-                title: result.Title,
-                year: result.Year,
-                runtime: result.Runtime,
-                genre: result.Genre,
-                plot: result.Plot,
-                rating: result.imdbRating,
-                awards: result.Awards,
+                id: responseJson.imdbID,
+                title: responseJson.Title,
+                year: responseJson.Year,
+                runtime: responseJson.Runtime,
+                genre: responseJson.Genre,
+                plot: responseJson.Plot,
+                rating: responseJson.imdbRating,
+                awards: responseJson.Awards,
                 suggester: socket.token,
                 votes: {},
                 removed: false
@@ -642,7 +646,7 @@ io.on('connection', (socket) => {
                         if (!mkErr) {
                             dumpFile(filePath, fileOutput);
                         } else {
-                            console.log(mkErr);
+                            console.error(mkErr);
                         }
                     });
                 } else {
@@ -716,28 +720,27 @@ app.get('/movieDetails/:id', (req, res) => {
     const cachedMovie = movieDetailsCache.get(movieId);
 
     if (cachedMovie == null) {
-        makeOmdbRequest('i', movieId, (response) => {
-            if (response.data.Response === 'True') {
-                const result = response.data;
+        makeOmdbRequest('i', movieId, (responseJson) => {
+            if (responseJson.Response === 'True') {
                 const movie = {
-                    id: result.imdbID,
-                    title: result.Title,
-                    year: result.Year,
-                    runtime: result.Runtime,
-                    genre: result.Genre,
-                    plot: result.Plot,
-                    rating: result.imdbRating,
-                    awards: result.Awards,
-                    actors: result.Actors,
-                    director: result.Director,
-                    writer: result.Writer,
-                    poster: result.Poster
+                    id: responseJson.imdbID,
+                    title: responseJson.Title,
+                    year: responseJson.Year,
+                    runtime: responseJson.Runtime,
+                    genre: responseJson.Genre,
+                    plot: responseJson.Plot,
+                    rating: responseJson.imdbRating,
+                    awards: responseJson.Awards,
+                    actors: responseJson.Actors,
+                    director: responseJson.Director,
+                    writer: responseJson.Writer,
+                    poster: responseJson.Poster
                 };
 
                 movieDetailsCache.set(movie);
                 res.json(movie);
             } else {
-                res.status(404).json(response.data.Error);
+                res.status(404).json(responseJson.Error);
             }
         }, { plot: 'full' });
     } else {
