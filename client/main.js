@@ -5,6 +5,7 @@ import { SearchView } from './views/searchView.js';
 import { SuggestionsView } from './views/suggestionsView.js';
 import { VoteView } from './views/voteView.js';
 import { ResultsView } from './views/resultsView.js';
+import { PHASES } from '../server/constants.js';
 
 const socket = io();
 const client = new ClientJS();
@@ -74,14 +75,14 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
 function getViewPhase(viewName) {
     switch (viewName) {
         case HostView.viewName:
-            return constants.PHASES.HOST;
+            return PHASES.HOST;
         case SearchView.viewName:
         case SuggestionsView.viewName:
-            return constants.PHASES.SUGGEST;
+            return PHASES.SUGGEST;
         case VoteView.viewName:
-            return constants.PHASES.VOTE;
+            return PHASES.VOTE;
         case ResultsView.viewName:
-            return constants.PHASES.RESULTS;
+            return PHASES.RESULTS;
         default:
             return null;
     }
@@ -181,16 +182,16 @@ socket.on('new_phase', (phaseInfo) => {
         let viewName = null;
 
         switch (phaseInfo.name) {
-            case constants.PHASES.HOST:
+            case PHASES.HOST:
                 viewName = HostView.viewName;
                 break;
-            case constants.PHASES.SUGGEST:
+            case PHASES.SUGGEST:
                 viewName = (phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions) ? SuggestionsView.viewName : SearchView.viewName;
                 break;
-            case constants.PHASES.VOTE:
+            case PHASES.VOTE:
                 viewName = VoteView.viewName;
                 break;
-            case constants.PHASES.RESULTS:
+            case PHASES.RESULTS:
                 viewName = ResultsView.viewName;
                 break;
             default:

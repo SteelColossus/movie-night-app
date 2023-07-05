@@ -1,6 +1,6 @@
 'use strict';
 
-class ObjectCache {
+export default class ObjectCache {
     constructor(size, keyProp) {
         this.cache = [];
         this.size = size;
@@ -27,5 +27,3 @@ class ObjectCache {
         }
     }
 }
-
-module.exports = ObjectCache;
