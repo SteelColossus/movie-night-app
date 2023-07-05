@@ -10,10 +10,10 @@ const socket = io();
 const client = new ClientJS();
 
 // Shared DOM elements
-const movieNightTitle = $('#movieNightTitle');
-const errorMessage = $('#errorMessage');
-const usernameIndicator = $('#usernameIndicator');
-const darkModeButton = $('#darkModeButton');
+const movieNightTitle = document.querySelector('#movieNightTitle');
+const errorMessage = document.querySelector('#errorMessage');
+const usernameIndicator = document.querySelector('#usernameIndicator');
+const darkModeButton = document.querySelector('#darkModeButton');
 
 const animTime = 400;
 
@@ -29,7 +29,7 @@ let darkMode = localStorage.getItem('darkMode') === true.toString();
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
-        errorMessage.hide(animTime);
+        errorMessage.style.display = 'none';
 
         if (currentView != null) {
             currentView.hide();
@@ -107,24 +107,28 @@ function requestViewDataForHash() {
 }
 
 function setDarkMode(isDarkMode) {
-    localStorage.setItem('darkMode', darkMode);
+    localStorage.setItem('darkMode', isDarkMode);
 
     if (isDarkMode) {
-        $(document.body).addClass('dark-mode');
-        darkModeButton.find('.fa-moon')
-            .removeClass('fa-moon')
-            .addClass('fa-sun');
+        document.body.classList.add('dark-mode');
+        const moonIcon = darkModeButton.querySelector('.fa-moon');
+        if (moonIcon) {
+            moonIcon.classList.remove('fa-moon');
+            moonIcon.classList.add('fa-sun');
+        }
     } else {
-        $(document.body).removeClass('dark-mode');
-        darkModeButton.find('.fa-sun')
-            .removeClass('fa-sun')
-            .addClass('fa-moon');
+        document.body.classList.remove('dark-mode');
+        const sunIcon = darkModeButton.querySelector('.fa-sun');
+        if (sunIcon) {
+            sunIcon.classList.remove('fa-sun');
+            sunIcon.classList.add('fa-moon');
+        }
     }
 }
 
 setDarkMode(darkMode);
 
-darkModeButton.click(() => {
+darkModeButton.addEventListener('click', () => {
     darkMode = !darkMode;
     setDarkMode(darkMode);
 });
@@ -134,7 +138,8 @@ window.addEventListener('hashchange', () => {
 });
 
 socket.on('connect', () => {
-    console.log('Connected to the app server.'); // eslint-disable-line no-console
+    // eslint-disable-next-line no-console
+    console.log('Connected to the app server.');
 });
 
 socket.on('request_user_token', () => {
@@ -152,11 +157,13 @@ socket.on('request_new_user', () => {
 });
 
 socket.on('request_new_username', () => {
-    errorMessage.text('The name you have entered is already taken.').show(animTime);
+    errorMessage.textContent = 'The name you have entered is already taken.';
+    errorMessage.style.display = '';
 });
 
 socket.on('user_info', (username) => {
-    usernameIndicator.text(username).show(animTime);
+    usernameIndicator.textContent = username;
+    usernameIndicator.style.display = '';
 });
 
 socket.on('new_phase', (phaseInfo) => {
@@ -196,9 +203,10 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
-        movieNightTitle.text(phaseInfo.data.name).show(animTime);
+        movieNightTitle.textContent = phaseInfo.data.name;
+        movieNightTitle.style.display = '';
     } else {
-        movieNightTitle.hide(animTime);
+        movieNightTitle.style.display = 'none';
     }
 });
 

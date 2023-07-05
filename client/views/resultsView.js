@@ -8,9 +8,9 @@ export class ResultsView extends View {
         this.movies = movies;
         this.winner = movies.find((movie) => movie.id === winner);
         this.users = users;
-        this.canvas = $('#voteChart');
-        this.endButton = $('#endButton');
-        this.newMovieButton = $('#newMovieButton');
+        this.canvas = document.querySelector('#voteChart');
+        this.endButton = document.querySelector('#endButton');
+        this.newMovieButton = document.querySelector('#newMovieButton');
     }
 
     createChart(users, movies) {
@@ -84,7 +84,7 @@ export class ResultsView extends View {
                 }
             });
 
-            this.canvas.show();
+            this.canvas.style.display = '';
         }
     }
 
@@ -108,7 +108,7 @@ export class ResultsView extends View {
             }
         }
 
-        $('#winner').text(winnerText);
+        document.querySelector('#winner').textContent = winnerText;
 
         if (this.winner != null) {
             this.createChart(this.users, this.movies);
@@ -117,22 +117,22 @@ export class ResultsView extends View {
         if (this.isHost === true) {
             this.addDOMListener(this.endButton, 'click', () => {
                 this.socket.emit('end_night');
-            }).show(this.animTime);
+            }).style.display = '';
 
             this.addDOMListener(this.newMovieButton, 'click', () => {
                 this.socket.emit('new_round');
-            }).show(this.animTime);
+            }).style.display = '';
         }
     }
 
     onViewHidden() {
-        this.endButton.hide();
-        this.newMovieButton.hide();
+        this.endButton.style.display = 'none';
+        this.newMovieButton.style.display = 'none';
         // Destroy the existing chart so that a new one can be created
         if (this.voteChart != null) {
             this.voteChart.destroy();
         }
-        this.canvas.hide();
+        this.canvas.style.display = 'none';
     }
 }
 

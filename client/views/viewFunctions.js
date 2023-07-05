@@ -3,13 +3,13 @@ export function sumVotes(votesObj) {
 }
 
 export function createTableRow(objList) {
-    const tableRow = $('<tr>');
+    const tableRow = document.createElement('tr');
 
     objList.forEach((obj) => {
-        const cell = $('<td>');
+        const cell = document.createElement('td');
 
         if (obj.text != null) {
-            cell.text(obj.text);
+            cell.textContent = obj.text;
         }
 
         if (obj.func != null) {
@@ -48,19 +48,19 @@ export function getTimeStringFromRuntime(runtime) {
 }
 
 export function setBackgroundColorRedToGreen(element) {
-    const num = parseFloat(element.text());
+    const num = parseFloat(element.textContent);
     const g = Math.round(num * (255 / 10));
     const r = 255 - g;
     const b = 0;
     const a = 0.5;
 
-    element.css('background-color', `rgba(${r},${g},${b},${a})`);
+    element.style.backgroundColor = `rgba(${r},${g},${b},${a})`;
 }
 
 export function setAsMovieDetailsLink(element, movieId) {
-    element.addClass('subtle-link')
-        .attr('title', 'View more details for this movie')
-        .click(() => {
-            window.open(`/movie?id=${movieId}`);
-        });
+    element.classList.add('subtle-link');
+    element.setAttribute('title', 'View more details for this movie');
+    element.addEventListener('click', () => {
+        window.open(`/movie?id=${movieId}`);
+    });
 }

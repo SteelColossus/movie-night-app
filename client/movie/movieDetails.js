@@ -38,7 +38,8 @@ fetch(`../movieDetails/${movieId}`, {
     .then((res) => {
         if (!res.ok) {
             res.json().then((err) => {
-                alert(err); // eslint-disable-line no-alert
+                // eslint-disable-next-line no-alert
+                alert(err);
             });
         } else {
             res.json().then((movie) => {

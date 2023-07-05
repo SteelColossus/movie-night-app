@@ -5,18 +5,21 @@ export class HostView extends View {
         super(HostView.viewName, socket, animTime);
         this.votingSystems = votingSystems;
         this.isPasswordRequired = isPasswordRequired;
-        this.nightInput = $('#nightName');
-        this.votingSystemInput = $('#votingSystem');
-        this.numSuggestionsInput = $('#numSuggestions');
-        this.passwordInput = $('#password');
-        this.errorMessage = $('#errorMessage');
+        this.nightInput = document.querySelector('#nightName');
+        this.votingSystemInput = document.querySelector('#votingSystem');
+        this.numSuggestionsInput = document.querySelector('#numSuggestions');
+        this.passwordInput = document.querySelector('#password');
+        this.errorMessage = document.querySelector('#errorMessage');
     }
 
-    formSubmit() {
-        const name = this.nightInput.val().toString().trim();
-        const votingSystem = this.votingSystemInput.val();
-        const numSuggestions = this.numSuggestionsInput.val();
-        const password = this.passwordInput.val();
+    formSubmit(event) {
+        // Stop the page from refreshing
+        event.preventDefault();
+
+        const name = this.nightInput.value.trim();
+        const votingSystem = this.votingSystemInput.value;
+        const numSuggestions = this.numSuggestionsInput.value;
+        const password = this.passwordInput.value;
 
         const nightInfo = {
             name,
@@ -26,39 +29,43 @@ export class HostView extends View {
         };
 
         this.socket.emit('host_night', nightInfo);
-
-        // Stop the page from refreshing
-        return false;
     }
 
     onViewShown() {
-        this.votingSystemInput.empty();
+        this.votingSystemInput.replaceChildren();
 
         this.votingSystems.forEach((system) => {
-            this.votingSystemInput.append($('<option>').val(system).text(system));
+            const option = document.createElement('option');
+            option.value = system;
+            option.text = system;
+            this.votingSystemInput.appendChild(option);
         });
 
-        this.numSuggestionsInput.empty();
+        this.numSuggestionsInput.replaceChildren();
 
         for (let i = 1; i <= 3; i++) {
-            this.numSuggestionsInput.append($('<option>').val(i).text(i));
+            const option = document.createElement('option');
+            option.value = i;
+            option.text = i;
+            this.numSuggestionsInput.appendChild(option);
         }
 
         if (this.isPasswordRequired === true) {
-            $('#passwordLabel').show();
-            this.passwordInput.show();
+            document.querySelector('#passwordLabel').style.display = '';
+            this.passwordInput.style.display = '';
         }
 
-        this.addDOMListener($('#startVotingForm'), 'submit', this.formSubmit);
+        this.addDOMListener(document.querySelector('#startVotingForm'), 'submit', this.formSubmit);
 
         this.addSocketListener('wrong_password', () => {
-            this.errorMessage.text(`The password you have entered is incorrect.`).show(this.animTime);
+            this.errorMessage.textContent = 'The password you have entered is incorrect.';
+            this.errorMessage.style.display = '';
         });
     }
 
     onViewHidden() {
-        this.nightInput.val('');
-        this.errorMessage.hide();
+        this.nightInput.value = '';
+        this.errorMessage.style.display = 'none';
     }
 }
 

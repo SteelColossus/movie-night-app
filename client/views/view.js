@@ -1,7 +1,7 @@
 export class View {
     constructor(name, socket, animTime) {
         this.viewName = name;
-        this.container = $(`#${name}View`);
+        this.container = document.querySelector(`#${name}View`);
         this.socket = socket;
         this.animTime = animTime;
         this.socketListeners = [];
@@ -10,14 +10,14 @@ export class View {
 
     // Show this page
     show() {
-        this.container.show(this.animTime);
+        this.container.style.display = '';
         this.updateHistory();
         this.onViewShown();
     }
 
     // Hide this page
     hide() {
-        this.container.hide(this.animTime);
+        this.container.style.display = 'none';
         this.onViewHidden();
         this.clearListeners();
     }
@@ -66,11 +66,11 @@ export class View {
         return this.socket;
     }
 
-    // Adds an event listener for the associated jQuery object - need to call this so the event is removed when the page is hidden
+    // Adds an event listener for the associated element - need to call this so the event is removed when the page is hidden
     addDOMListener(element, eventName, callback) {
         const func = callback.bind(this);
 
-        element.on(eventName, func);
+        element.addEventListener(eventName, func);
 
         this.domListeners.push({
             element,
@@ -78,7 +78,7 @@ export class View {
             func
         });
 
-        // Return the jQuery object for chaining purposes
+        // Return the element for chaining purposes
         return element;
     }
 
@@ -86,7 +86,7 @@ export class View {
     clearListeners() {
         this.socketListeners.forEach((listener) => this.socket.off(listener.name, listener.func));
         this.socketListeners.length = 0;
-        this.domListeners.forEach((listener) => listener.element.off(listener.name, listener.func));
+        this.domListeners.forEach((listener) => listener.element.removeEventListener(listener.name, listener.func));
         this.domListeners.length = 0;
     }
 }

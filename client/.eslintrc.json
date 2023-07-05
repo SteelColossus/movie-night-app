@@ -3,13 +3,14 @@
         "sourceType": "module"
     },
     "env": {
-        "browser": true,
-        "jquery": true
+        "browser": true
     },
     "globals": {
         "io": false,
         "Chart": false,
         "ClientJS": false,
-        "constants": false
+        "constants": false,
+        "bootstrap": false,
+        "Sortable": false
     }
 }
