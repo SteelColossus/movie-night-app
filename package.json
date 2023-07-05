@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A voting application for movie night.",
   "main": "server/app.js",
+  "type": "module",
   "scripts": {
     "start": "node .",
     "test": "jasmine",

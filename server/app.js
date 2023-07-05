@@ -1,19 +1,27 @@
 'use strict';
 
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const favicon = require('serve-favicon');
-const app = express();
-const server = require('http').createServer(app);
-const io = require('socket.io')(server, { cookie: false });
-const args = require('minimist')(process.argv.slice(2));
-const sanitize = require('sanitize-filename');
+import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createServer } from 'node:http';
+import express from 'express';
+import favicon from 'serve-favicon';
+import sanitize from 'sanitize-filename';
+import socketIO from 'socket.io';
+import minimist from 'minimist';
 
-const keys = require('./apiKeys');
-const constants = require('./constants');
-const ObjectCache = require('./objectCache');
+import { OMDB_KEY } from './apiKeys.js';
+import { PHASES, VOTING_SYSTEMS } from './constants.js';
+import ObjectCache from './objectCache.js';
+
+const app = express();
+const server = createServer(app);
+const io = socketIO(server, { cookie: false });
+const args = minimist(process.argv.slice(2));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const verboseLogging = args.verbose === true;
 
@@ -29,7 +37,7 @@ const port = process.env.PORT || 3000;
 
 let password = null;
 
-let phase = constants.PHASES.HOST;
+let phase = PHASES.HOST;
 let host = null;
 
 const users = {};
@@ -41,10 +49,10 @@ const usersToChooseFrom = [];
 let chosenUserIndex = null;
 
 const orderedPhases = [
-    constants.PHASES.HOST,
-    constants.PHASES.SUGGEST,
-    constants.PHASES.VOTE,
-    constants.PHASES.RESULTS
+    PHASES.HOST,
+    PHASES.SUGGEST,
+    PHASES.VOTE,
+    PHASES.RESULTS
 ];
 
 const movieDetailsCache = new ObjectCache(20, 'id');
@@ -53,7 +61,7 @@ const movieDetailsCache = new ObjectCache(20, 'id');
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 // Serve the constants file
-app.use('/constants.js', express.static(path.join(__dirname, 'constants.js')));
+app.use('/server/constants.js', express.static(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given hostname and port
 server.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
@@ -87,7 +95,7 @@ function makeOmdbRequest(type, query, callback, data = {}) {
         additionalQueryString += `&${entry[0]}=${entry[1]}`;
     });
 
-    return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${keys.OMDB_KEY}&type=movie${additionalQueryString}`)
+    return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`)
         .then(async (response) => {
             if (response.ok) {
                 callback(await response.json());
@@ -155,13 +163,13 @@ function getPhaseData(phaseName, token) {
     let data = null;
 
     switch (phaseName) {
-        case constants.PHASES.HOST:
+        case PHASES.HOST:
             data = {
-                votingSystems: Object.values(constants.VOTING_SYSTEMS),
+                votingSystems: Object.values(VOTING_SYSTEMS),
                 isPasswordRequired: password != null
             };
             break;
-        case constants.PHASES.SUGGEST:
+        case PHASES.SUGGEST:
             data = {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
@@ -169,7 +177,7 @@ function getPhaseData(phaseName, token) {
                 maxSuggestions: nightInfo.maxSuggestions
             };
             break;
-        case constants.PHASES.VOTE:
+        case PHASES.VOTE:
             data = {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
@@ -178,7 +186,7 @@ function getPhaseData(phaseName, token) {
                 liveVoting
             };
             break;
-        case constants.PHASES.RESULTS:
+        case PHASES.RESULTS:
             data = {
                 name: nightInfo.name,
                 movies: nightInfo.movies,
@@ -311,7 +319,7 @@ io.on('connection', (socket) => {
     socket.on('host_night', (info) => {
         const nightAlreadyHosted = host != null;
 
-        if (!preCheck(socket.token, constants.PHASES.HOST, nightAlreadyHosted)) {
+        if (!preCheck(socket.token, PHASES.HOST, nightAlreadyHosted)) {
             return;
         }
 
@@ -333,12 +341,12 @@ io.on('connection', (socket) => {
             console.log(`User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'.`);
         }
 
-        switchPhase(socket, constants.PHASES.SUGGEST);
+        switchPhase(socket, PHASES.SUGGEST);
     });
 
     // When a movie is searched for, check the API for results
     socket.on('movie_search', (suggestion) => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) {
+        if (!preCheck(socket.token, PHASES.SUGGEST, false)) {
             return;
         }
 
@@ -393,7 +401,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('movie_chosen', (movieId) => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, false)) {
+        if (!preCheck(socket.token, PHASES.SUGGEST, false)) {
             return;
         }
 
@@ -506,7 +514,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('votes_changed', (voteDeltas) => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) {
+        if (!preCheck(socket.token, PHASES.VOTE, false, true)) {
             return;
         }
 
@@ -536,7 +544,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('remove_movie', (id) => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, false, true)) {
+        if (!preCheck(socket.token, PHASES.VOTE, false, true)) {
             return;
         }
 
@@ -547,7 +555,7 @@ io.on('connection', (socket) => {
 
             io.to(nightInfo.name).emit('movie_removed', id);
 
-            if (nightInfo.votingSystem === constants.VOTING_SYSTEMS.VETO) {
+            if (nightInfo.votingSystem === VOTING_SYSTEMS.VETO) {
                 chooseNewUser();
 
                 io.to(nightInfo.name).emit('get_chosen_user', usersToChooseFrom[chosenUserIndex]);
@@ -558,7 +566,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('remove_random_movie', () => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) {
+        if (!preCheck(socket.token, PHASES.VOTE, true, true)) {
             return;
         }
 
@@ -577,15 +585,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('close_suggestions', () => {
-        if (!preCheck(socket.token, constants.PHASES.SUGGEST, true, true)) {
+        if (!preCheck(socket.token, PHASES.SUGGEST, true, true)) {
             return;
         }
 
-        switchPhase(socket, constants.PHASES.VOTE);
+        switchPhase(socket, PHASES.VOTE);
     });
 
     socket.on('close_voting', () => {
-        if (!preCheck(socket.token, constants.PHASES.VOTE, true, true)) {
+        if (!preCheck(socket.token, PHASES.VOTE, true, true)) {
             return;
         }
 
@@ -597,7 +605,7 @@ io.on('connection', (socket) => {
         if (winners.length > 1) {
             const newStageData = {
                 movies: nightInfo.movies.filter((movie) => winners.includes(movie.id)),
-                votingSystem: constants.VOTING_SYSTEMS.RANDOM,
+                votingSystem: VOTING_SYSTEMS.RANDOM,
                 isHost: host === socket.token
             };
 
@@ -612,12 +620,12 @@ io.on('connection', (socket) => {
                 nightInfo.winner = winners[0];
             }
 
-            switchPhase(socket, constants.PHASES.RESULTS);
+            switchPhase(socket, PHASES.RESULTS);
         }
     });
 
     socket.on('end_night', () => {
-        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) {
+        if (!preCheck(socket.token, PHASES.RESULTS, true)) {
             return;
         }
 
@@ -663,14 +671,14 @@ io.on('connection', (socket) => {
         nightInfo.startDate = new Date();
         host = null;
 
-        switchPhase(socket, constants.PHASES.HOST);
+        switchPhase(socket, PHASES.HOST);
 
         // The name has to be reset after switching the phase as it is used as the socket room name
         nightInfo.name = null;
     });
 
     socket.on('new_round', () => {
-        if (!preCheck(socket.token, constants.PHASES.RESULTS, true)) {
+        if (!preCheck(socket.token, PHASES.RESULTS, true)) {
             return;
         }
 
@@ -682,7 +690,7 @@ io.on('connection', (socket) => {
         nightInfo.movies = [];
         nightInfo.winner = null;
 
-        switchPhase(socket, constants.PHASES.SUGGEST);
+        switchPhase(socket, PHASES.SUGGEST);
     });
 
     socket.on('get_phase_data', (phaseName) => {

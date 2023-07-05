@@ -1,5 +1,6 @@
 import { View } from './view.js';
 import { createTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
+import { VOTING_SYSTEMS } from '../../server/constants.js';
 
 export class VoteView extends View {
     constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, liveVoting, isExactPhase) {
@@ -454,16 +455,16 @@ export class VoteView extends View {
         this.movies = this.movies.filter((movie) => movie.removed === false);
 
         switch (this.votingSystem) {
-            case constants.VOTING_SYSTEMS.MULTI_VOTE:
+            case VOTING_SYSTEMS.MULTI_VOTE:
                 this.setupMultiVoteView();
                 break;
-            case constants.VOTING_SYSTEMS.RANDOM:
+            case VOTING_SYSTEMS.RANDOM:
                 this.setupRandomView();
                 break;
-            case constants.VOTING_SYSTEMS.RANKED:
+            case VOTING_SYSTEMS.RANKED:
                 this.setupRankedView();
                 break;
-            case constants.VOTING_SYSTEMS.VETO:
+            case VOTING_SYSTEMS.VETO:
                 this.setupVetoView();
                 break;
             default:

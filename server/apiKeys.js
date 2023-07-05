@@ -1,3 +1,3 @@
 'use strict';
 
-exports.OMDB_KEY = '315de77c';
+export const OMDB_KEY = '315de77c';
