@@ -284,15 +284,13 @@ export class VoteView extends View {
 
         const voteTableBody = $('#voteTable > tbody');
 
-        console.log(this.movies);
-
         this.movies.forEach((movie) => {
             const tableRow = this.createMultiVoteTableRow(movie);
             voteTableBody.append(tableRow);
         });
 
         if (this.liveVoting) {
-            this.addSocketListener('votes_changed', (newVotes) => {
+            this.addSocketListener('votes_changed', (newVotes: Map<string, Map<number, number>>) => {
                 this.handleVotesChanged(newVotes);
             });
         } else {
@@ -338,8 +336,8 @@ export class VoteView extends View {
             voteTableBody.append(tableRow);
         });
 
-        this.addSocketListener('movie_removed', (movie) => {
-            this.handleMovieRemoved(movie);
+        this.addSocketListener('movie_removed', (removedMovieId: string) => {
+            this.handleMovieRemoved(removedMovieId);
         });
 
         if (this.isHost && this.isExactPhase) {
@@ -509,7 +507,7 @@ export class VoteView extends View {
             voteTableBody.append(tableRow);
         });
 
-        this.addSocketListener('movie_removed', (removedMovieId) => {
+        this.addSocketListener('movie_removed', (removedMovieId: string) => {
             this.handleMovieRemoved(removedMovieId);
 
             let numRemainingMovies = 0;

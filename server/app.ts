@@ -8,8 +8,7 @@ import { createServer } from 'node:http';
 import express from 'express';
 import favicon from 'serve-favicon';
 import sanitize from 'sanitize-filename';
-import type { Socket } from 'socket.io';
-import socketIO from 'socket.io';
+import socketIO, { type Socket } from 'socket.io';
 import minimist from 'minimist';
 
 import { OMDB_KEY } from './apiKeys.js';
@@ -110,7 +109,7 @@ async function makeOmdbRequest<T extends OmdbQuery>(
     return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`)
         .then(async (response) => {
             if (response.ok) {
-                callback(await response.json());
+                callback(await response.json() as OmdbResponse<T>);
             } else {
                 console.error(response.status);
             }
@@ -281,13 +280,13 @@ function addUser(socket: Socket, token: number, username: string | null = null):
             }
 
             if (isExistingUser) {
-                previousUsername = existingUser!.username;
+                previousUsername = existingUser.username;
                 users.splice(users.findIndex((u) => u.token === token), 1);
             }
 
             newUser = {
                 token,
-                username: username!
+                username
             };
 
             users.push(newUser);
@@ -296,10 +295,10 @@ function addUser(socket: Socket, token: number, username: string | null = null):
         setUserSocket(socket, token);
 
         if (isExistingUser && newUsername) {
-            console.log(`Existing user '${previousUsername!}' (${token}) changed their name to '${username!}'.`);
+            console.log(`Existing user '${previousUsername!}' (${token}) changed their name to '${username}'.`);
         } else if (isExistingUser) {
             if (verboseLogging) {
-                console.log(`Existing user '${existingUser!.username}' (${token}) reconnected.`);
+                console.log(`Existing user '${existingUser.username}' (${token}) reconnected.`);
             }
         } else {
             console.log(`New user '${newUser!.username}' (${token}) connected.`);

@@ -1,8 +1,5 @@
-import type { ThenableWebDriver, Locator, WebElement } from 'selenium-webdriver';
-import type { ChildProcess } from 'child_process';
-
-import { Builder, Browser, By, Key, until } from 'selenium-webdriver';
-import { spawn } from 'child_process';
+import { Builder, Browser, By, Key, until, type ThenableWebDriver, type Locator, type WebElement } from 'selenium-webdriver';
+import { spawn, type ChildProcess } from 'child_process';
 
 let driver: ThenableWebDriver | null = null;
 let appProcess: ChildProcess | null = null;

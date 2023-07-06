@@ -44,10 +44,10 @@ export class SuggestionsView extends View {
             window.location.hash = 'search';
         });
 
-        this.addSocketListener('new_movie', (movie) => {
+        this.addSocketListener('new_movie', (movie: SelectableMovie) => {
             this.handleNewMovie(movie);
         });
-        this.addSocketListener('removed_movie', (movieId) => {
+        this.addSocketListener('removed_movie', (movieId: string) => {
             this.handleRemovedMovie(movieId);
         });
 

@@ -78,7 +78,7 @@ export interface User {
     username: string;
 }
 
-export type OmdbQuery = 's' | 't' | 'i';
+export type OmdbQuery = 'i' | 's' | 't';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface OmdbResult {
@@ -111,7 +111,7 @@ export interface OmdbSearchResult {
     Search: OmdbMovieSmall[];
 }
 
-export type OmdbResponse<T extends OmdbQuery> = (T extends 's' ? OmdbSearchResult : (T extends 't' ? OmdbMovie : OmdbMovieDetailed)) & OmdbResult;
+export type OmdbResponse<T extends OmdbQuery> = OmdbResult & (T extends 's' ? OmdbSearchResult : (T extends 't' ? OmdbMovie : OmdbMovieDetailed));
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export interface NightHistory {
