@@ -7,5 +7,8 @@
         "client/**/*",
         "server/**/*",
         "spec/**/*"
-    ]
+    ],
+    "ts-node": {
+        "experimentalResolver": true
+    }
 }
