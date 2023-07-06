@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "A voting application for movie night.",
   "main": "server/app.js",
+  "type": "module",
   "scripts": {
     "start": "node .",
     "test": "jasmine",
     "lint": "eslint **/*.ts",
-    "lint:fix": "eslint **/*.ts --fix"
+    "lint:fix": "eslint **/*.ts --fix",
+    "lint:html": "htmlhint **/*.html"
   },
   "author": "Michael Winkworth",
   "contributors": [
@@ -19,12 +21,11 @@
   },
   "private": true,
   "dependencies": {
-    "axios": "^0.21.1",
-    "express": "^4.17.1",
-    "minimist": "^1.2.5",
+    "express": "^4.18.2",
+    "minimist": "^1.2.8",
     "sanitize-filename": "^1.6.3",
     "serve-favicon": "^2.5.0",
-    "socket.io": "^2.4.1"
+    "socket.io": "^2.5.0"
   },
   "devDependencies": {
     "@types/bootstrap": "^4.5.1",
@@ -34,16 +35,16 @@
     "@types/jquery": "^3.5.5",
     "@types/jqueryui": "^1.12.14",
     "@types/minimist": "^1.2.1",
-    "@types/node": "^14.14.20",
+    "@types/node": "^18.16.19",
     "@types/selenium-webdriver": "^4.0.11",
     "@types/serve-favicon": "^2.5.2",
     "@types/socket.io": "^2.1.12",
-    "@typescript-eslint/eslint-plugin": "^4.12.0",
-    "@typescript-eslint/parser": "^4.12.0",
-    "eslint": "^7.26.0",
-    "htmlhint": "^0.14.2",
-    "jasmine": "^3.7.0",
-    "selenium-webdriver": "^4.0.0-beta.3",
-    "typescript": "^4.1.3"
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
+    "eslint": "^8.44.0",
+    "htmlhint": "^1.1.4",
+    "jasmine": "^5.0.0",
+    "selenium-webdriver": "^4.9.2",
+    "typescript": "^5.1.6"
   }
 }

@@ -1,25 +1,25 @@
 import type { SmallMovie, SelectableMovie, DetailedMovie, NightInfo, HostNightInfo, PhaseData, PhaseInfo,
     MovieResults, User, OmdbQuery, OmdbMovieSmall, OmdbResponse, NightHistory } from './common.js';
 
-import os from 'os';
-import fs from 'fs';
-import path from 'path';
+import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createServer } from 'node:http';
 import express from 'express';
 import favicon from 'serve-favicon';
-const app = express();
-import httpImport from 'http';
-const http = httpImport.createServer(app);
-import socketIO from 'socket.io';
-import type { Socket } from 'socket.io';
-const io = socketIO(http, { cookie: false });
-import axios from 'axios';
-import minimist from 'minimist';
-const args = minimist(process.argv.slice(2));
 import sanitize from 'sanitize-filename';
+import type { Socket } from 'socket.io';
+import socketIO from 'socket.io';
+import minimist from 'minimist';
 
 import { OMDB_KEY } from './apiKeys.js';
 import { PHASES, VOTING_SYSTEMS } from './constants.js';
 import { ObjectCache } from './objectCache.js';
+
+const app = express();
+const server = createServer(app);
+const io = socketIO(server, { cookie: false });
+const args = minimist(process.argv.slice(2));
 
 const verboseLogging = args.verbose === true;
 
@@ -63,7 +63,7 @@ app.use(favicon(path.resolve('./client/favicon.ico')));
 app.use('/server/constants.js', express.static(path.resolve(), { index: '/server/constants.js' }));
 
 // Tell the server to listen on the given hostname and port
-http.listen(port, hostname, () => {
+server.listen(port, hostname, () => {
     console.log(`Now listening on: http://${hostname}:${port}`);
 });
 
@@ -107,9 +107,15 @@ async function makeOmdbRequest<T extends OmdbQuery>(
         additionalQueryString += `&${entry[0]}=${entry[1]}`;
     });
 
-    return axios.get(`http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`)
-        .then(callback)
-        .catch(console.log);
+    return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`)
+        .then(async (response) => {
+            if (response.ok) {
+                callback(await response.json());
+            } else {
+                console.error(response.status);
+            }
+        })
+        .catch(console.error);
 }
 
 function sumVotes(votes: Map<number, number>): number {
@@ -323,7 +329,7 @@ function dumpFile(filePath: string, fileOutput: NightHistory): void {
         if (!err) {
             console.log(`Dump file saved to ${filePath}.`);
         } else {
-            console.log(err);
+            console.error(err);
         }
     });
 }
@@ -388,9 +394,9 @@ io.on('connection', (socket) => {
          * When we get the results we send them back to the user.
          */
         const movieResultsPromise = new Promise<MovieResults>((resolve) => {
-            void makeOmdbRequest('s', encodedSuggestion, (response) => {
+            void makeOmdbRequest('s', encodedSuggestion, (responseJson) => {
                 const movieResults = {
-                    success: response.data.Response === 'True'
+                    success: responseJson.Response === 'True'
                 } as MovieResults;
 
                 function movieMapFunction(result: OmdbMovieSmall): SmallMovie {
@@ -402,24 +408,24 @@ io.on('connection', (socket) => {
                 }
 
                 if (movieResults.success) {
-                    movieResults.results = response.data.Search.map(movieMapFunction);
+                    movieResults.results = responseJson.Search.map(movieMapFunction);
 
                     resolve(movieResults);
-                } else if (response.data.Error === 'Too many results.') {
+                } else if (responseJson.Error === 'Too many results.') {
                     // If the API says we get too many results, then instead try to search by the exact title
-                    void makeOmdbRequest('t', encodedSuggestion, (response2) => {
-                        movieResults.success = response2.data.Response === 'True';
+                    void makeOmdbRequest('t', encodedSuggestion, (responseJson2) => {
+                        movieResults.success = responseJson2.Response === 'True';
 
                         if (movieResults.success) {
-                            movieResults.results = [movieMapFunction(response2.data)];
+                            movieResults.results = [movieMapFunction(responseJson2)];
                         } else {
-                            movieResults.errorMessage = `${response.data.Error} ${response2.data.Error}`;
+                            movieResults.errorMessage = `${responseJson.Error} ${responseJson2.Error}`;
                         }
 
                         resolve(movieResults);
                     });
                 } else {
-                    movieResults.errorMessage = response.data.Error;
+                    movieResults.errorMessage = responseJson.Error;
 
                     resolve(movieResults);
                 }
@@ -446,17 +452,16 @@ io.on('connection', (socket) => {
         }
 
         // Get more information for the chosen movie
-        void makeOmdbRequest('i', movieId, (response) => {
-            const result = response.data;
+        void makeOmdbRequest('i', movieId, (responseJson) => {
             const movie: SelectableMovie = {
-                id: result.imdbID,
-                title: result.Title,
-                year: result.Year,
-                runtime: result.Runtime,
-                genre: result.Genre,
-                plot: result.Plot,
-                rating: result.imdbRating,
-                awards: result.Awards,
+                id: responseJson.imdbID,
+                title: responseJson.Title,
+                year: responseJson.Year,
+                runtime: responseJson.Runtime,
+                genre: responseJson.Genre,
+                plot: responseJson.Plot,
+                rating: responseJson.imdbRating,
+                awards: responseJson.Awards,
                 suggester: token!,
                 votes: new Map<number, number>(),
                 removed: false
@@ -699,7 +704,7 @@ io.on('connection', (socket) => {
                         if (!mkErr) {
                             dumpFile(filePath, fileOutput);
                         } else {
-                            console.log(mkErr);
+                            console.error(mkErr);
                         }
                     });
                 } else {
@@ -784,28 +789,27 @@ app.get('/movieDetails/:id', (req, res) => {
     const cachedMovie = movieDetailsCache.get(movieId);
 
     if (cachedMovie == null) {
-        void makeOmdbRequest('i', movieId, (response) => {
-            if (response.data.Response === 'True') {
-                const result = response.data;
+        void makeOmdbRequest('i', movieId, (responseJson) => {
+            if (responseJson.Response === 'True') {
                 const movie: DetailedMovie = {
-                    id: result.imdbID,
-                    title: result.Title,
-                    year: result.Year,
-                    runtime: result.Runtime,
-                    genre: result.Genre,
-                    plot: result.Plot,
-                    rating: result.imdbRating,
-                    awards: result.Awards,
-                    actors: result.Actors,
-                    director: result.Director,
-                    writer: result.Writer,
-                    poster: result.Poster
+                    id: responseJson.imdbID,
+                    title: responseJson.Title,
+                    year: responseJson.Year,
+                    runtime: responseJson.Runtime,
+                    genre: responseJson.Genre,
+                    plot: responseJson.Plot,
+                    rating: responseJson.imdbRating,
+                    awards: responseJson.Awards,
+                    actors: responseJson.Actors,
+                    director: responseJson.Director,
+                    writer: responseJson.Writer,
+                    poster: responseJson.Poster
                 };
 
                 movieDetailsCache.set(movie);
                 res.json(movie);
             } else {
-                res.status(404).json(response.data.Error);
+                res.status(404).json(responseJson.Error);
             }
         }, new Map([['plot', 'full']]));
     } else {

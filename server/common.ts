@@ -111,9 +111,7 @@ export interface OmdbSearchResult {
     Search: OmdbMovieSmall[];
 }
 
-export interface OmdbResponse<T extends OmdbQuery> {
-    data: (T extends 's' ? OmdbSearchResult : (T extends 't' ? OmdbMovie : OmdbMovieDetailed)) & OmdbResult;
-}
+export type OmdbResponse<T extends OmdbQuery> = (T extends 's' ? OmdbSearchResult : (T extends 't' ? OmdbMovie : OmdbMovieDetailed)) & OmdbResult;
 /* eslint-enable @typescript-eslint/naming-convention */
 
 export interface NightHistory {
