@@ -79,8 +79,5 @@ typings/
 
 ### ADDITIONAL
 .vscode
-client/**/*.js
 !client/views/external
-server/**/*.js
-spec/**/*.js
-**/*.js.map
+built/

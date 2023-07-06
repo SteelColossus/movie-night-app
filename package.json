@@ -2,10 +2,11 @@
   "name": "movie-night-app",
   "version": "1.0.0",
   "description": "A voting application for movie night.",
-  "main": "server/app.js",
-  "type": "module",
+  "main": "server/app.ts",
   "scripts": {
-    "start": "node .",
+    "build:prod": "tsc",
+    "start": "ts-node .",
+    "start:prod": "node ./built/server/app.js",
     "test": "jasmine",
     "lint": "eslint **/*.ts",
     "lint:fix": "eslint **/*.ts --fix",
@@ -28,6 +29,7 @@
     "socket.io": "^2.5.0"
   },
   "devDependencies": {
+    "@tsconfig/node-lts": "^18.12.3",
     "@types/bootstrap": "^4.5.1",
     "@types/chart.js": "^2.9.29",
     "@types/express": "^4.17.9",
@@ -45,6 +47,7 @@
     "htmlhint": "^1.1.4",
     "jasmine": "^5.0.0",
     "selenium-webdriver": "^4.9.2",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   }
 }
