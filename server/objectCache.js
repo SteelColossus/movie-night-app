@@ -1,5 +1,3 @@
-'use strict';
-
 export default class ObjectCache {
     constructor(size, keyProp) {
         this.cache = [];

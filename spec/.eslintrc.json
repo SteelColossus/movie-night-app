@@ -1,9 +1,10 @@
 {
-    "parserOptions": {
-        "ecmaVersion": 8
-    },
     "env": {
         "jasmine": true,
         "node": true
+    },
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
     }
 }

@@ -1,10 +1,9 @@
-'use strict';
-
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import express from 'express';
 import favicon from 'serve-favicon';
 import sanitize from 'sanitize-filename';
@@ -67,16 +66,8 @@ app.use('/server/constants.js', express.static(path.join(__dirname, 'constants.j
 server.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
 
 function getRandomPassword() {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-    const passwordLength = 8;
-
-    let randomPassword = '';
-
-    for (let i = 0; i < passwordLength; i++) {
-        const randomChar = chars[Math.floor(Math.random() * chars.length)];
-        randomPassword += randomChar;
-    }
-
+    const randomID = randomUUID();
+    const randomPassword = randomID.substring(0, randomID.indexOf('-'));
     return randomPassword;
 }
 

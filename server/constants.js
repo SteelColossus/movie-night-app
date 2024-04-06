@@ -1,5 +1,3 @@
-'use strict';
-
 export const VOTING_SYSTEMS = {
     MULTI_VOTE: 'Multi Vote',
     RANDOM: 'Random',

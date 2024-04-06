@@ -1,7 +1,5 @@
-'use strict';
-
-const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
-const { spawn } = require('child_process');
+import { Builder, Browser, By, Key, until } from 'selenium-webdriver';
+import { spawn } from 'child_process';
 
 let driver = null;
 let appProcess = null;

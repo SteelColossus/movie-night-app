@@ -3,9 +3,11 @@
         "node": true
     },
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": "latest",
+        "sourceType": "module"
     },
     "rules": {
-        "no-console": "off"
+        "no-console": "off",
+        "no-underscore-dangle": "off"
     }
 }
