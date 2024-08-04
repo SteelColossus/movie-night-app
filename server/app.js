@@ -31,7 +31,7 @@ const requirePassword = args.password !== false;
 // Whether the users get the votes for movies live in real time
 const liveVoting = args.live === true;
 
-const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
+const hostname = (allowOutsideConnections ? os.hostname() : null);
 const port = process.env.PORT || 3000;
 
 let password = null;
@@ -63,7 +63,11 @@ app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 app.use('/server/constants.js', express.static(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given hostname and port
-server.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
+if (hostname != null) {
+    server.listen(port, hostname, () => { console.log(`Now listening on: http://${hostname}:${port}`) });
+} else {
+    server.listen(port, () => { console.log(`Now listening on: http://localhost:${port}`) });
+}
 
 function getRandomPassword() {
     const randomID = randomUUID();
