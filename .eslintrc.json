@@ -4,10 +4,6 @@
     },
     "extends": "eslint:all",
     "rules": {
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
         "eol-last": [
             "error",
             "never"
