@@ -24,13 +24,13 @@
     "express": "^4.21.2",
     "minimist": "^1.2.8",
     "sanitize-filename": "^1.6.3",
-    "serve-favicon": "^2.5.0",
+    "serve-favicon": "^2.5.1",
     "socket.io": "^2.5.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
-    "htmlhint": "^1.1.4",
-    "jasmine": "^5.7.1",
-    "selenium-webdriver": "^4.32.0"
+    "htmlhint": "^1.7.1",
+    "jasmine": "^5.12.0",
+    "selenium-webdriver": "^4.38.0"
   }
 }
