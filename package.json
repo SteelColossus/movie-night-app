@@ -25,13 +25,13 @@
     "express": "^4.21.2",
     "minimist": "^1.2.8",
     "sanitize-filename": "^1.6.3",
-    "serve-favicon": "^2.5.0",
+    "serve-favicon": "^2.5.1",
     "socket.io": "^2.5.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
     "@types/node": "^24.10.0",
     "eslint": "^8.57.1",
-    "htmlhint": "^1.1.4"
+    "htmlhint": "^1.7.1"
   }
 }
