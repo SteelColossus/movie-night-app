@@ -38,6 +38,8 @@ export default defineConfig({
   snapshotPathTemplate:
     "{snapshotDir}/{testFileDir}/{testFileName}-snapshots/{arg}{-projectName}{ext}",
 
+  ignoreSnapshots: process.env.CI,
+
   /* Configure projects for major browsers */
   projects: [
     {
