@@ -33,8 +33,10 @@ test('creates and finishes a movie night', async ({ page }) => {
         await expect(voteText).toHaveText(val);
     }
     await checkVoting('1');
+    await expect(page).toHaveScreenshot('after-voting.png');
     await checkVoting('0');
     await checkVoting('1');
+    await expect(page).toHaveScreenshot('after-voting.png');
     await page.locator('#closeVotingButton').click();
 
     await expect(page.locator('#winner')).toContainText('Harry Potter and the Goblet of Fire');
