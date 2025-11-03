@@ -30,7 +30,6 @@ test('creates and finishes a movie night', async ({ page }) => {
 
     async function checkVoting(val) {
         await voteButton.click();
-        await page.waitForTimeout(500);
         await expect(voteText).toHaveText(val);
     }
     await checkVoting('1');
@@ -39,10 +38,9 @@ test('creates and finishes a movie night', async ({ page }) => {
     await page.locator('#closeVotingButton').click();
 
     await expect(page.locator('#winner')).toContainText('Harry Potter and the Goblet of Fire');
-    await expect(page.locator('#voteChart')).toBeVisible({ timeout: 1000 });
+    await expect(page.locator('#voteChart')).toBeVisible();
     await page.locator('#endButton').click();
 
     await expect(page.locator('#nightName')).toBeVisible();
-    await page.waitForTimeout(500);
     await expect(page.locator('#movieNightTitle')).not.toBeVisible();
 });
