@@ -3,6 +3,10 @@
         "es6": true
     },
     "extends": "eslint:all",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
     "rules": {
         "eol-last": [
             "error",
