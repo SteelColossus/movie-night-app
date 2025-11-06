@@ -8,9 +8,9 @@
     "start": "node .",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "lint": "eslint \"**/*.js\"",
-    "lint:fix": "eslint \"**/*.js\" --fix",
-    "lint:html": "htmlhint \"**/*.html\""
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:html": "htmlhint ."
   },
   "author": "Michael Winkworth",
   "contributors": [
