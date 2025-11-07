@@ -1,8 +1,8 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier';
 import importPlugin from 'eslint-plugin-import';
 import nPlugin from 'eslint-plugin-n';
+import playwrightPlugin from 'eslint-plugin-playwright';
 import promisePlugin from 'eslint-plugin-promise';
 import globals from 'globals';
 
@@ -33,8 +33,7 @@ export default [
         plugins: {
             import: importPlugin,
             n: nPlugin,
-            promise: promisePlugin,
-            prettier: prettierPlugin
+            promise: promisePlugin
         }
     },
 
@@ -73,7 +72,8 @@ export default [
                 ...globals.node,
                 ...globals.jasmine
             }
-        }
+        },
+        ...playwrightPlugin.configs['flat/recommended']
     },
 
     // Prettier config (must be last to override formatting rules

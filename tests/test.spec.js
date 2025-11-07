@@ -48,5 +48,5 @@ test('creates and finishes a movie night', async ({ page }) => {
     await page.locator('#endButton').click();
 
     await expect(page.locator('#nightName')).toBeVisible();
-    await expect(page.locator('#movieNightTitle')).not.toBeVisible();
+    await expect(page.locator('#movieNightTitle')).toBeHidden();
 });
