@@ -100,7 +100,7 @@ export class SearchView extends View {
     handleMovieRejected(message) {
         const fullMessage = `${message}\nPlease choose a different movie.`;
 
-        alert(fullMessage); // eslint-disable-line no-alert
+        alert(fullMessage);
     }
 
     handleSuggestionAdded(movie) {

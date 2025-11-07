@@ -154,7 +154,7 @@ window.addEventListener('hashchange', () => {
 });
 
 socket.on('connect', () => {
-    console.log('Connected to the app server.'); // eslint-disable-line no-console
+    console.log('Connected to the app server.');
 });
 
 socket.on('request_user_token', () => {

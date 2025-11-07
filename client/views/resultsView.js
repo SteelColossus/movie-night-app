@@ -25,7 +25,6 @@ export class ResultsView extends View {
                 data: []
             };
 
-            // eslint-disable-next-line no-loop-func
             movies.forEach((movie) => {
                 const numVotes = movie.votes[id] || 0;
                 dataset.data.push(numVotes);
