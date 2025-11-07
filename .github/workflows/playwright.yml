@@ -22,7 +22,7 @@ jobs:
             - name: Run HTML lint
               run: npm run lint:html
             - name: Run format
-              run: npm run format
+              run: npm run format:check
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps
             - name: Run Playwright tests
