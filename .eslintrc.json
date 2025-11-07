@@ -1,109 +1,50 @@
 {
     "env": {
-        "es6": true
+        "es2021": true,
+        "node": true,
+        "browser": true
     },
-    "extends": "eslint:all",
+    "extends": ["standard", "prettier"],
+    "plugins": ["import", "n", "promise"],
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
+    "globals": {
+        "io": "readonly",
+        "Chart": "readonly",
+        "ClientJS": "readonly",
+        "$": "readonly",
+        "jQuery": "readonly",
+        "jasmine": "readonly"
+    },
     "rules": {
-        "eol-last": [
-            "error",
-            "never"
-        ],
-        "object-curly-spacing": [
-            "error",
-            "always"
-        ],
-        "quotes": [
-            "error",
-            "single",
-            {
-                "allowTemplateLiterals": true
+        "no-console": "off"
+    },
+    "overrides": [
+        {
+            "files": ["server/**/*.js"],
+            "env": {
+                "node": true,
+                "browser": false
+            },
+            "rules": {
+                "no-underscore-dangle": "off"
             }
-        ],
-        "sort-imports": "off",
-        "one-var": "off",
-        "func-style": [
-            "error",
-            "declaration"
-        ],
-        "space-before-function-paren": [
-            "error",
-            {
-                "anonymous": "always",
-                "named": "never",
-                "asyncArrow": "always"
+        },
+        {
+            "files": ["client/**/*.js"],
+            "env": {
+                "browser": true,
+                "node": false
             }
-        ],
-        "padded-blocks": [
-            "error",
-            "never"
-        ],
-        "max-len": [
-            "error",
-            {
-                "code": 160
+        },
+        {
+            "files": ["tests/**/*.js"],
+            "env": {
+                "jasmine": true,
+                "node": true
             }
-        ],
-        "eqeqeq": [
-            "error",
-            "always",
-            {
-                "null": "never"
-            }
-        ],
-        "no-eq-null": "off",
-        "indent": [
-            "error",
-            4,
-            {
-                "SwitchCase": 1
-            }
-        ],
-        "max-params": "off",
-        "no-magic-numbers": "off",
-        "max-statements": "off",
-        "prefer-destructuring": "off",
-        "no-ternary": "off",
-        "multiline-ternary": [
-            "error",
-            "always-multiline"
-        ],
-        "no-extra-parens": "off",
-        "no-prototype-builtins": "off",
-        "quote-props": [
-            "error",
-            "as-needed"
-        ],
-        "sort-keys": "off",
-        "dot-location": [
-            "error",
-            "property"
-        ],
-        "no-negated-condition": "off",
-        "array-element-newline": [
-            "error",
-            "consistent"
-        ],
-        "newline-per-chained-call": "off",
-        "max-lines-per-function": "off",
-        "class-methods-use-this": "off",
-        "id-length": "off",
-        "max-lines": "off",
-        "operator-linebreak": [
-            "error",
-            "before"
-        ],
-        "no-plusplus": [
-            "error",
-            {
-                "allowForLoopAfterthoughts": true
-            }
-        ],
-        "no-confusing-arrow": "off",
-        "function-call-argument-newline": "off",
-        "no-process-env": "off"
-    }
+        }
+    ]
 }

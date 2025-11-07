@@ -1,9 +1,25 @@
 import { View } from './view.js';
-import { createTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
+import {
+    createTableRow,
+    sumVotes,
+    getTimeStringFromRuntime,
+    setBackgroundColorRedToGreen,
+    setAsMovieDetailsLink
+} from './viewFunctions.js';
 import { VOTING_SYSTEMS } from '../../server/constants.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, liveVoting, isExactPhase) {
+    constructor(
+        socket,
+        animTime,
+        userToken,
+        isHost,
+        movies,
+        votingSystem,
+        numUsers,
+        liveVoting,
+        isExactPhase
+    ) {
         super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
@@ -41,7 +57,7 @@ export class VoteView extends View {
                             const voteDeltas = {};
 
                             // Inverted because the class has not been added at the point of the click event firing
-                            voteDeltas[movie.id] = (!voteButton.is('.active')) ? 1 : -1;
+                            voteDeltas[movie.id] = !voteButton.is('.active') ? 1 : -1;
 
                             this.socket.emit('votes_changed', voteDeltas);
                         });
@@ -105,8 +121,7 @@ export class VoteView extends View {
             {
                 text: rank,
                 func: (cell) => {
-                    cell.addClass('rank-cell')
-                        .data('movie-id', movie.id);
+                    cell.addClass('rank-cell').data('movie-id', movie.id);
                 }
             }
         ]);
@@ -219,12 +234,11 @@ export class VoteView extends View {
             voteTableBody.parent().addClass('not-live');
         }
 
-        const lockInButton = $('#lockInButton')
-            .click(() => {
-                const disabled = lockInButton.is('.active') === false;
-                lockInButton.blur();
-                $('.vote-button').prop('disabled', disabled);
-            });
+        const lockInButton = $('#lockInButton').click(() => {
+            const disabled = lockInButton.is('.active') === false;
+            lockInButton.blur();
+            $('.vote-button').prop('disabled', disabled);
+        });
 
         if (this.isHost === true && this.isExactPhase === true) {
             const closeVotingButton = $('#closeVotingButton');
@@ -338,7 +352,9 @@ export class VoteView extends View {
 
         const initialVoteDeltas = {};
 
-        this.movies = this.movies.sort((movieA, movieB) => movieB.votes[this.userToken] - movieA.votes[this.userToken]);
+        this.movies = this.movies.sort(
+            (movieA, movieB) => movieB.votes[this.userToken] - movieA.votes[this.userToken]
+        );
 
         this.movies.forEach((movie) => {
             if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
@@ -379,13 +395,12 @@ export class VoteView extends View {
             }
         });
 
-        const lockInButton = $('#lockInButton')
-            .click(() => {
-                const disabled = lockInButton.is('.active') === false;
-                lockInButton.blur();
-                voteTableBody.sortable(disabled ? 'disable' : 'enable');
-                voteTableBody.toggleClass('rank-sortable');
-            });
+        const lockInButton = $('#lockInButton').click(() => {
+            const disabled = lockInButton.is('.active') === false;
+            lockInButton.blur();
+            voteTableBody.sortable(disabled ? 'disable' : 'enable');
+            voteTableBody.toggleClass('rank-sortable');
+        });
 
         if (this.isHost === true && this.isExactPhase === true) {
             const closeVotingButton = $('#closeVotingButton');

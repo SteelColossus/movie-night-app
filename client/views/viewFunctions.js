@@ -58,7 +58,8 @@ export function setBackgroundColorRedToGreen(element) {
 }
 
 export function setAsMovieDetailsLink(element, movieId) {
-    element.addClass('subtle-link')
+    element
+        .addClass('subtle-link')
         .attr('title', 'View more details for this movie')
         .click(() => {
             window.open(`/movie?id=${movieId}`);

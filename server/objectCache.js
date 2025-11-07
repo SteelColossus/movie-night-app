@@ -15,13 +15,15 @@ export default class ObjectCache {
     }
 
     set(value) {
-        if (value != null && typeof value === 'object' && value.hasOwnProperty(this.keyProp)) {
+        if (value != null && typeof value === 'object' && Object.hasOwn(value, this.keyProp)) {
             if (!this.has(value[this.keyProp])) {
                 this.cache[this.index] = value;
                 this.index = (this.index + 1) % this.size;
             }
         } else {
-            throw new Error(`Invalid value to set - must be a non-null object with property '${this.keyProp}'.`);
+            throw new Error(
+                `Invalid value to set - must be a non-null object with property '${this.keyProp}'.`
+            );
         }
     }
 }

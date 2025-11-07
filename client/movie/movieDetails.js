@@ -34,47 +34,48 @@ fetch(`../movieDetails/${movieId}`, {
     headers: {
         Accept: 'application/json'
     }
-})
-    .then((res) => {
-        if (!res.ok) {
-            res.json().then((err) => {
-                alert(err); // eslint-disable-line no-alert
+}).then((res) => {
+    if (!res.ok) {
+        res.json().then((err) => {
+            alert(err); // eslint-disable-line no-alert
+        });
+    } else {
+        res.json().then((movie) => {
+            const title = `${movie.title} (${movie.year})`;
+
+            document.title = `${title} - Movie Night App`;
+
+            const movieTitle = document.getElementById('movieTitle');
+            movieTitle.textContent = title;
+            movieTitle.addEventListener('click', () => {
+                window.open(`https://www.imdb.com/title/${movieId}/`);
             });
-        } else {
-            res.json().then((movie) => {
-                const title = `${movie.title} (${movie.year})`;
 
-                document.title = `${title} - Movie Night App`;
+            document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);
+            document.getElementById('movieGenre').textContent = movie.genre;
 
-                const movieTitle = document.getElementById('movieTitle');
-                movieTitle.textContent = title;
-                movieTitle.addEventListener('click', () => {
-                    window.open(`https://www.imdb.com/title/${movieId}/`);
-                });
+            const bannedGenres = ['Short', 'Documentary'];
 
-                document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);
-                document.getElementById('movieGenre').textContent = movie.genre;
+            if (bannedGenres.some((genre) => movie.genre.includes(genre))) {
+                document.getElementById('bannedGenreText').style.removeProperty('display');
+            }
 
-                const bannedGenres = ['Short', 'Documentary'];
+            document.getElementById('movieRuntime').textContent = getTimeStringFromRuntime(
+                movie.runtime
+            );
+            document.getElementById('movieActors').textContent = movie.actors;
+            document.getElementById('movieDirector').textContent = movie.director;
+            document.getElementById('movieWriter').textContent = movie.writer;
+            if (movie.awards !== 'N/A') {
+                document.getElementById('movieAwards').textContent = movie.awards;
+            }
+            document.getElementById('movieImdbRating').textContent = movie.rating;
 
-                if (bannedGenres.some((genre) => movie.genre.includes(genre))) {
-                    document.getElementById('bannedGenreText').style.removeProperty('display');
-                }
+            const posterImage = document.getElementById('posterImage');
+            posterImage.setAttribute('src', movie.poster);
+            posterImage.setAttribute('alt', `${movie.title} Poster`);
 
-                document.getElementById('movieRuntime').textContent = getTimeStringFromRuntime(movie.runtime);
-                document.getElementById('movieActors').textContent = movie.actors;
-                document.getElementById('movieDirector').textContent = movie.director;
-                document.getElementById('movieWriter').textContent = movie.writer;
-                if (movie.awards !== 'N/A') {
-                    document.getElementById('movieAwards').textContent = movie.awards;
-                }
-                document.getElementById('movieImdbRating').textContent = movie.rating;
-
-                const posterImage = document.getElementById('posterImage');
-                posterImage.setAttribute('src', movie.poster);
-                posterImage.setAttribute('alt', `${movie.title} Poster`);
-
-                document.getElementById('movieContainer').style.removeProperty('display');
-            });
-        }
-    });
+            document.getElementById('movieContainer').style.removeProperty('display');
+        });
+    }
+});

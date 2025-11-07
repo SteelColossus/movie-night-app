@@ -29,7 +29,7 @@ let currentView = null;
 let darkMode = localStorage.getItem('darkMode') === true.toString();
 
 function switchView(view, forceRefresh = false) {
-    if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
+    if (currentView == null || currentView.viewName !== view.viewName || forceRefresh === true) {
         errorMessage.hide(animTime);
 
         if (currentView != null) {
@@ -41,7 +41,13 @@ function switchView(view, forceRefresh = false) {
     }
 }
 
-function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true, forceRefresh = false) {
+function switchViewWithName(
+    viewName,
+    data = null,
+    isHost = null,
+    isExactPhase = true,
+    forceRefresh = false
+) {
     let view = null;
 
     switch (viewName) {
@@ -55,10 +61,27 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             view = new SearchView(socket, animTime, data.suggestedMovies, data.maxSuggestions);
             break;
         case SuggestionsView.viewName:
-            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
+            view = new SuggestionsView(
+                socket,
+                animTime,
+                userToken,
+                isHost,
+                data.movies,
+                isExactPhase
+            );
             break;
         case VoteView.viewName:
-            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, data.numUsers, data.liveVoting, isExactPhase);
+            view = new VoteView(
+                socket,
+                animTime,
+                userToken,
+                isHost,
+                data.movies,
+                data.votingSystem,
+                data.numUsers,
+                data.liveVoting,
+                isExactPhase
+            );
             break;
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner, data.users);
@@ -112,14 +135,10 @@ function setDarkMode(isDarkMode) {
 
     if (isDarkMode) {
         $(document.body).addClass('dark-mode');
-        darkModeButton.find('.fa-moon')
-            .removeClass('fa-moon')
-            .addClass('fa-sun');
+        darkModeButton.find('.fa-moon').removeClass('fa-moon').addClass('fa-sun');
     } else {
         $(document.body).removeClass('dark-mode');
-        darkModeButton.find('.fa-sun')
-            .removeClass('fa-sun')
-            .addClass('fa-moon');
+        darkModeButton.find('.fa-sun').removeClass('fa-sun').addClass('fa-moon');
     }
 }
 
@@ -179,7 +198,10 @@ socket.on('new_phase', (phaseInfo) => {
                 viewName = HostView.viewName;
                 break;
             case PHASES.SUGGEST:
-                viewName = (phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions) ? SuggestionsView.viewName : SearchView.viewName;
+                viewName =
+                    phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions
+                        ? SuggestionsView.viewName
+                        : SearchView.viewName;
                 break;
             case PHASES.VOTE:
                 viewName = VoteView.viewName;

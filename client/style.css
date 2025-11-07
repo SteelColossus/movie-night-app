@@ -12,13 +12,17 @@ body.dark-mode .table {
 }
 
 @media (max-width: 576px) {
-    #movieTable th:last-child, #movieTable td:last-child {
+    #movieTable th:last-child,
+    #movieTable td:last-child {
         display: none;
     }
 }
 
 @media (max-width: 768px) {
-    #movieTable th:nth-child(5), #movieTable td:nth-child(5), #voteTable th:nth-child(5), #voteTable td:nth-child(5) {
+    #movieTable th:nth-child(5),
+    #movieTable td:nth-child(5),
+    #voteTable th:nth-child(5),
+    #voteTable td:nth-child(5) {
         display: none;
     }
 }
@@ -36,7 +40,7 @@ body.dark-mode .table {
     font-size: 1.5rem;
     cursor: pointer;
 }
-    
+
 #darkModeButton:hover {
     color: #0069d9;
 }
@@ -58,7 +62,9 @@ body.dark-mode .table {
     text-align: right;
 }
 
-#votingSystemLabel, #numSuggestionsLabel, #passwordLabel {
+#votingSystemLabel,
+#numSuggestionsLabel,
+#passwordLabel {
     font-weight: bold;
 }
 
@@ -100,11 +106,13 @@ body.dark-mode .table {
     font-style: italic;
 }
 
-.vote-cell, .rank-cell {
+.vote-cell,
+.rank-cell {
     text-align: center;
 }
 
-#voteTable.not-live th:last-child, #voteTable.not-live td:last-child {
+#voteTable.not-live th:last-child,
+#voteTable.not-live td:last-child {
     display: none;
 }
 
@@ -137,7 +145,7 @@ body.dark-mode .table {
 #posterImage {
     align-self: self-start;
     margin-right: 20px;
-    box-shadow: 4px 4px 4px 0px rgba(0,0,0,0.75);
+    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.75);
 }
 
 #bannedGenreText {

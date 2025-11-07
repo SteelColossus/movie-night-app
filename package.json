@@ -1,37 +1,45 @@
 {
-  "name": "movie-night-app",
-  "version": "1.0.0",
-  "description": "A voting application for movie night.",
-  "main": "server/app.js",
-  "type": "module",
-  "scripts": {
-    "start": "node .",
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "lint:html": "htmlhint ."
-  },
-  "author": "Michael Winkworth",
-  "contributors": [
-    "Will Thorpe"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/SteelColossus/movie-night-app.git"
-  },
-  "private": true,
-  "dependencies": {
-    "express": "^5.1.0",
-    "minimist": "^1.2.8",
-    "sanitize-filename": "^1.6.3",
-    "serve-favicon": "^2.5.1",
-    "socket.io": "^2.5.1"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.56.1",
-    "@types/node": "^24.10.0",
-    "eslint": "^8.57.1",
-    "htmlhint": "^1.7.1"
-  }
+    "name": "movie-night-app",
+    "version": "1.0.0",
+    "description": "A voting application for movie night.",
+    "main": "server/app.js",
+    "type": "module",
+    "scripts": {
+        "start": "node .",
+        "test": "playwright test",
+        "test:ui": "playwright test --ui",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "lint:html": "htmlhint .",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "author": "Michael Winkworth",
+    "contributors": [
+        "Will Thorpe"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SteelColossus/movie-night-app.git"
+    },
+    "private": true,
+    "dependencies": {
+        "express": "^5.1.0",
+        "minimist": "^1.2.8",
+        "sanitize-filename": "^1.6.3",
+        "serve-favicon": "^2.5.1",
+        "socket.io": "^2.5.1"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.56.1",
+        "@types/node": "^24.10.0",
+        "eslint": "^8.57.1",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-config-standard": "^17.1.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-n": "^16.6.2",
+        "eslint-plugin-promise": "^6.1.1",
+        "htmlhint": "^1.7.1",
+        "prettier": "^3.2.5"
+    }
 }

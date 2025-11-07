@@ -1,5 +1,11 @@
 import { View } from './view.js';
-import { createTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
+import {
+    createTableRow,
+    getTimeStringFromRuntime,
+    setBackgroundColorRedToGreen,
+    setAsMovieDetailsLink,
+    pluralize
+} from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {
@@ -48,7 +54,9 @@ export class SuggestionsView extends View {
 
     updateNumMoviesSuggested(numSuggested) {
         this.numMoviesSuggested = numSuggested;
-        this.numMoviesSuggestedLabel.text(`${pluralize('movie', this.numMoviesSuggested)} suggested.`);
+        this.numMoviesSuggestedLabel.text(
+            `${pluralize('movie', this.numMoviesSuggested)} suggested.`
+        );
     }
 
     handleNewMovie(movie) {

@@ -52,7 +52,9 @@ export class HostView extends View {
         this.addDOMListener($('#startVotingForm'), 'submit', this.formSubmit);
 
         this.addSocketListener('wrong_password', () => {
-            this.errorMessage.text(`The password you have entered is incorrect.`).show(this.animTime);
+            this.errorMessage
+                .text(`The password you have entered is incorrect.`)
+                .show(this.animTime);
         });
     }
 
