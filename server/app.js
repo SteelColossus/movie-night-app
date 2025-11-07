@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto';
 import express from 'express';
 import favicon from 'serve-favicon';
 import sanitize from 'sanitize-filename';
-import socketIO from 'socket.io';
+import { Server as SocketIOServer } from 'socket.io';
 import minimist from 'minimist';
 
 import { OMDB_KEY } from './apiKeys.js';
@@ -16,7 +16,7 @@ import ObjectCache from './objectCache.js';
 
 const app = express();
 const server = createServer(app);
-const io = socketIO(server, { cookie: false });
+const io = new SocketIOServer(server, { cookie: false });
 const args = minimist(process.argv.slice(2));
 
 const __filename = fileURLToPath(import.meta.url);
@@ -209,7 +209,7 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     // Get the clients in the movie night room if they aren't already
     if (nightInfo.name != null) {
         if (sendToAll === true) {
-            Object.values(io.sockets.connected).forEach((sock) => {
+            io.sockets.sockets.forEach((sock) => {
                 if (sock.token != null) {
                     sock.join(nightInfo.name);
                 }
