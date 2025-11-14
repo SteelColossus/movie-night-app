@@ -33,31 +33,38 @@ body.dark-mode .table {
     }
 }
 
-#darkModeButton {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
+.icon-button {
+    padding: 10px;
     font-size: 1.5rem;
     cursor: pointer;
+    color: inherit;
 }
 
-#darkModeButton:hover {
+.icon-button:hover {
     color: #0069d9;
+}
+
+#darkModeButton {
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
 }
 
 .table tr > td {
     vertical-align: middle;
 }
 
-#usernameIndicator {
+#usernameIndicatorContainer {
     position: fixed;
     top: 0;
     right: 0;
     padding: inherit;
     background-color: inherit;
-
-    /* For those cheeky boys and girls who put massive usernames */
     max-width: 50%;
+}
+
+#usernameIndicator {
+    /* For those cheeky boys and girls who put massive usernames */
     overflow-wrap: break-word;
     text-align: right;
 }

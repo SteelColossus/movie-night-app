@@ -13,7 +13,9 @@ const client = new ClientJS();
 // Shared DOM elements
 const movieNightTitle = $('#movieNightTitle');
 const errorMessage = $('#errorMessage');
+const usernameIndicatorContainer = $('#usernameIndicatorContainer');
 const usernameIndicator = $('#usernameIndicator');
+const logoutButton = $('#logoutButton');
 const darkModeButton = $('#darkModeButton');
 
 const animTime = 400;
@@ -149,6 +151,10 @@ darkModeButton.click(() => {
     setDarkMode(darkMode);
 });
 
+logoutButton.click(() => {
+    socket.emit('logout');
+});
+
 window.addEventListener('hashchange', () => {
     requestViewDataForHash();
 });
@@ -176,7 +182,8 @@ socket.on('request_new_username', () => {
 });
 
 socket.on('user_info', (username) => {
-    usernameIndicator.text(username).show(animTime);
+    usernameIndicator.text(username);
+    usernameIndicatorContainer.show(animTime);
 });
 
 socket.on('new_phase', (phaseInfo) => {

@@ -73,7 +73,12 @@
     </head>
     <body>
         <h2 id="movieNightTitle" style="display: none"></h2>
-        <span class="h3" id="usernameIndicator" style="display: none"></span>
+        <div id="usernameIndicatorContainer" style="display: none">
+            <span class="h3" id="usernameIndicator"></span>
+            <a id="logoutButton" class="icon-button" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
 
         <div id="usernameView" style="display: none">
             <form id="usernameForm">
@@ -253,7 +258,7 @@
 
         <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
 
-        <a id="darkModeButton" title="Toggle dark mode">
+        <a id="darkModeButton" class="icon-button" title="Toggle dark mode">
             <i class="fas fa-moon"></i>
         </a>
 

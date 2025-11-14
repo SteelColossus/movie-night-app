@@ -323,6 +323,8 @@ io.on('connection', (socket) => {
         addUser(socket, user.token, user.username);
     });
 
+    socket.on('logout', () => {});
+
     // Host a new movie night
     socket.on('host_night', (info) => {
         const nightAlreadyHosted = host != null;
