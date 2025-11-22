@@ -39,7 +39,9 @@ test('creates and finishes a movie night', async ({ page }) => {
     ]);
 
     await newPage.waitForLoadState('domcontentloaded');
-    await expect(newPage.getByRole('heading')).toHaveText("Harry Potter and the Goblet of Fire (2005)");
+    await expect(newPage.getByRole('heading')).toHaveText(
+        'Harry Potter and the Goblet of Fire (2005)'
+    );
     await expect(newPage).toHaveScreenshot('movie-view.png');
 
     await newPage.close();
