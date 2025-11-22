@@ -32,6 +32,19 @@ test('creates and finishes a movie night', async ({ page }) => {
         page.locator('//table[@id="movieTable"]//tr/td[text() = "2 hours 37 mins"]')
     ).toBeVisible();
     await expect(page).toHaveScreenshot('vote-view.png');
+
+    const [newPage] = await Promise.all([
+        page.context().waitForEvent('page'),
+        page.getByRole('cell', { name: 'Harry Potter and the Goblet of Fire' }).click()
+    ]);
+
+    await newPage.waitForLoadState('domcontentloaded');
+    await expect(newPage.getByRole('heading')).toHaveText("Harry Potter and the Goblet of Fire (2005)");
+    await expect(newPage).toHaveScreenshot('movie-view.png');
+
+    await newPage.close();
+    await page.bringToFront();
+
     await page.locator('#closeSuggestionsButton').click();
 
     const voteButton = page.locator('table#voteTable td > input[type="button"][value="Vote!"]');
