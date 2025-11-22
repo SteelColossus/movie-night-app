@@ -65,20 +65,16 @@ export class ResultsView extends View {
                 options: {
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [
-                            {
-                                stacked: true
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 1
                             }
-                        ],
-                        yAxes: [
-                            {
-                                stacked: true,
-                                ticks: {
-                                    beginAtZero: true,
-                                    precision: 1
-                                }
-                            }
-                        ]
+                        }
                     }
                 }
             });

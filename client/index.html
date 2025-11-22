@@ -13,6 +13,19 @@
             integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
             crossorigin="anonymous"
         />
+        <!-- FontAwesome -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/fontawesome.min.css"
+            rel="stylesheet"
+            integrity="sha384-lh5DFFvCcv4qMf2iSXYmPIz9tet9bWEENYTzh1iyiWZm4FlKhDJ2aFxscwkHo9Lr"
+            crossorigin="anonymous"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/solid.min.css"
+            rel="stylesheet"
+            integrity="sha384-wbMWab3UDSPm2kvIgVOn/d9KPTecgPU1+Nb3zoQrm/oVu0EkPL6IaKinjbwW0rum"
+            crossorigin="anonymous"
+        />
         <link href="style.css" rel="stylesheet" />
 
         <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -46,22 +59,9 @@
         ></script>
         <!-- Chart.js -->
         <script
-            src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"
+            src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
             defer
-            integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha"
-            crossorigin="anonymous"
-        ></script>
-        <!-- FontAwesome -->
-        <script
-            src="https://use.fontawesome.com/releases/v5.15.4/js/solid.js"
-            defer
-            integrity="sha384-/BxOvRagtVDn9dJ+JGCtcofNXgQO/CCCVKdMfL115s3gOgQxWaX/tSq5V8dRgsbc"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://use.fontawesome.com/releases/v5.15.4/js/fontawesome.js"
-            defer
-            integrity="sha384-dPBGbj4Uoy1OOpM4+aRGfAOc0W37JkROT+3uynUgTHZCHZNMHfGXsmmvYTffZjYO"
+            integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ"
             crossorigin="anonymous"
         ></script>
 
@@ -76,7 +76,7 @@
         <div id="usernameIndicatorContainer" style="display: none">
             <span class="h3" id="usernameIndicator"></span>
             <a id="logoutButton" class="icon-button" title="Logout">
-                <i class="fas fa-sign-out-alt"></i>
+                <i class="fa-solid fa-right-from-bracket"></i>
             </a>
         </div>
 
@@ -163,7 +163,7 @@
                     />
                     <input type="submit" class="btn btn-primary mr-2" value="Search!" />
                     <a id="movieInfo" data-toggle="popover">
-                        <i class="fas fa-info-circle"></i>
+                        <i class="fa-solid fa-circle-info"></i>
                     </a>
                 </div>
             </form>
@@ -259,7 +259,7 @@
         <div id="errorMessage" class="alert alert-danger" role="alert" style="display: none"></div>
 
         <a id="darkModeButton" class="icon-button" title="Toggle dark mode">
-            <i class="fas fa-moon"></i>
+            <i class="fa-solid fa-moon"></i>
         </a>
 
         <!-- Shown when JS is disabled -->
