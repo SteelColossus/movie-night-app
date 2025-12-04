@@ -42,6 +42,6 @@
         "eslint-plugin-promise": "^7.2.1",
         "globals": "^16.5.0",
         "htmlhint": "^1.8.0",
-        "prettier": "^3.7.3"
+        "prettier": "^3.7.4"
     }
 }
