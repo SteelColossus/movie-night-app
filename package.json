@@ -28,13 +28,13 @@
         "minimist": "^1.2.8",
         "sanitize-filename": "^1.6.3",
         "serve-favicon": "^2.5.1",
-        "socket.io": "^4.8.1"
+        "socket.io": "^4.8.3"
     },
     "devDependencies": {
-        "@eslint/js": "^9.39.1",
+        "@eslint/js": "^9.39.2",
         "@playwright/test": "^1.57.0",
-        "@types/node": "^24.10.1",
-        "eslint": "^9.39.1",
+        "@types/node": "^25.0.3",
+        "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-n": "^17.23.1",
