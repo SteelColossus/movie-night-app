@@ -32,16 +32,16 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.39.2",
-        "@playwright/test": "^1.58.1",
-        "@types/node": "^25.2.0",
+        "@playwright/test": "^1.58.2",
+        "@types/node": "^25.3.3",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
-        "eslint-plugin-n": "^17.23.2",
-        "eslint-plugin-playwright": "^2.5.1",
+        "eslint-plugin-n": "^17.24.0",
+        "eslint-plugin-playwright": "^2.9.0",
         "eslint-plugin-promise": "^7.2.1",
-        "globals": "^17.3.0",
-        "htmlhint": "^1.8.0",
+        "globals": "^17.4.0",
+        "htmlhint": "^1.9.1",
         "prettier": "^3.8.1"
     }
 }
