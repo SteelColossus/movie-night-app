@@ -9,8 +9,8 @@ test('creates and finishes a movie night', async ({ page }) => {
     await page.locator('#username').press('Enter');
     await expect(page.locator('#usernameIndicator')).toHaveText('User 1');
 
-    await page.selectOption('#votingSystem', { label: 'Multi Vote' });
-    await page.selectOption('#numSuggestions', { label: '1' });
+    await page.locator('#votingSystem').selectOption({ label: 'Multi Vote' });
+    await page.locator('#numSuggestions').selectOption({ label: '1' });
 
     await page.locator('#nightName').fill('My Movie Night');
     await expect(page).toHaveScreenshot('host-view.png');
