@@ -28,7 +28,14 @@ let authenticated = false;
 let currentView = null;
 
 // Whether the page is currently in dark mode
-let darkMode = localStorage.getItem('darkMode') === true.toString();
+const storedDarkMode = localStorage.getItem('darkMode');
+let darkMode;
+
+if (storedDarkMode !== null) {
+    darkMode = storedDarkMode === 'true';
+} else {
+    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || currentView.viewName !== view.viewName || forceRefresh === true) {
@@ -132,8 +139,10 @@ function requestViewDataForHash() {
     }
 }
 
-function setDarkMode(isDarkMode) {
-    localStorage.setItem('darkMode', darkMode);
+function setDarkMode(isDarkMode, shouldStore) {
+    if (shouldStore) {
+        localStorage.setItem('darkMode', darkMode);
+    }
 
     if (isDarkMode) {
         $(document.body).addClass('dark-mode');
@@ -144,11 +153,11 @@ function setDarkMode(isDarkMode) {
     }
 }
 
-setDarkMode(darkMode);
+setDarkMode(darkMode, false);
 
 darkModeButton.click(() => {
     darkMode = !darkMode;
-    setDarkMode(darkMode);
+    setDarkMode(darkMode, true);
 });
 
 logoutButton.click(() => {
