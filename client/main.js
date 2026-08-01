@@ -50,7 +50,7 @@ function switchViewWithName(
     isExactPhase = true,
     forceRefresh = false
 ) {
-    let view = null;
+    let view;
 
     switch (viewName) {
         case UsernameView.viewName:
@@ -198,7 +198,7 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (switchPhaseView === true) {
-        let viewName = null;
+        let viewName;
 
         switch (phaseInfo.name) {
             case PHASES.HOST:
