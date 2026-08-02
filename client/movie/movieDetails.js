@@ -25,7 +25,16 @@ function truncateText(text, length) {
 const queryParams = new URLSearchParams(location.search);
 const movieId = queryParams.get('id');
 
-if (localStorage.getItem('darkMode') === true.toString()) {
+const storedDarkMode = localStorage.getItem('darkMode');
+let darkMode;
+
+if (storedDarkMode !== null) {
+    darkMode = storedDarkMode === 'true';
+} else {
+    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+if (darkMode) {
     document.body.classList.add('dark-mode');
 }
 
