@@ -34,9 +34,8 @@ if (storedDarkMode !== null) {
     darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-if (darkMode) {
-    document.body.classList.add('dark-mode');
-}
+document.querySelector('html')
+    .setAttribute('data-bs-theme', darkMode ? 'dark' : 'light');
 
 fetch(`../movieDetails/${movieId}`, {
     method: 'GET',

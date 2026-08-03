@@ -145,10 +145,10 @@ function setDarkMode(isDarkMode, shouldStore) {
     }
 
     if (isDarkMode) {
-        $(document.body).addClass('dark-mode');
+        $('html').attr('data-bs-theme', 'dark');
         darkModeButton.find('.fa-moon').removeClass('fa-moon').addClass('fa-sun');
     } else {
-        $(document.body).removeClass('dark-mode');
+        $('html').attr('data-bs-theme', 'light');
         darkModeButton.find('.fa-sun').removeClass('fa-sun').addClass('fa-moon');
     }
 }

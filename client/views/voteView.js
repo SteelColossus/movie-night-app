@@ -307,12 +307,12 @@ export class VoteView extends View {
                 }
             }
 
-            #voteTable > tbody.rank-sortable > tr:hover {
+            #voteTable > tbody.rank-sortable > tr:hover td {
                 cursor: move;
                 background-color: #e1e1e1;
             }
 
-            body.dark-mode #voteTable > tbody.rank-sortable > tr:hover {
+            [data-bs-theme=dark] #voteTable > tbody.rank-sortable > tr:hover td {
                 background-color: #3c3c3c;
             }
             </style>

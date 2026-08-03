@@ -2,15 +2,6 @@ body {
     padding: 10px;
 }
 
-body.dark-mode {
-    background-color: #1e1e1e;
-    color: #e1e1e1;
-}
-
-body.dark-mode .table {
-    color: #e1e1e1;
-}
-
 @media (max-width: 576px) {
     #movieTable th:last-child,
     #movieTable td:last-child {
