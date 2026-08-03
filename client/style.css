@@ -2,6 +2,12 @@ body {
     padding: 10px;
 }
 
+.form-inline .form-control,.form-select {
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+}
+
 @media (max-width: 576px) {
     #movieTable th:last-child,
     #movieTable td:last-child {

@@ -75,13 +75,13 @@
         </div>
 
         <div id="usernameView" style="display: none">
-            <form id="usernameForm" class="row g-2">
+            <form id="usernameForm">
                 <h5>Enter your name:</h5>
-                <div class="col">
+                <div class="form-inline">
                     <input
                         id="username"
                         type="text"
-                        class="form-control"
+                        class="form-control me-sm-2 mb-2 mb-sm-0"
                         name="movie"
                         size="25"
                         placeholder="e.g. Will"
@@ -89,11 +89,11 @@
                         pattern="(?=^.{2,25}$).*\S.*"
                         aria-describedby="usernameHelp"
                     />
-                </div>
-                <div class="col">
                     <input type="submit" class="btn btn-primary" value="Join!" />
                 </div>
-                <div id="usernameHelp" class="form-text mb-2">Must be 2-25 characters long.</div>
+                <small id="usernameHelp" class="form-text mb-2"
+                    >Must be 2-25 characters long.</small
+                >
             </form>
         </div>
 
@@ -104,7 +104,7 @@
                     <input
                         id="nightName"
                         type="text"
-                        class="form-control mr-sm-2"
+                        class="form-control me-sm-2"
                         name="movie"
                         size="40"
                         placeholder="e.g. Our Movie Night"
@@ -114,7 +114,7 @@
                     <label id="votingSystemLabel" for="votingSystem">Choose voting system:</label>
                     <select
                         id="votingSystem"
-                        class="form-control ml-sm-2 mr-sm-2 mb-2 mb-sm-0"
+                        class="form-select ms-sm-2 me-sm-2 mb-2 mb-sm-0"
                         name="votingSystem"
                     ></select>
                     <label id="numSuggestionsLabel" for="numSuggestions"
@@ -122,7 +122,7 @@
                     >
                     <select
                         id="numSuggestions"
-                        class="form-control ml-sm-2 mr-sm-2 mb-2 mb-sm-0"
+                        class="form-select ms-sm-2 me-sm-2 mb-2 mb-sm-0"
                         name="numSuggestions"
                     ></select>
                     <label id="passwordLabel" for="password" style="display: none"
@@ -131,7 +131,7 @@
                     <input
                         id="password"
                         type="text"
-                        class="form-control ml-sm-2 mr-sm-2 mb-2 mb-sm-0"
+                        class="form-control ms-sm-2 me-sm-2 mb-2 mb-sm-0"
                         name="password"
                         size="10"
                         style="display: none"
@@ -148,14 +148,14 @@
                     <input
                         id="suggestion"
                         type="text"
-                        class="form-control mr-2 mb-2 mb-sm-0"
+                        class="form-control me-2 mb-2 mb-sm-0"
                         name="movie"
                         size="40"
                         placeholder="e.g. Harry Potter"
                         required
                         pattern=".*\S.*"
                     />
-                    <input type="submit" class="btn btn-primary mr-2" value="Search!" />
+                    <input type="submit" class="btn btn-primary me-2" value="Search!" />
                     <a id="movieInfo" data-toggle="popover">
                         <i class="fa-solid fa-circle-info"></i>
                     </a>
