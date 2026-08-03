@@ -34,8 +34,7 @@ if (storedDarkMode !== null) {
     darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-document.querySelector('html')
-    .setAttribute('data-bs-theme', darkMode ? 'dark' : 'light');
+document.querySelector('html').setAttribute('data-bs-theme', darkMode ? 'dark' : 'light');
 
 fetch(`../movieDetails/${movieId}`, {
     method: 'GET',

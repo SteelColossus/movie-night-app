@@ -2,10 +2,11 @@ body {
     padding: 10px;
 }
 
-.form-inline .form-control,.form-select {
-  display: inline-block;
-  width: auto;
-  vertical-align: middle;
+.form-inline .form-control,
+.form-inline .form-select {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
 }
 
 @media (max-width: 576px) {
