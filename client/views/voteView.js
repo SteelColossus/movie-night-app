@@ -51,7 +51,7 @@ export class VoteView extends View {
                         .prop('type', 'button')
                         .val('Vote!')
                         .addClass('btn btn-primary vote-button')
-                        .attr('data-toggle', 'button')
+                        .attr('data-bs-toggle', 'button')
                         .attr('aria-pressed', 'false')
                         .click(() => {
                             const voteDeltas = {};
@@ -214,7 +214,7 @@ export class VoteView extends View {
                 <tbody></tbody>
             </table>
             <div>
-                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-bs-toggle="button" aria-pressed="false">
                 <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
             </div>
         `;
@@ -335,7 +335,7 @@ export class VoteView extends View {
                 </table>
             </div>
             <div>
-                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-bs-toggle="button" aria-pressed="false">
                 <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
             </div>
 
