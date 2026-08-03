@@ -31,7 +31,7 @@ let darkMode;
 if (storedDarkMode !== null) {
     darkMode = storedDarkMode === 'true';
 } else {
-    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 if (darkMode) {
