@@ -141,7 +141,7 @@ function requestViewDataForHash() {
 
 function setDarkMode(isDarkMode, shouldStore) {
     if (shouldStore) {
-        localStorage.setItem('darkMode', darkMode);
+        localStorage.setItem('darkMode', isDarkMode);
     }
 
     if (isDarkMode) {
