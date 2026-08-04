@@ -119,7 +119,8 @@ export class SearchView extends View {
         this.updateSuggestionsLabel();
         this.updateSuggestedMovies();
 
-        $('#movieInfo').popover({
+        const movieInfoElement = document.getElementById('movieInfo');
+        new bootstrap.Popover(movieInfoElement, {
             container: 'html',
             trigger: 'hover focus',
             placement: 'bottom',
