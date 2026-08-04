@@ -56,8 +56,7 @@ export class VoteView extends View {
                         .click(() => {
                             const voteDeltas = {};
 
-                            // Inverted because the class has not been added at the point of the click event firing
-                            voteDeltas[movie.id] = !voteButton.is('.active') ? 1 : -1;
+                            voteDeltas[movie.id] = voteButton.is('.active') ? 1 : -1;
 
                             this.socket.emit('votes_changed', voteDeltas);
                         });
