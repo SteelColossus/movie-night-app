@@ -2,13 +2,11 @@ body {
     padding: 10px;
 }
 
-body.dark-mode {
-    background-color: #1e1e1e;
-    color: #e1e1e1;
-}
-
-body.dark-mode .table {
-    color: #e1e1e1;
+.form-inline .form-control,
+.form-inline .form-select {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
 }
 
 @media (max-width: 576px) {

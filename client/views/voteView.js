@@ -51,13 +51,12 @@ export class VoteView extends View {
                         .prop('type', 'button')
                         .val('Vote!')
                         .addClass('btn btn-primary vote-button')
-                        .attr('data-toggle', 'button')
+                        .attr('data-bs-toggle', 'button')
                         .attr('aria-pressed', 'false')
                         .click(() => {
                             const voteDeltas = {};
 
-                            // Inverted because the class has not been added at the point of the click event firing
-                            voteDeltas[movie.id] = !voteButton.is('.active') ? 1 : -1;
+                            voteDeltas[movie.id] = voteButton.is('.active') ? 1 : -1;
 
                             this.socket.emit('votes_changed', voteDeltas);
                         });
@@ -214,7 +213,7 @@ export class VoteView extends View {
                 <tbody></tbody>
             </table>
             <div>
-                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-bs-toggle="button" aria-pressed="false">
                 <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
             </div>
         `;
@@ -307,12 +306,12 @@ export class VoteView extends View {
                 }
             }
 
-            #voteTable > tbody.rank-sortable > tr:hover {
+            #voteTable > tbody.rank-sortable > tr:hover td {
                 cursor: move;
                 background-color: #e1e1e1;
             }
 
-            body.dark-mode #voteTable > tbody.rank-sortable > tr:hover {
+            [data-bs-theme=dark] #voteTable > tbody.rank-sortable > tr:hover td {
                 background-color: #3c3c3c;
             }
             </style>
@@ -335,7 +334,7 @@ export class VoteView extends View {
                 </table>
             </div>
             <div>
-                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-toggle="button" aria-pressed="false">
+                <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-bs-toggle="button" aria-pressed="false">
                 <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
             </div>
 
