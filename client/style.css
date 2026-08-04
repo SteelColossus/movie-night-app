@@ -2,23 +2,25 @@ body {
     padding: 10px;
 }
 
-body.dark-mode {
-    background-color: #1e1e1e;
-    color: #e1e1e1;
-}
-
-body.dark-mode .table {
-    color: #e1e1e1;
+.form-inline .form-control,
+.form-inline .form-select {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
 }
 
 @media (max-width: 576px) {
-    #movieTable th:last-child, #movieTable td:last-child {
+    #movieTable th:last-child,
+    #movieTable td:last-child {
         display: none;
     }
 }
 
 @media (max-width: 768px) {
-    #movieTable th:nth-child(5), #movieTable td:nth-child(5), #voteTable th:nth-child(5), #voteTable td:nth-child(5) {
+    #movieTable th:nth-child(5),
+    #movieTable td:nth-child(5),
+    #voteTable th:nth-child(5),
+    #voteTable td:nth-child(5) {
         display: none;
     }
 }
@@ -29,36 +31,45 @@ body.dark-mode .table {
     }
 }
 
-#darkModeButton {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
+.icon-button {
+    padding: 10px;
     font-size: 1.5rem;
     cursor: pointer;
+    color: inherit;
 }
-    
-#darkModeButton:hover {
+
+.icon-button:hover {
     color: #0069d9;
+}
+
+#darkModeButton {
+    position: fixed;
+    right: 0px;
+    bottom: 0px;
 }
 
 .table tr > td {
     vertical-align: middle;
 }
 
-#usernameIndicator {
+#usernameIndicatorContainer {
     position: fixed;
     top: 0;
     right: 0;
     padding: inherit;
     background-color: inherit;
-
-    /* For those cheeky boys and girls who put massive usernames */
     max-width: 50%;
+}
+
+#usernameIndicator {
+    /* For those cheeky boys and girls who put massive usernames */
     overflow-wrap: break-word;
     text-align: right;
 }
 
-#votingSystemLabel, #numSuggestionsLabel, #passwordLabel {
+#votingSystemLabel,
+#numSuggestionsLabel,
+#passwordLabel {
     font-weight: bold;
 }
 
@@ -100,11 +111,13 @@ body.dark-mode .table {
     font-style: italic;
 }
 
-.vote-cell, .rank-cell {
+.vote-cell,
+.rank-cell {
     text-align: center;
 }
 
-#voteTable.not-live th:last-child, #voteTable.not-live td:last-child {
+#voteTable.not-live th:last-child,
+#voteTable.not-live td:last-child {
     display: none;
 }
 
@@ -137,7 +150,7 @@ body.dark-mode .table {
 #posterImage {
     align-self: self-start;
     margin-right: 20px;
-    box-shadow: 4px 4px 4px 0px rgba(0,0,0,0.75);
+    box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.75);
 }
 
 #bannedGenreText {

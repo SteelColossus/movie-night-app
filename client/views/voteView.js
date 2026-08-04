@@ -1,9 +1,25 @@
 import { View } from './view.js';
-import { createTableRow, sumVotes, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink } from './viewFunctions.js';
+import {
+    createTableRow,
+    sumVotes,
+    getTimeStringFromRuntime,
+    setBackgroundColorRedToGreen,
+    setAsMovieDetailsLink
+} from './viewFunctions.js';
 import { VOTING_SYSTEMS } from '../../server/constants.js';
 
 export class VoteView extends View {
-    constructor(socket, animTime, userToken, isHost, movies, votingSystem, numUsers, liveVoting, isExactPhase) {
+    constructor(
+        socket,
+        animTime,
+        userToken,
+        isHost,
+        movies,
+        votingSystem,
+        numUsers,
+        liveVoting,
+        isExactPhase
+    ) {
         super(VoteView.viewName, socket, animTime);
         this.userToken = userToken;
         this.isHost = isHost;
@@ -286,12 +302,12 @@ export class VoteView extends View {
                 }
             }
 
-            #voteTable > tbody.rank-sortable > tr:hover {
+            #voteTable > tbody.rank-sortable > tr:hover td {
                 cursor: move;
                 background-color: #e1e1e1;
             }
 
-            body.dark-mode #voteTable > tbody.rank-sortable > tr:hover {
+            [data-bs-theme=dark] #voteTable > tbody.rank-sortable > tr:hover td {
                 background-color: #3c3c3c;
             }
             </style>
@@ -328,7 +344,9 @@ export class VoteView extends View {
 
         const initialVoteDeltas = {};
 
-        this.movies = this.movies.sort((movieA, movieB) => movieB.votes[this.userToken] - movieA.votes[this.userToken]);
+        this.movies = this.movies.sort(
+            (movieA, movieB) => movieB.votes[this.userToken] - movieA.votes[this.userToken]
+        );
 
         this.movies.forEach((movie) => {
             if (movie.votes[this.userToken] == null || movie.votes[this.userToken] === 0) {
@@ -371,7 +389,7 @@ export class VoteView extends View {
 
         const lockInButton = document.querySelector('#lockInButton');
         lockInButton.addEventListener('click', () => {
-            const disabled = lockInButton.is('.active') === true;
+            const disabled = lockInButton.matches('.active') === true;
             lockInButton.blur();
             sortableVoteTable.disabled = disabled;
             voteTableBody.classList.toggle('rank-sortable');
@@ -388,7 +406,7 @@ export class VoteView extends View {
 
     setupVetoView() {
         const viewHtml = `
-            <h5>It is <span id="vetoUser" class="font-weight-bold"></span>'s turn to choose a movie to veto:</h5>
+            <h5>It is <span id="vetoUser" class="fw-bold"></span>'s turn to choose a movie to veto:</h5>
             <table id="voteTable" class="table">
                 <thead>
                     <tr>

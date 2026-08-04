@@ -25,7 +25,6 @@ export class ResultsView extends View {
                 data: []
             };
 
-            // eslint-disable-next-line no-loop-func
             movies.forEach((movie) => {
                 const numVotes = movie.votes[id] || 0;
                 dataset.data.push(numVotes);
@@ -66,20 +65,16 @@ export class ResultsView extends View {
                 options: {
                     maintainAspectRatio: false,
                     scales: {
-                        xAxes: [
-                            {
-                                stacked: true
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 1
                             }
-                        ],
-                        yAxes: [
-                            {
-                                stacked: true,
-                                ticks: {
-                                    beginAtZero: true,
-                                    precision: 1
-                                }
-                            }
-                        ]
+                        }
                     }
                 }
             });

@@ -1,0 +1,8 @@
+node_modules
+built
+logs
+playwright-report
+test-results
+*.lockb
+client/views/external
+.github/

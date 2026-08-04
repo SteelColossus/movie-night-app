@@ -13,7 +13,9 @@ const client = new ClientJS();
 // Shared DOM elements
 const movieNightTitle = document.querySelector('#movieNightTitle');
 const errorMessage = document.querySelector('#errorMessage');
+const usernameIndicatorContainer = document.querySelector('#usernameIndicatorContainer');
 const usernameIndicator = document.querySelector('#usernameIndicator');
+const logoutButton = document.querySelector('#logoutButton');
 const darkModeButton = document.querySelector('#darkModeButton');
 
 const animTime = 400;
@@ -26,7 +28,14 @@ let authenticated = false;
 let currentView = null;
 
 // Whether the page is currently in dark mode
-let darkMode = localStorage.getItem('darkMode') === true.toString();
+const storedDarkMode = localStorage.getItem('darkMode');
+let darkMode;
+
+if (storedDarkMode !== null) {
+    darkMode = storedDarkMode === 'true';
+} else {
+    darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
@@ -41,8 +50,14 @@ function switchView(view, forceRefresh = false) {
     }
 }
 
-function switchViewWithName(viewName, data = null, isHost = null, isExactPhase = true, forceRefresh = false) {
-    let view = null;
+function switchViewWithName(
+    viewName,
+    data = null,
+    isHost = null,
+    isExactPhase = true,
+    forceRefresh = false
+) {
+    let view;
 
     switch (viewName) {
         case UsernameView.viewName:
@@ -55,10 +70,27 @@ function switchViewWithName(viewName, data = null, isHost = null, isExactPhase =
             view = new SearchView(socket, animTime, data.suggestedMovies, data.maxSuggestions);
             break;
         case SuggestionsView.viewName:
-            view = new SuggestionsView(socket, animTime, userToken, isHost, data.movies, isExactPhase);
+            view = new SuggestionsView(
+                socket,
+                animTime,
+                userToken,
+                isHost,
+                data.movies,
+                isExactPhase
+            );
             break;
         case VoteView.viewName:
-            view = new VoteView(socket, animTime, userToken, isHost, data.movies, data.votingSystem, data.numUsers, data.liveVoting, isExactPhase);
+            view = new VoteView(
+                socket,
+                animTime,
+                userToken,
+                isHost,
+                data.movies,
+                data.votingSystem,
+                data.numUsers,
+                data.liveVoting,
+                isExactPhase
+            );
             break;
         case ResultsView.viewName:
             view = new ResultsView(socket, animTime, isHost, data.movies, data.winner, data.users);
@@ -127,11 +159,15 @@ function setDarkMode(isDarkMode) {
     }
 }
 
-setDarkMode(darkMode);
+setDarkMode(darkMode, false);
 
 darkModeButton.addEventListener('click', () => {
     darkMode = !darkMode;
-    setDarkMode(darkMode);
+    setDarkMode(darkMode, true);
+});
+
+logoutButton.click(() => {
+    socket.emit('logout');
 });
 
 window.addEventListener('hashchange', () => {
@@ -164,7 +200,7 @@ socket.on('request_new_username', () => {
 
 socket.on('user_info', (username) => {
     usernameIndicator.textContent = username;
-    usernameIndicator.style.display = '';
+    if (usernameIndicatorContainer) usernameIndicatorContainer.style.display = '';
 });
 
 socket.on('new_phase', (phaseInfo) => {
@@ -179,14 +215,17 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (switchPhaseView === true) {
-        let viewName = null;
+        let viewName;
 
         switch (phaseInfo.name) {
             case PHASES.HOST:
                 viewName = HostView.viewName;
                 break;
             case PHASES.SUGGEST:
-                viewName = (phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions) ? SuggestionsView.viewName : SearchView.viewName;
+                viewName =
+                    phaseInfo.data.suggestedMovies.length >= phaseInfo.data.maxSuggestions
+                        ? SuggestionsView.viewName
+                        : SearchView.viewName;
                 break;
             case PHASES.VOTE:
                 viewName = VoteView.viewName;

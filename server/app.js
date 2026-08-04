@@ -1,14 +1,13 @@
-'use strict';
-
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import express from 'express';
 import favicon from 'serve-favicon';
 import sanitize from 'sanitize-filename';
-import socketIO from 'socket.io';
+import { Server as SocketIOServer } from 'socket.io';
 import minimist from 'minimist';
 
 import { OMDB_KEY } from './apiKeys.js';
@@ -17,7 +16,7 @@ import ObjectCache from './objectCache.js';
 
 const app = express();
 const server = createServer(app);
-const io = socketIO(server, { cookie: false });
+const io = new SocketIOServer(server, { cookie: false });
 const args = minimist(process.argv.slice(2));
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,7 +31,7 @@ const requirePassword = args.password !== false;
 // Whether the users get the votes for movies live in real time
 const liveVoting = args.live === true;
 
-const hostname = (allowOutsideConnections ? os.hostname() : 'localhost');
+const hostname = allowOutsideConnections ? os.hostname() : null;
 const port = process.env.PORT || 3000;
 
 let password = null;
@@ -48,12 +47,7 @@ const nightHistory = [];
 const usersToChooseFrom = [];
 let chosenUserIndex = null;
 
-const orderedPhases = [
-    PHASES.HOST,
-    PHASES.SUGGEST,
-    PHASES.VOTE,
-    PHASES.RESULTS
-];
+const orderedPhases = [PHASES.HOST, PHASES.SUGGEST, PHASES.VOTE, PHASES.RESULTS];
 
 const movieDetailsCache = new ObjectCache(20, 'id');
 
@@ -64,19 +58,19 @@ app.use(favicon(path.join(__dirname, '../client/favicon.ico')));
 app.use('/server/constants.js', express.static(path.join(__dirname, 'constants.js')));
 
 // Tell the server to listen on the given hostname and port
-server.listen(port, hostname, console.log(`Now listening on: http://${hostname}:${port}`));
+if (hostname != null) {
+    server.listen(port, hostname, () => {
+        console.log(`Now listening on: http://${hostname}:${port}`);
+    });
+} else {
+    server.listen(port, () => {
+        console.log(`Now listening on: http://localhost:${port}`);
+    });
+}
 
 function getRandomPassword() {
-    const chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-    const passwordLength = 8;
-
-    let randomPassword = '';
-
-    for (let i = 0; i < passwordLength; i++) {
-        const randomChar = chars[Math.floor(Math.random() * chars.length)];
-        randomPassword += randomChar;
-    }
-
+    const randomID = randomUUID();
+    const randomPassword = randomID.substring(0, randomID.indexOf('-'));
     return randomPassword;
 }
 
@@ -95,7 +89,9 @@ function makeOmdbRequest(type, query, callback, data = {}) {
         additionalQueryString += `&${entry[0]}=${entry[1]}`;
     });
 
-    return fetch(`http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`)
+    return fetch(
+        `http://www.omdbapi.com/?${type}=${query}&apikey=${OMDB_KEY}&type=movie${additionalQueryString}`
+    )
         .then(async (response) => {
             if (response.ok) {
                 callback(await response.json());
@@ -133,7 +129,10 @@ function getWinners() {
     }));
 
     // Otherwise, we have to see which one has the most votes
-    const highestVotes = movieResults.reduce((max, movie) => (movie.totalVotes > max ? movie.totalVotes : max), 0);
+    const highestVotes = movieResults.reduce(
+        (max, movie) => (movie.totalVotes > max ? movie.totalVotes : max),
+        0
+    );
 
     if (highestVotes > 0 || nonRemovedMovies.length < nightInfo.movies.length) {
         const winners = movieResults.filter((movie) => movie.totalVotes === highestVotes);
@@ -154,9 +153,13 @@ function isCurrentPhaseBeforeOrSameAsPhase(requiredPhase) {
 
 // Perform some checks before proceeding with a socket request
 function preCheck(token, requiredPhase, requireHost, requireExactPhase = false) {
-    return isLoggedIn(token)
-        && (requireExactPhase ? phase === requiredPhase : isCurrentPhaseBeforeOrSameAsPhase(requiredPhase))
-        && (!requireHost || host === token);
+    return (
+        isLoggedIn(token) &&
+        (requireExactPhase
+            ? phase === requiredPhase
+            : isCurrentPhaseBeforeOrSameAsPhase(requiredPhase)) &&
+        (!requireHost || host === token)
+    );
 }
 
 function getPhaseData(phaseName, token) {
@@ -206,7 +209,7 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     // Get the clients in the movie night room if they aren't already
     if (nightInfo.name != null) {
         if (sendToAll === true) {
-            Object.values(io.sockets.connected).forEach((sock) => {
+            io.sockets.sockets.forEach((sock) => {
                 if (sock.token != null) {
                     sock.join(nightInfo.name);
                 }
@@ -222,7 +225,7 @@ function switchPhase(socket, phaseName, sendToAll = true) {
     };
 
     if (host != null) {
-        phaseInfo.isHost = (host === socket.token);
+        phaseInfo.isHost = host === socket.token;
     }
 
     phase = phaseName;
@@ -239,14 +242,17 @@ function switchPhase(socket, phaseName, sendToAll = true) {
 }
 
 function addUser(socket, token, username = null) {
-    const isExistingUser = users.hasOwnProperty(token);
+    const isExistingUser = Object.hasOwn(users, token);
     const newUsername = username != null;
 
     if (isExistingUser || newUsername) {
         let previousUsername = null;
 
         if (newUsername) {
-            const usernameExists = Object.keys(users).some((userToken) => userToken !== token.toString() && users[userToken].username === username);
+            const usernameExists = Object.keys(users).some(
+                (userToken) =>
+                    userToken !== token.toString() && users[userToken].username === username
+            );
 
             if (usernameExists === true) {
                 socket.emit('request_new_username');
@@ -265,7 +271,9 @@ function addUser(socket, token, username = null) {
         socket.token = token;
 
         if (isExistingUser && newUsername) {
-            console.log(`Existing user '${previousUsername}' (${token}) changed their name to '${username}'.`);
+            console.log(
+                `Existing user '${previousUsername}' (${token}) changed their name to '${username}'.`
+            );
         } else if (isExistingUser) {
             if (verboseLogging) {
                 console.log(`Existing user '${users[token].username}' (${token}) reconnected.`);
@@ -315,6 +323,8 @@ io.on('connection', (socket) => {
         addUser(socket, user.token, user.username);
     });
 
+    socket.on('logout', () => {});
+
     // Host a new movie night
     socket.on('host_night', (info) => {
         const nightAlreadyHosted = host != null;
@@ -323,7 +333,10 @@ io.on('connection', (socket) => {
             return;
         }
 
-        if (password != null && (info.password == null || info.password.toLowerCase() !== password)) {
+        if (
+            password != null &&
+            (info.password == null || info.password.toLowerCase() !== password)
+        ) {
             socket.emit('wrong_password');
             return;
         }
@@ -336,9 +349,13 @@ io.on('connection', (socket) => {
         host = socket.token;
 
         if (nightAlreadyHosted) {
-            console.log(`User '${users[socket.token].username}' has restarted the movie night under the new name: '${nightInfo.name}'.`);
+            console.log(
+                `User '${users[socket.token].username}' has restarted the movie night under the new name: '${nightInfo.name}'.`
+            );
         } else {
-            console.log(`User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'.`);
+            console.log(
+                `User '${users[socket.token].username}' has started the movie night: '${nightInfo.name}'.`
+            );
         }
 
         switchPhase(socket, PHASES.SUGGEST);
@@ -397,7 +414,9 @@ io.on('connection', (socket) => {
             });
         });
 
-        movieResultsPromise.then((movieResults) => socket.emit('movie_search_results', movieResults));
+        movieResultsPromise.then((movieResults) =>
+            socket.emit('movie_search_results', movieResults)
+        );
     });
 
     socket.on('movie_chosen', (movieId) => {
@@ -408,7 +427,11 @@ io.on('connection', (socket) => {
         let suggestionsLeft = nightInfo.maxSuggestions - getSuggestedMovies(socket.token).length;
 
         // Disallow multiple people from choosing the same movie
-        if (nightInfo.movies.some((x) => x.id === movieId && !(suggestionsLeft <= 0 && x.suggester === socket.token))) {
+        if (
+            nightInfo.movies.some(
+                (x) => x.id === movieId && !(suggestionsLeft <= 0 && x.suggester === socket.token)
+            )
+        ) {
             socket.emit('request_different_movie', 'Someone has already chosen that movie.');
             return;
         }
@@ -436,7 +459,10 @@ io.on('connection', (socket) => {
 
             // Disallow anyone from choosing a movie that is one of the banned genres
             if (sharedGenres.length > 0) {
-                socket.emit('request_different_movie', `The movie you have picked is one of the banned genres: ${sharedGenres.join(', ')}.`);
+                socket.emit(
+                    'request_different_movie',
+                    `The movie you have picked is one of the banned genres: ${sharedGenres.join(', ')}.`
+                );
                 return;
             }
 
@@ -461,7 +487,10 @@ io.on('connection', (socket) => {
 
             // Disallow movies which have key pieces of information missing (likely obscure movies that no-one really wants to watch)
             if (missingInfo.length > 0) {
-                socket.emit('request_different_movie', `The movie you have picked is missing the following key information: ${missingInfo.join(', ')}.`);
+                socket.emit(
+                    'request_different_movie',
+                    `The movie you have picked is missing the following key information: ${missingInfo.join(', ')}.`
+                );
                 return;
             }
 
@@ -469,7 +498,9 @@ io.on('connection', (socket) => {
                 // Remove all the previous movie suggestions this user has made
                 for (let i = nightInfo.movies.length - 1; i >= 0; i--) {
                     if (nightInfo.movies[i].suggester === socket.token) {
-                        socket.broadcast.to(nightInfo.name).emit('removed_movie', nightInfo.movies[i].id);
+                        socket.broadcast
+                            .to(nightInfo.name)
+                            .emit('removed_movie', nightInfo.movies[i].id);
                         nightInfo.movies.splice(i, 1);
                     }
                 }
@@ -486,10 +517,12 @@ io.on('connection', (socket) => {
             };
 
             if (host != null) {
-                data.isHost = (host === socket.token);
+                data.isHost = host === socket.token;
             }
 
-            console.log(`User '${users[socket.token].username}' has suggested the movie: '${movie.title}' (${movie.id}).`);
+            console.log(
+                `User '${users[socket.token].username}' has suggested the movie: '${movie.title}' (${movie.id}).`
+            );
 
             if (suggestionsLeft <= 0) {
                 if (usersToChooseFrom.findIndex((x) => x.token === socket.token) === -1) {
@@ -525,7 +558,7 @@ io.on('connection', (socket) => {
             const movie = nightInfo.movies.find((x) => x.id === key);
 
             if (movie != null) {
-                if (movie.votes.hasOwnProperty(socket.token)) {
+                if (Object.hasOwn(movie.votes, socket.token)) {
                     movie.votes[socket.token] += value;
                 } else {
                     movie.votes[socket.token] = value;
@@ -560,7 +593,9 @@ io.on('connection', (socket) => {
 
                 io.to(nightInfo.name).emit('get_chosen_user', usersToChooseFrom[chosenUserIndex]);
 
-                console.log(`User '${users[socket.token].username}' has vetoed the movie: '${movieToRemove.title}' (${movieToRemove.id}).`);
+                console.log(
+                    `User '${users[socket.token].username}' has vetoed the movie: '${movieToRemove.title}' (${movieToRemove.id}).`
+                );
             }
         }
     });
@@ -573,7 +608,8 @@ io.on('connection', (socket) => {
         const nonRemovedMovies = nightInfo.movies.filter((movie) => movie.removed === false);
 
         if (nonRemovedMovies.length > 1) {
-            const randomMovie = nonRemovedMovies[Math.floor(Math.random() * nonRemovedMovies.length)];
+            const randomMovie =
+                nonRemovedMovies[Math.floor(Math.random() * nonRemovedMovies.length)];
 
             // Remove the chosen movie from the night
             randomMovie.removed = true;
@@ -600,7 +636,11 @@ io.on('connection', (socket) => {
         const winners = getWinners();
 
         console.log('Final results are:');
-        nightInfo.movies.forEach((movie) => console.log(`'${movie.title}' (${movie.id}): ${movie.removed ? 'removed' : JSON.stringify(movie.votes)}`));
+        nightInfo.movies.forEach((movie) =>
+            console.log(
+                `'${movie.title}' (${movie.id}): ${movie.removed ? 'removed' : JSON.stringify(movie.votes)}`
+            )
+        );
 
         if (winners.length > 1) {
             const newStageData = {
@@ -701,7 +741,7 @@ io.on('connection', (socket) => {
         const data = getPhaseData(phaseName, socket.token);
 
         if (host != null) {
-            data.isHost = (host === socket.token);
+            data.isHost = host === socket.token;
         }
 
         data.isExactPhase = phase === phaseName;
@@ -728,29 +768,34 @@ app.get('/movieDetails/:id', (req, res) => {
     const cachedMovie = movieDetailsCache.get(movieId);
 
     if (cachedMovie == null) {
-        makeOmdbRequest('i', movieId, (responseJson) => {
-            if (responseJson.Response === 'True') {
-                const movie = {
-                    id: responseJson.imdbID,
-                    title: responseJson.Title,
-                    year: responseJson.Year,
-                    runtime: responseJson.Runtime,
-                    genre: responseJson.Genre,
-                    plot: responseJson.Plot,
-                    rating: responseJson.imdbRating,
-                    awards: responseJson.Awards,
-                    actors: responseJson.Actors,
-                    director: responseJson.Director,
-                    writer: responseJson.Writer,
-                    poster: responseJson.Poster
-                };
+        makeOmdbRequest(
+            'i',
+            movieId,
+            (responseJson) => {
+                if (responseJson.Response === 'True') {
+                    const movie = {
+                        id: responseJson.imdbID,
+                        title: responseJson.Title,
+                        year: responseJson.Year,
+                        runtime: responseJson.Runtime,
+                        genre: responseJson.Genre,
+                        plot: responseJson.Plot,
+                        rating: responseJson.imdbRating,
+                        awards: responseJson.Awards,
+                        actors: responseJson.Actors,
+                        director: responseJson.Director,
+                        writer: responseJson.Writer,
+                        poster: responseJson.Poster
+                    };
 
-                movieDetailsCache.set(movie);
-                res.json(movie);
-            } else {
-                res.status(404).json(responseJson.Error);
-            }
-        }, { plot: 'full' });
+                    movieDetailsCache.set(movie);
+                    res.json(movie);
+                } else {
+                    res.status(404).json(responseJson.Error);
+                }
+            },
+            { plot: 'full' }
+        );
     } else {
         res.json(cachedMovie);
     }

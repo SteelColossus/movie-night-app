@@ -1,5 +1,11 @@
 import { View } from './view.js';
-import { createTableRow, getTimeStringFromRuntime, setBackgroundColorRedToGreen, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
+import {
+    createTableRow,
+    getTimeStringFromRuntime,
+    setBackgroundColorRedToGreen,
+    setAsMovieDetailsLink,
+    pluralize
+} from './viewFunctions.js';
 
 export class SuggestionsView extends View {
     constructor(socket, animTime, userToken, isHost, movies, isExactPhase) {

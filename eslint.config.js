@@ -1,0 +1,80 @@
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
+import nPlugin from 'eslint-plugin-n';
+import playwrightPlugin from 'eslint-plugin-playwright';
+import promisePlugin from 'eslint-plugin-promise';
+import globals from 'globals';
+
+export default [
+    // Base recommended rules
+    js.configs.recommended,
+
+    // Global ignores
+    {
+        ignores: [
+            'node_modules/**',
+            'built/**',
+            'logs/**',
+            'playwright-report/**',
+            'test-results/**',
+            '*.lockb',
+            'client/views/external/**'
+        ]
+    },
+
+    // Base configuration for all JavaScript files
+    {
+        files: ['**/*.js'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module'
+        },
+        plugins: {
+            n: nPlugin,
+            promise: promisePlugin
+        }
+    },
+
+    // Server-side configuration
+    {
+        files: ['server/**/*.js'],
+        languageOptions: {
+            globals: {
+                ...globals.node
+            }
+        },
+        rules: {
+            'no-underscore-dangle': 'off'
+        }
+    },
+
+    // Client-side configuration
+    {
+        files: ['client/**/*.js'],
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+                ...globals.jquery,
+                io: 'readonly',
+                Chart: 'readonly',
+                ClientJS: 'readonly',
+                bootstrap: 'readonly'
+            }
+        }
+    },
+
+    // Test configuration
+    {
+        files: ['tests/**/*.js'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+                ...globals.jasmine
+            }
+        },
+        ...playwrightPlugin.configs['flat/recommended']
+    },
+
+    // Prettier config (must be last to override formatting rules
+    prettier
+];
