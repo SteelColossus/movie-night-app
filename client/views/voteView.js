@@ -412,7 +412,7 @@ export class VoteView extends View {
 
     setupVetoView() {
         const viewHtml = `
-            <h5>It is <span id="vetoUser" class="font-weight-bold"></span>'s turn to choose a movie to veto:</h5>
+            <h5>It is <span id="vetoUser" class="fw-bold"></span>'s turn to choose a movie to veto:</h5>
             <table id="voteTable" class="table">
                 <thead>
                     <tr>

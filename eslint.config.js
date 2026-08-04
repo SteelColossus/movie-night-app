@@ -57,7 +57,8 @@ export default [
                 ...globals.jquery,
                 io: 'readonly',
                 Chart: 'readonly',
-                ClientJS: 'readonly'
+                ClientJS: 'readonly',
+                bootstrap: 'readonly'
             }
         }
     },
