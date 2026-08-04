@@ -63,3 +63,4 @@ export function setAsMovieDetailsLink(element, movieId) {
     element.addEventListener('click', () => {
         window.open(`/movie?id=${movieId}`);
     });
+}

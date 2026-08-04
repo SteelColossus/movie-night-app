@@ -86,7 +86,9 @@ export class View {
     clearListeners() {
         this.socketListeners.forEach((listener) => this.socket.off(listener.name, listener.func));
         this.socketListeners.length = 0;
-        this.domListeners.forEach((listener) => listener.element.removeEventListener(listener.name, listener.func));
+        this.domListeners.forEach((listener) =>
+            listener.element.removeEventListener(listener.name, listener.func)
+        );
         this.domListeners.length = 0;
     }
 }

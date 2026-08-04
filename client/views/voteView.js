@@ -176,7 +176,6 @@ export class VoteView extends View {
         Object.keys(newVotes).forEach((key) => {
             const votesCell = this.voteView.querySelector(`td[votes-for=${key}]`);
             const totalVotes = sumVotes(newVotes[key]);
-            const fadeMilliseconds = 150;
 
             votesCell.textContent = totalVotes;
             votesCell.style.display = '';

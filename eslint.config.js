@@ -58,7 +58,8 @@ export default [
                 io: 'readonly',
                 Chart: 'readonly',
                 ClientJS: 'readonly',
-                bootstrap: 'readonly'
+                bootstrap: 'readonly',
+                Sortable: 'readonly'
             }
         }
     },

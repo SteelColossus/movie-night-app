@@ -41,12 +41,21 @@ fetch(`../movieDetails/${movieId}`, {
     headers: {
         Accept: 'application/json'
     }
-})
-    .then((res) => {
-        if (!res.ok) {
-            res.json().then((err) => {
-                // eslint-disable-next-line no-alert
-                alert(err);
+}).then((res) => {
+    if (!res.ok) {
+        res.json().then((err) => {
+            alert(err);
+        });
+    } else {
+        res.json().then((movie) => {
+            const title = `${movie.title} (${movie.year})`;
+
+            document.title = `${title} - Movie Night App`;
+
+            const movieTitle = document.getElementById('movieTitle');
+            movieTitle.textContent = title;
+            movieTitle.addEventListener('click', () => {
+                window.open(`https://www.imdb.com/title/${movieId}/`);
             });
 
             document.getElementById('moviePlot').textContent = truncateText(movie.plot, 500);

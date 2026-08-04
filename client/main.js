@@ -38,7 +38,7 @@ if (storedDarkMode !== null) {
 }
 
 function switchView(view, forceRefresh = false) {
-    if (currentView == null || (currentView.viewName !== view.viewName || forceRefresh === true)) {
+    if (currentView == null || currentView.viewName !== view.viewName || forceRefresh === true) {
         errorMessage.style.display = 'none';
 
         if (currentView != null) {
@@ -175,7 +175,6 @@ window.addEventListener('hashchange', () => {
 });
 
 socket.on('connect', () => {
-    // eslint-disable-next-line no-console
     console.log('Connected to the app server.');
 });
 
