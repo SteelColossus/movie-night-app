@@ -121,8 +121,8 @@ export class SearchView extends View {
         this.updateSuggestionsLabel();
         this.updateSuggestedMovies();
 
-        // eslint-disable-next-line no-unused-vars
-        const popover = new bootstrap.Popover(document.querySelector('#movieInfo'), {
+        const movieInfoElement = document.getElementById('movieInfo');
+        new bootstrap.Popover(movieInfoElement, {
             container: 'html',
             trigger: 'hover focus',
             placement: 'bottom',

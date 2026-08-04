@@ -51,7 +51,7 @@ export class VoteView extends View {
                     voteButton.type = 'button';
                     voteButton.value = 'Vote!';
                     voteButton.classList.add('btn', 'btn-primary', 'vote-button');
-                    voteButton.dataset.bsToggle = 'button';
+                    voteButton.setAttribute('data-bs-toggle', 'button');
                     voteButton.addEventListener('click', () => {
                         const voteDeltas = {};
 

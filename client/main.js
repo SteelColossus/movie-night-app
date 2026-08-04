@@ -139,18 +139,20 @@ function requestViewDataForHash() {
     }
 }
 
-function setDarkMode(isDarkMode) {
-    localStorage.setItem('darkMode', isDarkMode);
+function setDarkMode(isDarkMode, shouldStore) {
+    if (shouldStore) {
+        localStorage.setItem('darkMode', isDarkMode);
+    }
 
     if (isDarkMode) {
-        document.body.classList.add('dark-mode');
+        document.querySelector('html').setAttribute('data-bs-theme', 'dark');
         const moonIcon = darkModeButton.querySelector('.fa-moon');
         if (moonIcon) {
             moonIcon.classList.remove('fa-moon');
             moonIcon.classList.add('fa-sun');
         }
     } else {
-        document.body.classList.remove('dark-mode');
+        document.querySelector('html').setAttribute('data-bs-theme', 'light');
         const sunIcon = darkModeButton.querySelector('.fa-sun');
         if (sunIcon) {
             sunIcon.classList.remove('fa-sun');
