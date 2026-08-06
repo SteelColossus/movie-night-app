@@ -233,7 +233,7 @@ export class VoteView extends View {
         lockInButton.addEventListener('click', () => {
             const disabled = lockInButton.matches('.active') === true;
             lockInButton.blur();
-            document.querySelector('.vote-button').disabled = disabled;
+            document.querySelectorAll('.vote-button').disabled = disabled;
         });
 
         if (this.isHost === true && this.isExactPhase === true) {
@@ -364,19 +364,19 @@ export class VoteView extends View {
 
         const sortableVoteTable = new Sortable(voteTableBody, {
             update: () => {
-                const rankCells = voteTableBody.querySelector('.rank-cell');
+                const rankCells = voteTableBody.querySelectorAll('.rank-cell');
 
                 const changedVoteDeltas = {};
 
                 for (let i = 0; i < rankCells.length; i++) {
                     const rankCell = document.querySelector(rankCells[i]);
-                    const currentRank = Number.parseInt(rankCell.textContext, 10);
+                    const currentRank = Number.parseInt(rankCell.textContent, 10);
                     const newRank = i + 1;
 
                     if (newRank !== currentRank) {
                         const movieId = rankCell.dataset.movieId;
                         changedVoteDeltas[movieId] = currentRank - newRank;
-                        rankCell.textContext = newRank;
+                        rankCell.textContent = newRank;
                     }
                 }
 
