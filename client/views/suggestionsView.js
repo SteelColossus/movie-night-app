@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import {
     createTableRow,
@@ -59,13 +60,13 @@ export class SuggestionsView extends View {
 
     handleNewMovie(movie) {
         const movieRow = this.appendMovieToTable(movie);
-        movieRow.style.display = '';
+        show(movieRow, this.animTime);
         this.updateNumMoviesSuggested(this.numMoviesSuggested + 1);
     }
 
     handleRemovedMovie(movieId) {
         const movieRow = this.movieTableBody.querySelector(`tr[movie-id="${movieId}"]`);
-        movieRow.remove();
+        hide(movieRow, this.animTime);
         this.updateNumMoviesSuggested(this.numMoviesSuggested - 1);
     }
 
@@ -85,12 +86,13 @@ export class SuggestionsView extends View {
         if (this.isHost === true && this.isExactPhase === true) {
             this.addDOMListener(this.closeSuggestionsButton, 'click', () => {
                 this.socket.emit('close_suggestions');
-            }).style.display = '';
+            });
+            show(this.closeSuggestionsButton, this.animTime);
         }
     }
 
     onViewHidden() {
-        this.closeSuggestionsButton.style.display = 'none';
+        hide(this.closeSuggestionsButton, this.animTime);
         // Remove all the existing movies
         this.movieTableBody.replaceChildren();
     }

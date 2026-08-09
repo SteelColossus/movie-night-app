@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './views/view.js';
 import { UsernameView } from './views/usernameView.js';
 import { HostView } from './views/hostView.js';
@@ -39,7 +40,7 @@ if (storedDarkMode !== null) {
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || currentView.viewName !== view.viewName || forceRefresh === true) {
-        errorMessage.style.display = 'none';
+        hide(errorMessage, animTime);
 
         if (currentView != null) {
             currentView.hide();
@@ -196,12 +197,12 @@ socket.on('request_new_user', () => {
 
 socket.on('request_new_username', () => {
     errorMessage.textContent = 'The name you have entered is already taken.';
-    errorMessage.style.display = '';
+    show(errorMessage, animTime);
 });
 
 socket.on('user_info', (username) => {
     usernameIndicator.textContent = username;
-    if (usernameIndicatorContainer) usernameIndicatorContainer.style.display = '';
+    show(usernameIndicatorContainer, animTime);
 });
 
 socket.on('new_phase', (phaseInfo) => {
@@ -245,9 +246,9 @@ socket.on('new_phase', (phaseInfo) => {
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
         movieNightTitle.textContent = phaseInfo.data.name;
-        movieNightTitle.style.display = '';
+        show(movieNightTitle, animTime);
     } else {
-        movieNightTitle.style.display = 'none';
+        hide(movieNightTitle, animTime);
     }
 });
 

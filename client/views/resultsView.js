@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import { sumVotes, pluralize } from './viewFunctions.js';
 
@@ -79,7 +80,7 @@ export class ResultsView extends View {
                 }
             });
 
-            this.canvas.style.display = '';
+            show(this.canvas, this.animTime);
         }
     }
 
@@ -112,22 +113,24 @@ export class ResultsView extends View {
         if (this.isHost === true) {
             this.addDOMListener(this.endButton, 'click', () => {
                 this.socket.emit('end_night');
-            }).style.display = '';
+            });
+            show(this.endButton, this.animTime);
 
             this.addDOMListener(this.newMovieButton, 'click', () => {
                 this.socket.emit('new_round');
-            }).style.display = '';
+            });
+            show(this.newMovieButton, this.animTime);
         }
     }
 
     onViewHidden() {
-        this.endButton.style.display = 'none';
-        this.newMovieButton.style.display = 'none';
+        hide(this.endButton, this.animTime);
+        hide(this.newMovieButton, this.animTime);
         // Destroy the existing chart so that a new one can be created
         if (this.voteChart != null) {
             this.voteChart.destroy();
         }
-        this.canvas.style.display = 'none';
+        hide(this.canvas, this.animTime);
     }
 }
 

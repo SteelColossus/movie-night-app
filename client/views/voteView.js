@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import {
     createTableRow,
@@ -178,13 +179,13 @@ export class VoteView extends View {
             const totalVotes = sumVotes(newVotes[key]);
 
             votesCell.textContent = totalVotes;
-            votesCell.style.display = '';
+            show(votesCell, this.animTime);
         });
     }
 
     handleMovieRemoved(removedMovieId) {
         const movieRow = this.voteView.querySelector(`tr[movie-id=${removedMovieId}]`);
-        movieRow.style.display = 'none';
+        hide(movieRow, this.animTime);
 
         const removedMovie = this.movies.find((movie) => movie.id === removedMovieId);
         removedMovie.removed = true;
@@ -241,7 +242,8 @@ export class VoteView extends View {
 
             this.addDOMListener(closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
-            }).style.display = '';
+            });
+            show(closeVotingButton, this.animTime);
         }
     }
 
@@ -287,7 +289,8 @@ export class VoteView extends View {
                 } else {
                     this.socket.emit('close_voting');
                 }
-            }).style.display = '';
+            });
+            show(nextButton, this.animTime);
         }
     }
 
@@ -399,7 +402,8 @@ export class VoteView extends View {
 
             this.addDOMListener(closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
-            }).style.display = '';
+            });
+            show(closeVotingButton, this.animTime);
         }
     }
 

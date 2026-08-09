@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 
 export class HostView extends View {
@@ -51,21 +52,21 @@ export class HostView extends View {
         }
 
         if (this.isPasswordRequired === true) {
-            document.querySelector('#passwordLabel').style.display = '';
-            this.passwordInput.style.display = '';
+            show(document.querySelector('#passwordLabel'), this.animTime);
+            show(this.passwordInput, this.animTime);
         }
 
         this.addDOMListener(document.querySelector('#startVotingForm'), 'submit', this.formSubmit);
 
         this.addSocketListener('wrong_password', () => {
             this.errorMessage.textContent = 'The password you have entered is incorrect.';
-            this.errorMessage.style.display = '';
+            show(this.errorMessage, this.animTime);
         });
     }
 
     onViewHidden() {
         this.nightInput.value = '';
-        this.errorMessage.style.display = 'none';
+        hide(this.errorMessage, this.animTime);
     }
 }
 

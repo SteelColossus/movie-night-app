@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import { createTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
@@ -31,15 +32,15 @@ export class SearchView extends View {
         this.suggestionsLabel.textContent = `You have ${pluralize('suggestion', suggestionsLeft)} left.`;
 
         if (suggestionsLeft > 0) {
-            this.noSuggestionsLabel.style.display = 'none';
+            hide(this.noSuggestionsLabel, this.animTime);
         } else {
-            this.noSuggestionsLabel.style.display = '';
+            show(this.noSuggestionsLabel, this.animTime);
         }
     }
 
     clearSearch() {
         this.suggestionInput.value = '';
-        this.searchResults.style.display = 'none';
+        hide(this.searchResults, this.animTime);
     }
 
     updateSuggestedMovies() {
@@ -56,11 +57,11 @@ export class SearchView extends View {
     handleSearch(searchData) {
         if (searchData.success === false) {
             this.errorMessage.textContent = `Error: ${searchData.errorMessage}`;
-            this.errorMessage.style.display = '';
+            show(this.errorMessage, this.animTime);
             return;
         }
 
-        this.errorMessage.style.display = 'none';
+        hide(this.errorMessage, this.animTime);
 
         const suggestTableBody = document.querySelector('#suggestionTable > tbody');
 
@@ -96,7 +97,7 @@ export class SearchView extends View {
             suggestTableBody.append(tableRow);
         });
 
-        this.searchResults.style.display = '';
+        show(this.searchResults, this.animTime);
     }
 
     handleMovieRejected(message) {

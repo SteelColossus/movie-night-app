@@ -1,3 +1,5 @@
+import { hide, show } from '../anim.js';
+
 export class View {
     constructor(name, socket, animTime) {
         this.viewName = name;
@@ -10,14 +12,14 @@ export class View {
 
     // Show this page
     show() {
-        this.container.style.display = '';
+        show(this.container, this.animTime);
         this.updateHistory();
         this.onViewShown();
     }
 
     // Hide this page
     hide() {
-        this.container.style.display = 'none';
+        hide(this.container, this.animTime);
         this.onViewHidden();
         this.clearListeners();
     }
