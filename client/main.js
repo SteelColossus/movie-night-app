@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './views/view.js';
 import { UsernameView } from './views/usernameView.js';
 import { HostView } from './views/hostView.js';
@@ -11,12 +12,12 @@ const socket = io();
 const client = new ClientJS();
 
 // Shared DOM elements
-const movieNightTitle = $('#movieNightTitle');
-const errorMessage = $('#errorMessage');
-const usernameIndicatorContainer = $('#usernameIndicatorContainer');
-const usernameIndicator = $('#usernameIndicator');
-const logoutButton = $('#logoutButton');
-const darkModeButton = $('#darkModeButton');
+const movieNightTitle = document.querySelector('#movieNightTitle');
+const errorMessage = document.querySelector('#errorMessage');
+const usernameIndicatorContainer = document.querySelector('#usernameIndicatorContainer');
+const usernameIndicator = document.querySelector('#usernameIndicator');
+const logoutButton = document.querySelector('#logoutButton');
+const darkModeButton = document.querySelector('#darkModeButton');
 
 const animTime = 400;
 
@@ -39,7 +40,7 @@ if (storedDarkMode !== null) {
 
 function switchView(view, forceRefresh = false) {
     if (currentView == null || currentView.viewName !== view.viewName || forceRefresh === true) {
-        errorMessage.hide(animTime);
+        hide(errorMessage, animTime);
 
         if (currentView != null) {
             currentView.hide();
@@ -145,17 +146,25 @@ function setDarkMode(isDarkMode, shouldStore) {
     }
 
     if (isDarkMode) {
-        $('html').attr('data-bs-theme', 'dark');
-        darkModeButton.find('.fa-moon').removeClass('fa-moon').addClass('fa-sun');
+        document.querySelector('html').setAttribute('data-bs-theme', 'dark');
+        const moonIcon = darkModeButton.querySelector('.fa-moon');
+        if (moonIcon) {
+            moonIcon.classList.remove('fa-moon');
+            moonIcon.classList.add('fa-sun');
+        }
     } else {
-        $('html').attr('data-bs-theme', 'light');
-        darkModeButton.find('.fa-sun').removeClass('fa-sun').addClass('fa-moon');
+        document.querySelector('html').setAttribute('data-bs-theme', 'light');
+        const sunIcon = darkModeButton.querySelector('.fa-sun');
+        if (sunIcon) {
+            sunIcon.classList.remove('fa-sun');
+            sunIcon.classList.add('fa-moon');
+        }
     }
 }
 
 setDarkMode(darkMode, false);
 
-darkModeButton.click(() => {
+darkModeButton.addEventListener('click', () => {
     darkMode = !darkMode;
     setDarkMode(darkMode, true);
 });
@@ -187,12 +196,13 @@ socket.on('request_new_user', () => {
 });
 
 socket.on('request_new_username', () => {
-    errorMessage.text('The name you have entered is already taken.').show(animTime);
+    errorMessage.textContent = 'The name you have entered is already taken.';
+    show(errorMessage, animTime);
 });
 
 socket.on('user_info', (username) => {
-    usernameIndicator.text(username);
-    usernameIndicatorContainer.show(animTime);
+    usernameIndicator.textContent = username;
+    show(usernameIndicatorContainer, animTime);
 });
 
 socket.on('new_phase', (phaseInfo) => {
@@ -235,9 +245,10 @@ socket.on('new_phase', (phaseInfo) => {
     }
 
     if (phaseInfo.data != null && phaseInfo.data.name != null) {
-        movieNightTitle.text(phaseInfo.data.name).show(animTime);
+        movieNightTitle.textContent = phaseInfo.data.name;
+        show(movieNightTitle, animTime);
     } else {
-        movieNightTitle.hide(animTime);
+        hide(movieNightTitle, animTime);
     }
 });
 

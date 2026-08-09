@@ -17,8 +17,7 @@ export default [
             'logs/**',
             'playwright-report/**',
             'test-results/**',
-            '*.lockb',
-            'client/views/external/**'
+            '*.lockb'
         ]
     },
 
@@ -54,11 +53,11 @@ export default [
         languageOptions: {
             globals: {
                 ...globals.browser,
-                ...globals.jquery,
                 io: 'readonly',
                 Chart: 'readonly',
                 ClientJS: 'readonly',
-                bootstrap: 'readonly'
+                bootstrap: 'readonly',
+                Sortable: 'readonly'
             }
         }
     },

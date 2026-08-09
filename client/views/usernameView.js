@@ -4,27 +4,27 @@ export class UsernameView extends View {
     constructor(socket, animTime, userToken) {
         super(UsernameView.viewName, socket, animTime);
         this.userToken = userToken;
-        this.usernameInput = $('#username');
+        this.usernameInput = document.querySelector('#username');
     }
 
-    formSubmit() {
-        const username = this.usernameInput.val().toString().trim();
+    formSubmit(event) {
+        // Stop the page from refreshing
+        event.preventDefault();
+
+        const username = this.usernameInput.value.trim();
 
         this.socket.emit('new_user', {
             token: this.userToken,
             username
         });
-
-        // Stop the page from refreshing
-        return false;
     }
 
     onViewShown() {
-        this.addDOMListener($('#usernameForm'), 'submit', this.formSubmit);
+        this.addDOMListener(document.querySelector('#usernameForm'), 'submit', this.formSubmit);
     }
 
     onViewHidden() {
-        this.usernameInput.val('');
+        this.usernameInput.value = '';
     }
 }
 

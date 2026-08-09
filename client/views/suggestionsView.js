@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import {
     createTableRow,
@@ -14,9 +15,9 @@ export class SuggestionsView extends View {
         this.isHost = isHost;
         this.movies = movies;
         this.isExactPhase = isExactPhase;
-        this.movieTableBody = $('#movieTable > tbody');
-        this.numMoviesSuggestedLabel = $('#numMoviesSuggested');
-        this.closeSuggestionsButton = $('#closeSuggestionsButton');
+        this.movieTableBody = document.querySelector('#movieTable > tbody');
+        this.numMoviesSuggestedLabel = document.querySelector('#numMoviesSuggested');
+        this.closeSuggestionsButton = document.querySelector('#closeSuggestionsButton');
         this.numSuggestions = 0;
     }
 
@@ -38,10 +39,10 @@ export class SuggestionsView extends View {
         ]);
 
         if (movie.suggester === this.userToken) {
-            tableRow.addClass('suggester-row');
+            tableRow.classList.add('suggester-row');
         }
 
-        tableRow.attr('movie-id', movie.id);
+        tableRow.setAttribute('movie-id', movie.id);
 
         this.movieTableBody.append(tableRow);
 
@@ -54,27 +55,25 @@ export class SuggestionsView extends View {
 
     updateNumMoviesSuggested(numSuggested) {
         this.numMoviesSuggested = numSuggested;
-        this.numMoviesSuggestedLabel.text(
-            `${pluralize('movie', this.numMoviesSuggested)} suggested.`
-        );
+        this.numMoviesSuggestedLabel.textContent = `${pluralize('movie', this.numMoviesSuggested)} suggested.`;
     }
 
     handleNewMovie(movie) {
         const movieRow = this.appendMovieToTable(movie);
-        movieRow.hide().show(this.animTime);
+        show(movieRow, this.animTime);
         this.updateNumMoviesSuggested(this.numMoviesSuggested + 1);
     }
 
     handleRemovedMovie(movieId) {
-        const movieRow = this.movieTableBody.find(`tr[movie-id="${movieId}"]`);
-        movieRow.remove();
+        const movieRow = this.movieTableBody.querySelector(`tr[movie-id="${movieId}"]`);
+        hide(movieRow, this.animTime);
         this.updateNumMoviesSuggested(this.numMoviesSuggested - 1);
     }
 
     onViewShown() {
         this.buildSuggestionsTable(this.movies);
 
-        this.addDOMListener($('#backToSearchButton'), 'click', () => {
+        this.addDOMListener(document.querySelector('#backToSearchButton'), 'click', () => {
             // Slight hack here, just set the hash instead of going through the proper internal function to navigate to the search page
             window.location.hash = 'search';
         });
@@ -87,14 +86,15 @@ export class SuggestionsView extends View {
         if (this.isHost === true && this.isExactPhase === true) {
             this.addDOMListener(this.closeSuggestionsButton, 'click', () => {
                 this.socket.emit('close_suggestions');
-            }).show(this.animTime);
+            });
+            show(this.closeSuggestionsButton, this.animTime);
         }
     }
 
     onViewHidden() {
-        this.closeSuggestionsButton.hide();
+        hide(this.closeSuggestionsButton, this.animTime);
         // Remove all the existing movies
-        this.movieTableBody.empty();
+        this.movieTableBody.replaceChildren();
     }
 }
 

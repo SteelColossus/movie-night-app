@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import {
     createTableRow,
@@ -28,7 +29,7 @@ export class VoteView extends View {
         this.numUsers = numUsers;
         this.liveVoting = liveVoting;
         this.isExactPhase = isExactPhase;
-        this.voteView = $('#voteView');
+        this.voteView = document.querySelector('#voteView');
     }
 
     createMultiVoteTableRow(movie) {
@@ -47,40 +48,39 @@ export class VoteView extends View {
             },
             {
                 func: (cell) => {
-                    const voteButton = $('<input>')
-                        .prop('type', 'button')
-                        .val('Vote!')
-                        .addClass('btn btn-primary vote-button')
-                        .attr('data-bs-toggle', 'button')
-                        .attr('aria-pressed', 'false')
-                        .click(() => {
-                            const voteDeltas = {};
+                    const voteButton = document.createElement('input');
+                    voteButton.type = 'button';
+                    voteButton.value = 'Vote!';
+                    voteButton.classList.add('btn', 'btn-primary', 'vote-button');
+                    voteButton.setAttribute('data-bs-toggle', 'button');
+                    voteButton.addEventListener('click', () => {
+                        const voteDeltas = {};
 
-                            voteDeltas[movie.id] = voteButton.is('.active') ? 1 : -1;
+                        voteDeltas[movie.id] = voteButton.matches('.active') ? 1 : -1;
 
-                            this.socket.emit('votes_changed', voteDeltas);
-                        });
+                        this.socket.emit('votes_changed', voteDeltas);
+                    });
 
                     if (this.isExactPhase === false) {
-                        voteButton.prop('disabled', true);
+                        voteButton.disabled = true;
                     }
 
                     if (movie.votes[this.userToken] != null && movie.votes[this.userToken] >= 1) {
-                        voteButton.addClass('active').attr('aria-pressed', 'true');
+                        voteButton.classList.add('active');
                     }
 
-                    cell.addClass('vote-cell');
+                    cell.classList.add('vote-cell');
                     cell.append(voteButton);
                 }
             },
             {
                 text: this.liveVoting === true ? sumVotes(movie.votes) : 0,
-                func: (cell) => cell.attr('votes-for', movie.id)
+                func: (cell) => cell.setAttribute('votes-for', movie.id)
             }
         ]);
 
         if (movie.suggester === this.userToken) {
-            tableRow.addClass('suggester-row');
+            tableRow.classList.add('suggester-row');
         }
 
         return tableRow;
@@ -94,10 +94,10 @@ export class VoteView extends View {
             }
         ]);
 
-        tableRow.attr('movie-id', movie.id);
+        tableRow.setAttribute('movie-id', movie.id);
 
         if (movie.suggester === this.userToken) {
-            tableRow.addClass('suggester-row');
+            tableRow.classList.add('suggester-row');
         }
 
         return tableRow;
@@ -120,13 +120,14 @@ export class VoteView extends View {
             {
                 text: rank,
                 func: (cell) => {
-                    cell.addClass('rank-cell').data('movie-id', movie.id);
+                    cell.classList.add('rank-cell');
+                    cell.dataset.movieId = movie.id;
                 }
             }
         ]);
 
         if (movie.suggester === this.userToken) {
-            tableRow.addClass('suggester-row');
+            tableRow.classList.add('suggester-row');
         }
 
         return tableRow;
@@ -148,47 +149,43 @@ export class VoteView extends View {
             },
             {
                 func: (cell) => {
-                    const vetoButton = $('<input>')
-                        .prop('type', 'button')
-                        .val('Veto!')
-                        .addClass('btn btn-primary veto-button')
-                        .prop('disabled', true)
-                        .click(() => {
-                            this.socket.emit('remove_movie', movie.id);
-                        });
+                    const vetoButton = document.createElement('input');
+                    vetoButton.type = 'button';
+                    vetoButton.value = 'Veto!';
+                    vetoButton.classList.add('btn', 'btn-primary', 'veto-button');
+                    vetoButton.disabled = true;
+                    vetoButton.addEventListener('click', () => {
+                        this.socket.emit('remove_movie', movie.id);
+                    });
 
-                    cell.addClass('veto-cell');
+                    cell.classList.add('veto-cell');
                     cell.append(vetoButton);
                 }
             }
         ]);
 
         if (movie.suggester === this.userToken) {
-            tableRow.addClass('suggester-row');
+            tableRow.classList.add('suggester-row');
         }
 
-        tableRow.attr('movie-id', movie.id);
+        tableRow.setAttribute('movie-id', movie.id);
 
         return tableRow;
     }
 
     handleVotesChanged(newVotes) {
         Object.keys(newVotes).forEach((key) => {
-            const votesCell = this.voteView.find(`td[votes-for=${key}]`);
+            const votesCell = this.voteView.querySelector(`td[votes-for=${key}]`);
             const totalVotes = sumVotes(newVotes[key]);
-            const fadeMilliseconds = 150;
 
-            votesCell.fadeOut(fadeMilliseconds, () => {
-                votesCell.text(totalVotes).fadeIn(fadeMilliseconds);
-            });
+            votesCell.textContent = totalVotes;
+            show(votesCell, this.animTime);
         });
     }
 
     handleMovieRemoved(removedMovieId) {
-        const movieRow = this.voteView.find(`tr[movie-id=${removedMovieId}]`);
-        movieRow.fadeOut(this.animTime * 3, () => {
-            movieRow.hide();
-        });
+        const movieRow = this.voteView.querySelector(`tr[movie-id=${removedMovieId}]`);
+        hide(movieRow, this.animTime);
 
         const removedMovie = this.movies.find((movie) => movie.id === removedMovieId);
         removedMovie.removed = true;
@@ -218,9 +215,9 @@ export class VoteView extends View {
             </div>
         `;
 
-        this.voteView.html(viewHtml);
+        this.voteView.innerHTML = viewHtml;
 
-        const voteTableBody = $('#voteTable > tbody');
+        const voteTableBody = document.querySelector('#voteTable > tbody');
 
         this.movies.forEach((movie) => {
             const tableRow = this.createMultiVoteTableRow(movie);
@@ -230,21 +227,23 @@ export class VoteView extends View {
         if (this.liveVoting === true) {
             this.addSocketListener('votes_changed', this.handleVotesChanged);
         } else {
-            voteTableBody.parent().addClass('not-live');
+            voteTableBody.parentElement.classList.add('not-live');
         }
 
-        const lockInButton = $('#lockInButton').click(() => {
-            const disabled = lockInButton.is('.active') === false;
+        const lockInButton = document.querySelector('#lockInButton');
+        lockInButton.addEventListener('click', () => {
+            const disabled = lockInButton.matches('.active') === true;
             lockInButton.blur();
-            $('.vote-button').prop('disabled', disabled);
+            document.querySelectorAll('.vote-button').disabled = disabled;
         });
 
         if (this.isHost === true && this.isExactPhase === true) {
-            const closeVotingButton = $('#closeVotingButton');
+            const closeVotingButton = document.querySelector('#closeVotingButton');
 
             this.addDOMListener(closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
-            }).show(this.animTime);
+            });
+            show(closeVotingButton, this.animTime);
         }
     }
 
@@ -262,9 +261,9 @@ export class VoteView extends View {
             <input id="nextButton" type="button" class="btn btn-dark mb-2" value="Next" style="display: none">
         `;
 
-        this.voteView.html(viewHtml);
+        this.voteView.innerHTML = viewHtml;
 
-        const voteTableBody = $('#voteTable > tbody');
+        const voteTableBody = document.querySelector('#voteTable > tbody');
 
         this.movies.forEach((movie) => {
             const tableRow = this.createRandomTableRow(movie);
@@ -274,7 +273,7 @@ export class VoteView extends View {
         this.addSocketListener('movie_removed', this.handleMovieRemoved);
 
         if (this.isHost === true && this.isExactPhase === true) {
-            const nextButton = $('#nextButton');
+            const nextButton = document.querySelector('#nextButton');
 
             this.addDOMListener(nextButton, 'click', () => {
                 let numRemainingMovies = 0;
@@ -290,14 +289,13 @@ export class VoteView extends View {
                 } else {
                     this.socket.emit('close_voting');
                 }
-            }).show(this.animTime);
+            });
+            show(nextButton, this.animTime);
         }
     }
 
     setupRankedView() {
         const viewHtml = `
-            <link href="/views/external/jquery-ui.min.css" rel="stylesheet">
-
             <style>
             @media (max-width: 992px) {
                 #rankedTableContainer {
@@ -337,15 +335,12 @@ export class VoteView extends View {
                 <input id="lockInButton" type="button" class="btn btn-primary mb-2" value="Lock-in votes" data-bs-toggle="button" aria-pressed="false">
                 <input id="closeVotingButton" type="button" class="btn btn-danger mb-2" value="Close Voting" style="display: none">
             </div>
-
-            <script src="/views/external/jquery-ui.min.js"></script>
-            <script src="/views/external/jquery.ui.touch-punch.min.js"></script>
         `;
 
-        this.voteView.html(viewHtml);
+        this.voteView.innerHTML = viewHtml;
 
-        const voteTableBody = $('#voteTable > tbody');
-        voteTableBody.addClass('rank-sortable');
+        const voteTableBody = document.querySelector('#voteTable > tbody');
+        voteTableBody.classList.add('rank-sortable');
 
         let rank = 1;
 
@@ -370,21 +365,21 @@ export class VoteView extends View {
             this.socket.emit('votes_changed', initialVoteDeltas);
         }
 
-        voteTableBody.sortable({
+        const sortableVoteTable = new Sortable(voteTableBody, {
             update: () => {
-                const rankCells = voteTableBody.find('.rank-cell');
+                const rankCells = voteTableBody.querySelectorAll('.rank-cell');
 
                 const changedVoteDeltas = {};
 
                 for (let i = 0; i < rankCells.length; i++) {
-                    const rankCell = $(rankCells[i]);
-                    const currentRank = Number.parseInt(rankCell.text(), 10);
+                    const rankCell = document.querySelector(rankCells[i]);
+                    const currentRank = Number.parseInt(rankCell.textContent, 10);
                     const newRank = i + 1;
 
                     if (newRank !== currentRank) {
-                        const movieId = rankCell.data('movie-id');
+                        const movieId = rankCell.dataset.movieId;
                         changedVoteDeltas[movieId] = currentRank - newRank;
-                        rankCell.text(newRank);
+                        rankCell.textContent = newRank;
                     }
                 }
 
@@ -394,19 +389,21 @@ export class VoteView extends View {
             }
         });
 
-        const lockInButton = $('#lockInButton').click(() => {
-            const disabled = lockInButton.is('.active') === false;
+        const lockInButton = document.querySelector('#lockInButton');
+        lockInButton.addEventListener('click', () => {
+            const disabled = lockInButton.matches('.active') === true;
             lockInButton.blur();
-            voteTableBody.sortable(disabled ? 'disable' : 'enable');
-            voteTableBody.toggleClass('rank-sortable');
+            sortableVoteTable.disabled = disabled;
+            voteTableBody.classList.toggle('rank-sortable');
         });
 
         if (this.isHost === true && this.isExactPhase === true) {
-            const closeVotingButton = $('#closeVotingButton');
+            const closeVotingButton = document.querySelector('#closeVotingButton');
 
             this.addDOMListener(closeVotingButton, 'click', () => {
                 this.socket.emit('close_voting');
-            }).show(this.animTime);
+            });
+            show(closeVotingButton, this.animTime);
         }
     }
 
@@ -429,10 +426,10 @@ export class VoteView extends View {
             </table>
         `;
 
-        this.voteView.html(viewHtml);
+        this.voteView.innerHTML = viewHtml;
 
-        const voteTableBody = $('#voteTable > tbody');
-        const vetoUserText = $('#vetoUser');
+        const voteTableBody = document.querySelector('#voteTable > tbody');
+        const vetoUserText = document.querySelector('#vetoUser');
 
         this.movies.forEach((movie) => {
             const tableRow = this.createVetoTableRow(movie);
@@ -458,8 +455,8 @@ export class VoteView extends View {
         this.addSocketListener('get_chosen_user', (user) => {
             const enableButtons = this.isExactPhase === true && this.userToken === user.token;
 
-            $('.veto-button').prop('disabled', !enableButtons);
-            vetoUserText.text(user.username);
+            document.querySelector('.veto-button').disabled = !enableButtons;
+            vetoUserText.textContent = user.username;
         });
 
         this.socket.emit('get_chosen_user');
@@ -487,7 +484,7 @@ export class VoteView extends View {
     }
 
     onViewHidden() {
-        this.voteView.empty();
+        this.voteView.replaceChildren();
     }
 }
 

@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import { sumVotes, pluralize } from './viewFunctions.js';
 
@@ -8,9 +9,9 @@ export class ResultsView extends View {
         this.movies = movies;
         this.winner = movies.find((movie) => movie.id === winner);
         this.users = users;
-        this.canvas = $('#voteChart');
-        this.endButton = $('#endButton');
-        this.newMovieButton = $('#newMovieButton');
+        this.canvas = document.querySelector('#voteChart');
+        this.endButton = document.querySelector('#endButton');
+        this.newMovieButton = document.querySelector('#newMovieButton');
     }
 
     createChart(users, movies) {
@@ -79,7 +80,7 @@ export class ResultsView extends View {
                 }
             });
 
-            this.canvas.show();
+            show(this.canvas, this.animTime);
         }
     }
 
@@ -103,7 +104,7 @@ export class ResultsView extends View {
             }
         }
 
-        $('#winner').text(winnerText);
+        document.querySelector('#winner').textContent = winnerText;
 
         if (this.winner != null) {
             this.createChart(this.users, this.movies);
@@ -112,22 +113,24 @@ export class ResultsView extends View {
         if (this.isHost === true) {
             this.addDOMListener(this.endButton, 'click', () => {
                 this.socket.emit('end_night');
-            }).show(this.animTime);
+            });
+            show(this.endButton, this.animTime);
 
             this.addDOMListener(this.newMovieButton, 'click', () => {
                 this.socket.emit('new_round');
-            }).show(this.animTime);
+            });
+            show(this.newMovieButton, this.animTime);
         }
     }
 
     onViewHidden() {
-        this.endButton.hide();
-        this.newMovieButton.hide();
+        hide(this.endButton, this.animTime);
+        hide(this.newMovieButton, this.animTime);
         // Destroy the existing chart so that a new one can be created
         if (this.voteChart != null) {
             this.voteChart.destroy();
         }
-        this.canvas.hide();
+        hide(this.canvas, this.animTime);
     }
 }
 

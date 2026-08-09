@@ -1,3 +1,4 @@
+import { hide, show } from '../anim.js';
 import { View } from './view.js';
 import { createTableRow, setAsMovieDetailsLink, pluralize } from './viewFunctions.js';
 
@@ -6,47 +7,48 @@ export class SearchView extends View {
         super(SearchView.viewName, socket, animTime);
         this.suggestedMovies = suggestedMovies;
         this.maxSuggestions = maxSuggestions;
-        this.suggestionInput = $('#suggestion');
-        this.suggestionsLabel = $('#suggestionsLabel');
-        this.movieSuggestionsList = $('#movieSuggestionsList');
-        this.noSuggestionsLabel = $('#noSuggestionsLabel');
-        this.searchResults = $('#searchResults');
-        this.errorMessage = $('#errorMessage');
+        this.suggestionInput = document.querySelector('#suggestion');
+        this.suggestionsLabel = document.querySelector('#suggestionsLabel');
+        this.movieSuggestionsList = document.querySelector('#movieSuggestionsList');
+        this.noSuggestionsLabel = document.querySelector('#noSuggestionsLabel');
+        this.searchResults = document.querySelector('#searchResults');
+        this.errorMessage = document.querySelector('#errorMessage');
     }
 
-    formSubmit() {
-        const suggestion = this.suggestionInput.val().toString().trim();
+    formSubmit(event) {
+        // Stop the page from refreshing
+        event.preventDefault();
+
+        const suggestion = this.suggestionInput.value.trim();
 
         if (suggestion.length > 0) {
             this.socket.emit('movie_search', suggestion);
         }
-
-        // Stop the page from refreshing
-        return false;
     }
 
     updateSuggestionsLabel() {
         const suggestionsLeft = this.maxSuggestions - this.suggestedMovies.length;
 
-        this.suggestionsLabel.text(`You have ${pluralize('suggestion', suggestionsLeft)} left.`);
+        this.suggestionsLabel.textContent = `You have ${pluralize('suggestion', suggestionsLeft)} left.`;
 
         if (suggestionsLeft > 0) {
-            this.noSuggestionsLabel.hide();
+            hide(this.noSuggestionsLabel, this.animTime);
         } else {
-            this.noSuggestionsLabel.show();
+            show(this.noSuggestionsLabel, this.animTime);
         }
     }
 
     clearSearch() {
-        this.suggestionInput.val('');
-        this.searchResults.hide();
+        this.suggestionInput.value = '';
+        hide(this.searchResults, this.animTime);
     }
 
     updateSuggestedMovies() {
-        this.movieSuggestionsList.empty();
+        this.movieSuggestionsList.replaceChildren();
 
         this.suggestedMovies.forEach((movie) => {
-            const listItem = $('<li>').text(`${movie.title} (${movie.year})`);
+            const listItem = document.createElement('li');
+            listItem.textContent = `${movie.title} (${movie.year})`;
             setAsMovieDetailsLink(listItem, movie.id);
             this.movieSuggestionsList.append(listItem);
         });
@@ -54,16 +56,17 @@ export class SearchView extends View {
 
     handleSearch(searchData) {
         if (searchData.success === false) {
-            this.errorMessage.text(`Error: ${searchData.errorMessage}`).show(this.animTime);
+            this.errorMessage.textContent = `Error: ${searchData.errorMessage}`;
+            show(this.errorMessage, this.animTime);
             return;
         }
 
-        this.errorMessage.hide(this.animTime);
+        hide(this.errorMessage, this.animTime);
 
-        const suggestTableBody = $('#suggestionTable > tbody');
+        const suggestTableBody = document.querySelector('#suggestionTable > tbody');
 
         // Remove all the existing suggestions
-        suggestTableBody.empty();
+        suggestTableBody.replaceChildren();
 
         const searchDataResults = searchData.results;
 
@@ -77,14 +80,14 @@ export class SearchView extends View {
                 { text: result.year },
                 {
                     func: (cell) => {
-                        const chooseButton = $('<input>')
-                            .prop('type', 'button')
-                            .val('Choose!')
-                            .addClass('btn btn-primary')
-                            .data('movie-id', result.id)
-                            .click(() => {
-                                this.socket.emit('movie_chosen', chooseButton.data('movie-id'));
-                            });
+                        const chooseButton = document.createElement('input');
+                        chooseButton.type = 'button';
+                        chooseButton.value = 'Choose!';
+                        chooseButton.classList.add('btn', 'btn-primary');
+                        chooseButton.dataset.movieId = result.id;
+                        chooseButton.addEventListener('click', () => {
+                            this.socket.emit('movie_chosen', chooseButton.dataset.movieId);
+                        });
 
                         cell.append(chooseButton);
                     }
@@ -94,7 +97,7 @@ export class SearchView extends View {
             suggestTableBody.append(tableRow);
         });
 
-        this.searchResults.show(this.animTime);
+        show(this.searchResults, this.animTime);
     }
 
     handleMovieRejected(message) {
@@ -139,9 +142,9 @@ export class SearchView extends View {
             `
         });
 
-        this.addDOMListener($('#movieSearchForm'), 'submit', this.formSubmit);
+        this.addDOMListener(document.querySelector('#movieSearchForm'), 'submit', this.formSubmit);
 
-        this.addDOMListener($('#viewSuggestionsButton'), 'click', () => {
+        this.addDOMListener(document.querySelector('#viewSuggestionsButton'), 'click', () => {
             // Slight hack here, just set the hash instead of going through the proper internal function to navigate to the suggestions page
             window.location.hash = 'suggestions';
         });
