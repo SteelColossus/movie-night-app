@@ -35,7 +35,10 @@ test('creates and finishes a movie night', async ({ page }) => {
 
     const [newPage] = await Promise.all([
         page.context().waitForEvent('page'),
-        page.locator('#movieTable').getByRole('cell', { name: 'Harry Potter and the Goblet of Fire' }).click()
+        page
+            .locator('#movieTable')
+            .getByRole('cell', { name: 'Harry Potter and the Goblet of Fire' })
+            .click()
     ]);
 
     await newPage.waitForLoadState('domcontentloaded');
